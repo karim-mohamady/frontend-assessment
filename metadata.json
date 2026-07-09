@@ -1,0 +1,6 @@
+{
+  "name": "Frontend Assessment Platform",
+  "description": "A comprehensive assessment platform evaluating front-end development skills across HTML, CSS, JavaScript, React, Bootstrap, and Technical English.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

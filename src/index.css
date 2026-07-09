@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme {
+  --animate-fade-in: fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Print layout optimizations to hide browser margins/headers and print perfect certificates */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  #navbar-header, 
+  #global-footer, 
+  #cert-view-actions, 
+  #landing-page-root, 
+  #dashboard-root, 
+  #assessment-quiz-active {
+    display: none !important;
+  }
+
+  #printable-certificate-card {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) scale(1.15) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border: 6px double #b45309 !important;
+    background: white !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+  }
+}

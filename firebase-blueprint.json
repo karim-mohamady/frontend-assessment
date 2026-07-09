@@ -1,0 +1,49 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Represents a developer's assessment history, bookmarks, achievements, name, and daily streak metrics.",
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string",
+          "description": "The custom nickname or name of the developer."
+        },
+        "streak": {
+          "type": "integer",
+          "description": "Number of consecutive days active on the platform."
+        },
+        "lastActive": {
+          "type": "string",
+          "format": "date",
+          "description": "The last day the developer was active."
+        },
+        "completedAssessments": {
+          "type": "array",
+          "description": "List of historical assessment scorecard records."
+        },
+        "bookmarks": {
+          "type": "array",
+          "description": "List of bookmarked question IDs."
+        },
+        "achievements": {
+          "type": "array",
+          "description": "List of unlocked platform achievement badges."
+        }
+      },
+      "required": [
+        "userName",
+        "streak",
+        "completedAssessments",
+        "bookmarks",
+        "achievements"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Saves full developer progress and quiz scoring historical details."
+    }
+  }
+}
