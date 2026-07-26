@@ -1,0 +1,43 @@
+name: Firebase Hosting
+
+# FIREBASE DEPLOYMENTS FROZEN DURING INCIDENT RESPONSE.
+# This workflow is manual only. Do not add push or pull_request live deploy triggers.
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-frontend-assessment:
+    if: github.repository == 'karim-mohamady/frontend-assessment'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify repository identity
+        run: |
+          test "${{ github.repository }}" = "karim-mohamady/frontend-assessment"
+          node -e "const id=require('./deployment-identity.json'); if (id.firebaseProjectId !== 'frontend-assessment-react' || id.forbiddenProjectIds.includes('nexaerp-karim-20260726') === false) process.exit(1)"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run validate:firebase-deploy
+        env:
+          FRONTEND_ASSESSMENT_FIREBASE_PROJECT_ID: frontend-assessment-react
+          FIREBASE_PROJECT_ID: frontend-assessment-react
+          FIREBASE_SERVICE_ACCOUNT_FRONTEND_ASSESSMENT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FRONTEND_ASSESSMENT }}
+      - run: npm run build
+        env:
+          VITE_APP_DEPLOYMENT_ID: frontend-assessment-platform
+      - run: npm run validate:firebase-deploy -- --require-dist
+        env:
+          FRONTEND_ASSESSMENT_FIREBASE_PROJECT_ID: frontend-assessment-react
+          FIREBASE_PROJECT_ID: frontend-assessment-react
+          FIREBASE_SERVICE_ACCOUNT_FRONTEND_ASSESSMENT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FRONTEND_ASSESSMENT }}
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FRONTEND_ASSESSMENT }}
+          projectId: frontend-assessment-react
+          channelId: live
+          entryPoint: .

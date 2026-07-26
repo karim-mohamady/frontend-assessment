@@ -1,0 +1,13 @@
+{
+  "application": "Frontend Assessment Platform",
+  "repository": "karim-mohamady/frontend-assessment",
+  "firebaseProjectId": "frontend-assessment-react",
+  "hostingSite": "frontend-assessment-react",
+  "deploymentFingerprint": "frontend-assessment-platform",
+  "forbiddenProjectIds": [
+    "nexaerp-karim-20260726"
+  ],
+  "forbiddenFingerprints": [
+    "nexaerp-platform"
+  ]
+}
