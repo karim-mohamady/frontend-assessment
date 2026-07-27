@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { isFirebaseConfigured, getFirebaseConfig, syncProgressToCloud, loginWithGoogle } from '../lib/firebase';
+import { PrismEditor } from '../components/PrismEditor';
 
 export const CodingSandbox: React.FC = () => {
   const { lang, isRtl, theme, progress, unlockAchievement, saveProgressState } = useApp();
@@ -21,6 +22,24 @@ export const CodingSandbox: React.FC = () => {
   const [challenges, setChallenges] = useState<CodingChallenge[]>(CODING_CHALLENGES);
   const [activeIdx, setActiveIdx] = useState(0);
   const activeChallenge = challenges[activeIdx];
+
+  const getChallengeTitle = (item: CodingChallenge) => {
+    if (lang === 'ar') return item.titleAr;
+    if (lang === 'es' && item.titleEs) return item.titleEs;
+    return item.titleEn;
+  };
+
+  const getChallengeDesc = (item: CodingChallenge) => {
+    if (lang === 'ar') return item.descAr;
+    if (lang === 'es' && item.descEs) return item.descEs;
+    return item.descEn;
+  };
+
+  const getChallengeHint = (item: CodingChallenge) => {
+    if (lang === 'ar') return item.hintAr;
+    if (lang === 'es' && item.hintEs) return item.hintEs;
+    return item.hintEn;
+  };
 
   // Editor code state
   const [code, setCode] = useState(activeChallenge.boilerplateCode);
@@ -385,7 +404,7 @@ export const CodingSandbox: React.FC = () => {
                         {item.difficulty}
                       </p>
                       <p className="text-sm font-semibold truncate mt-0.5">
-                        {lang === 'en' ? item.titleEn : item.titleAr}
+                        {getChallengeTitle(item)}
                       </p>
                     </div>
 
@@ -412,16 +431,16 @@ export const CodingSandbox: React.FC = () => {
                   {activeChallenge.category}
                 </span>
                 <span className="text-xs font-semibold text-slate-400">
-                  {lang === 'en' ? 'Challenge Rules' : 'قواعد التحدي'}
+                  {lang === 'ar' ? 'قواعد التحدي' : (lang === 'es' ? 'Reglas del Desafío' : 'Challenge Rules')}
                 </span>
               </div>
               <h2 className="text-xl font-extrabold text-white mt-2">
-                {lang === 'en' ? activeChallenge.titleEn : activeChallenge.titleAr}
+                {getChallengeTitle(activeChallenge)}
               </h2>
             </div>
 
             <p className="text-sm text-slate-300 leading-relaxed bg-slate-950/40 p-3 rounded-xl border border-slate-800/50">
-              {lang === 'en' ? activeChallenge.descEn : activeChallenge.descAr}
+              {getChallengeDesc(activeChallenge)}
             </p>
 
             {/* Hint Box toggler */}
@@ -433,8 +452,8 @@ export const CodingSandbox: React.FC = () => {
                 <HelpCircle className="w-4 h-4" />
                 <span>
                   {showHint 
-                    ? (lang === 'en' ? 'Hide Hint' : 'إخفاء التلميح المساعد') 
-                    : (lang === 'en' ? 'Need a hint?' : 'هل تحتاج مساعدة؟')}
+                    ? (lang === 'ar' ? 'إخفاء التلميح المساعد' : (lang === 'es' ? 'Ocultar Pista' : 'Hide Hint')) 
+                    : (lang === 'ar' ? 'هل تحتاج مساعدة؟' : (lang === 'es' ? '¿Necesitas una pista?' : 'Need a hint?'))}
                 </span>
               </button>
 
@@ -447,7 +466,7 @@ export const CodingSandbox: React.FC = () => {
                     className="overflow-hidden mt-2 bg-amber-500/5 border border-amber-500/10 p-3 rounded-lg text-xs text-amber-400 leading-relaxed flex items-start gap-2"
                   >
                     <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                    <p>{lang === 'en' ? activeChallenge.hintEn : activeChallenge.hintAr}</p>
+                    <p>{getChallengeHint(activeChallenge)}</p>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -487,24 +506,12 @@ export const CodingSandbox: React.FC = () => {
               </div>
             </div>
 
-            {/* Editor Text Area */}
-            <div className="relative flex-grow flex bg-slate-950 font-mono text-sm leading-relaxed text-slate-200">
-              {/* Line Gutter visual */}
-              <div className="w-12 bg-slate-950 border-r border-slate-800/80 text-slate-600 select-none text-right pr-3 pt-4 font-mono text-xs space-y-1">
-                {Array.from({ length: 15 }).map((_, i) => (
-                  <div key={i}>{i + 1}</div>
-                ))}
-              </div>
-
-              {/* Text Input */}
-              <textarea
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                dir="ltr"
-                className="flex-grow bg-transparent p-4 focus:outline-none resize-none font-mono text-sm text-slate-100 min-h-[250px] leading-relaxed selection:bg-amber-500/20"
-                style={{ tabSize: 2 }}
-              />
-            </div>
+            {/* Editor Text Area with Lightweight Prism Syntax Highlighting */}
+            <PrismEditor
+              value={code}
+              onChange={setCode}
+              language={activeChallenge.category}
+            />
 
             {/* Bottom Controls Bar */}
             <div className="bg-slate-950 px-4 py-3.5 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-3">

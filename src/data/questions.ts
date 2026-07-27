@@ -543,7 +543,7 @@ console.log(c1(), c1(), c2());`,
     category: 'react',
     topic: 'React 19 & Concurrent Mode',
     difficulty: 'expert',
-    type: 'code-output',
+    type: 'multiple-choice',
     questionText: 'Under React 19, which hook is introduced to manage transitions and handle pending states during asynchronous operations natively, exposing a "isPending" boolean?',
     questionTextAr: 'في React 19، ما هو الخطاف الذي تم تقديمه لإدارة الانتقالات والتعامل مع حالات الانتظار (pending states) أثناء العمليات غير المتزامنة محلياً، مع كشف المتغير المنطقي "isPending"؟',
     options: [
@@ -558,18 +558,16 @@ console.log(c1(), c1(), c2());`,
       'useAsyncEffect',
       'useDeferredValue'
     ],
-    correctAnswer: [0], // useTransition is standard, though useActionState is also new, useTransition exposes [isPending, startTransition]. Let's say useTransition.
+    correctAnswer: [0],
     explanation: 'The useTransition hook returns [isPending, startTransition] allowing components to delay updates until async operations complete while showing beautiful progress loaders.',
     explanationAr: 'يرجع useTransition المكونات من تأجيل التحديثات [isPending, startTransition] لتجنب تجميد الواجهة أثناء العمليات غير المتزامنة.'
   },
-
-  // --- Bootstrap ---
   {
     id: 'bs-1',
     category: 'bootstrap',
     topic: 'Grid System',
     difficulty: 'medium',
-    type: 'code-output',
+    type: 'multiple-choice',
     questionText: 'What is the standard behavior of an element with class "col-md-4 col-sm-6 col-12" under Bootstrap 5 grid layout?',
     questionTextAr: 'ما هو السلوك القياسي لعنصر يحمل فئة "col-md-4 col-sm-6 col-12" تحت تخطيط شبكة Bootstrap 5؟',
     options: [
@@ -611,222 +609,9 @@ console.log(c1(), c1(), c2());`,
     correctAnswer: [1],
     explanation: 'The align-items-center utility class sets align-items: center in CSS, which aligns child elements vertically in the middle of a flex box row.',
     explanationAr: 'تقوم فئة الأداة align-items-center بتعيين المحاذاة العمودية للعناصر في منتصف صف صندوق المرونة (flex box).'
-  },
-  {
-    id: 'bs-3',
-    category: 'bootstrap',
-    topic: 'Spacing Utilities',
-    difficulty: 'easy',
-    type: 'fill-in-blank',
-    questionText: 'Under Bootstrap spacing utilities, what class sets a padding of size 3 specifically on the top and bottom (vertical padding) of an element? (Write the class name only)',
-    questionTextAr: 'تحت أدوات مسافات Bootstrap، ما هي الفئة التي تحدد حشواً (padding) بحجم 3 على الجزء العلوي والسفلي (الحشو العمودي) للعنصر؟ (اكتب اسم الفئة فقط)',
-    correctAnswer: 'py-3',
-    explanation: 'The prefix "p" stands for padding, "y" specifies the vertical axis (top and bottom), and "3" represents the size multiplier based on the spacer scale.',
-    explanationAr: 'البادئة "p" ترمز للحشو، "y" تحدد المحور الرأسي (أعلى وأسفل)، و "3" تمثل مضاعف الحجم المعتمد على مقياس التباعد.'
-  },
-  {
-    id: 'bs-4',
-    category: 'bootstrap',
-    topic: 'Navbar & Forms',
-    difficulty: 'medium',
-    type: 'true-false',
-    questionText: 'In Bootstrap 5, collapse-trigger buttons in mobile navbars can toggle their respective nav-content containers without any external JS script loading.',
-    questionTextAr: 'في Bootstrap 5، يمكن لأزرار تشغيل الانهيار في أشرطة التنقل على الهواتف المحمولة التبديل بين حاويات محتوى التنقل المقابلة لها دون تحميل أي نص برمجى جافا سكريبت خارجي.',
-    options: ['True / صحيح', 'False / خطأ'],
-    optionsAr: ['True / صحيح', 'False / خطأ'],
-    correctAnswer: [1], // Bootstrap triggers require Bootstrap's own JS / Popper logic to parse data-bs-toggle and change classes, otherwise it won't animate on pure CSS.
-    explanation: 'Bootstrap toggles utilize custom HTML data-attributes (data-bs-toggle="collapse" data-bs-target="#id") which require the Bootstrap JS bundle script to listen, parse, and execute the CSS class transition toggling.',
-    explanationAr: 'تستخدم أزرار التبديل في بوتستراب سمات بيانات مخصصة تتطلب وجود ملف جافا سكريبت الخاص بالبوتستراب للعمل وتغيير فئات CSS بنجاح.'
-  },
-  {
-    id: 'bs-5',
-    category: 'bootstrap',
-    topic: 'Containers',
-    difficulty: 'medium',
-    type: 'multiple-choice',
-    questionText: 'Which Bootstrap container class spans 100% width on all responsive breakpoints, ignoring medium, large, and extra-large margins?',
-    questionTextAr: 'أي من فئات حاويات Bootstrap التالية تمتد بنسبة 100% من العرض على جميع نقاط التجاوب والشاشات، متجاهلة الهوامش؟',
-    options: [
-      'container',
-      'container-lg',
-      'container-fluid',
-      'container-sm'
-    ],
-    optionsAr: [
-      'container',
-      'container-lg',
-      'container-fluid',
-      'container-sm'
-    ],
-    correctAnswer: [2],
-    explanation: 'container-fluid creates a full-width container that expands dynamically to fill 100% of the viewport width at all breakpoints.',
-    explanationAr: 'تنشئ حاوية container-fluid تخطيطاً يملأ كامل عرض الشاشة بنسبة 100% لجميع المقاسات ونقاط التجاوب.'
-  },
-  {
-    id: 'bs-6',
-    category: 'bootstrap',
-    topic: 'Alerts & Modals',
-    difficulty: 'hard',
-    type: 'code-output',
-    questionText: 'What is the correct Bootstrap 5 markup class to add to an alert container to support a clickable closing "x" dismiss button inside the alert row?',
-    questionTextAr: 'ما هي فئة ترميز Bootstrap 5 الصحيحة لإضافتها إلى حاوية التنبيه لدعم زر إغلاق قابل للنقر "x" داخل صف التنبيه؟',
-    options: [
-      'alert-dismissible fade show',
-      'alert-closable dynamic',
-      'alert-fade close-trigger',
-      'alert-x-btn'
-    ],
-    optionsAr: [
-      'alert-dismissible fade show',
-      'alert-closable dynamic',
-      'alert-fade close-trigger',
-      'alert-x-btn'
-    ],
-    correctAnswer: [0],
-    explanation: 'The class "alert-dismissible" leaves padding on the right for the close button. "fade show" handles the transition states so the alert animates smoothly when the user clicks dismiss.',
-    explanationAr: 'الفئة "alert-dismissible" تحجز مسافة على اليمين لزر الإغلاق. وتتعامل فئات "fade show" مع حركات التلاشي والظهور ليتلاشى التنبيه بسلاسة عند إغلاقه.'
-  },
-
-  // --- Technical English for Developers ---
-  {
-    id: 'eng-1',
-    category: 'english',
-    topic: 'Error Message Interpretation',
-    difficulty: 'medium',
-    type: 'multiple-choice',
-    questionText: 'A console log error reads: "TypeError: Cannot read properties of undefined (reading \'map\')". What is the root functional cause of this bug?',
-    questionTextAr: 'يقول خطأ سجل وحدة التحكم: "TypeError: Cannot read properties of undefined (reading \'map\')". ما هو السبب الوظيفي الجذري لهذا الخطأ؟',
-    options: [
-      'The map method is missing from the global window object.',
-      'The variable being mapped was never declared or was assigned an undefined value instead of an Array.',
-      'The return statement inside the map callback is returning undefined.',
-      'The array has too many items, causing memory stack overflow.'
-    ],
-    optionsAr: [
-      'طريقة map مفقودة من كائن النافذة العالمية window.',
-      'المتغير الذي تتم قراءته لم يتم تعريفه مطلقاً أو تم تخصيصه بقيمة undefined بدلاً من مصفوفة Array.',
-      'جملة الإرجاع (return) داخل دالة استدعاء map ترجع undefined.',
-      'المصفوفة تحتوي على عناصر كثيرة جداً، مما تسبب في فيضان ذاكرة المكدس.'
-    ],
-    correctAnswer: [1],
-    explanation: 'The JS runtime throws "Cannot read properties of undefined" when you attempt to invoke a method (like .map()) on an uninitialized, undeclared, or nullified variable context.',
-    explanationAr: 'يقوم محرك جافا سكريبت برمي استثناء "TypeError" عند محاولة تشغيل دالة (مثل .map()) على متغير لم يتم تهيئته أو قيمته غير محددة.'
-  },
-  {
-    id: 'eng-2',
-    category: 'english',
-    topic: 'Git Terminology',
-    difficulty: 'easy',
-    type: 'fill-in-blank',
-    questionText: 'When working in teams on GitHub, you submit a pull request to ask the repository owners to ________ (join/combine) your branch code into the main production branch.',
-    questionTextAr: 'عند العمل كفريق على GitHub، تقوم بتقديم طلب سحب (pull request) لتطلب من مالكي المستودع ________ (دمج/ضم) كود فرعك في الفرع الرئيسي للإنتاج.',
-    correctAnswer: 'merge',
-    explanation: 'The verb "merge" is the industry-standard git action that integrates changes from one branch (e.g., developer feature branch) into another target branch (e.g., main).',
-    explanationAr: 'الفعل "merge" (دمج) هو إجراء جيت القياسي لدمج التغييرات من فرع إلى فرع مستهدف آخر.'
-  },
-  {
-    id: 'eng-3',
-    category: 'english',
-    topic: 'API Documentation Terminology',
-    difficulty: 'medium',
-    type: 'multiple-choice',
-    questionText: 'In API documentation, if a request argument is listed as "deprecated", what does this specify to developers?',
-    questionTextAr: 'في توثيق واجهة برمجة التطبيقات (API Documentation)، إذا تم إدراج معامل طلب على أنه "deprecated"، فماذا يعني ذلك للمطورين؟',
-    options: [
-      'The argument is strictly required and cannot be omitted under any circumstance.',
-      'The argument is experimental and only available in sandbox developer settings.',
-      'The argument is outdated, discouraged from use, and likely to be removed in future API versions.',
-      'The argument requires administrative elevated access tokens.'
-    ],
-    optionsAr: [
-      'المعامل مطلوب بدقة ولا يمكن حذفه تحت أي ظرف من الظروف.',
-      'المعامل تجريبي ومتوفر فقط في بيئات التطوير التجريبية.',
-      'المعامل قديم، ويُنصح بعدم استخدامه، ومن المرجح إزالته في إصدارات واجهة برمجة التطبيقات المستقبلية.',
-      'يتطلب المعامل رموز وصول إدارية مرتفعة.'
-    ],
-    correctAnswer: [2],
-    explanation: '"Deprecated" means a feature is tolerated but obsolete. It serves as a warning that it will be entirely unsupported or deleted in subsequent updates.',
-    explanationAr: 'تعني كلمة "Deprecated" (مهجور/مهمش) أن المعامل مقبول ولكنه عفا عليه الزمن. يُستخدم للتنبيه بأنه لن يتم دعمه أو سيتم حذفه تماماً في التحديثات اللاحقة.'
-  },
-  {
-    id: 'eng-4',
-    category: 'english',
-    topic: 'Developer Expressions',
-    difficulty: 'hard',
-    type: 'match-columns',
-    questionText: 'Match the common technical developer jargon to its literal software meaning.',
-    questionTextAr: 'طابق المصطلحات الفنية الشائعة للمطورين بمدلولها البرمجي الحرفي.',
-    matchLeft: [
-      'Refactoring',
-      'Technical Debt',
-      'Hotfix',
-      'Boilerplate'
-    ],
-    matchLeftAr: [
-      'Refactoring (إعادة الهيكلة)',
-      'Technical Debt (الدين الفني)',
-      'Hotfix (إصلاح عاجل)',
-      'Boilerplate (كود جاهز نمطي)'
-    ],
-    matchRight: [
-      'Restructuring existing code to improve readability and design without changing its external functional behavior.',
-      'The implied cost of future additional rework caused by choosing an easy short-term hack over a better long-term design.',
-      'An emergency patch deployed quickly to production to repair a critical live bug immediately.',
-      'Standard template sections of code that must be included in many places with little or no modification.'
-    ],
-    matchRightAr: [
-      'إعادة هيكلة الكود الحالي لتحسين قابليته للقراءة والتصميم دون تغيير سلوكه الوظيفي الخارجي.',
-      'التكلفة الضمنية لإعادة العمل الإضافية المستقبلية الناتجة عن اختيار حلول سهلة ومؤقتة بدلاً من تصميم متكامل طويل الأجل.',
-      'رقعة برمجية طارئة يتم نشرها بسرعة لإصلاح ثغرة أو خطأ فادح في الإنتاج الحي فوراً.',
-      'أقسام برمجية نمطية قياسية يجب تضمينها في العديد من الأماكن مع تعديل طفيف أو بدون تعديل.'
-    ],
-    correctAnswer: [0, 1, 2, 3],
-    explanation: 'Refactoring cleans structure. Debt accrues through rushed solutions. Hotfixes bypass normal release cycles. Boilerplate represents setup structures.',
-    explanationAr: 'إعادة الهيكلة تنظف الكود. الدين الفني يتراكم بسبب الحلول المتسرعة. الإصلاح العاجل يتجاوز دورات النشر العادية. الكود النمطي يمثل كود الإعداد الأولي.'
-  },
-  {
-    id: 'eng-5',
-    category: 'english',
-    topic: 'Grammar & Syntax Description',
-    difficulty: 'easy',
-    type: 'true-false',
-    questionText: 'In developer communication, a "syntax error" implies that the code has incorrect grammatical formatting according to language rules, preventing compilation entirely.',
-    questionTextAr: 'في تواصل المطورين، تعني كلمة "خطأ نحوي" (syntax error) أن الكود يحتوي على صياغة غير صحيحة وفقاً لقواعد اللغة، مما يمنع التجميع تماماً.',
-    options: ['True / صحيح', 'False / خطأ'],
-    optionsAr: ['True / صحيح', 'False / خطأ'],
-    correctAnswer: [0],
-    explanation: 'Syntax errors represent direct grammar violations (such as missing brackets or misplaced semicolons), meaning the compiler or parser fails to compile or evaluate the code.',
-    explanationAr: 'تمثل الأخطاء النحوية (Syntax errors) انتهاكاً مباشراً لقواعد كتابة لغة البرمجة (مثل الأقواس المفقودة أو الفاصلة المنقوطة الخاطئة)، مما يمنع تشغيل البرنامج.'
-  },
-  {
-    id: 'eng-6',
-    category: 'english',
-    topic: 'GitHub Terms',
-    difficulty: 'hard',
-    type: 'multiple-choice',
-    questionText: 'When you download a full replica of a public project with its entire Git history to your local computer for the first time, which command do you use?',
-    questionTextAr: 'عند تحميل نسخة كاملة من مشروع عام مع كامل سجل التعديلات الخاص به إلى جهازك المحلي للمرة الأولى، أي أمر تستخدم؟',
-    options: [
-      'git checkout',
-      'git clone',
-      'git pull',
-      'git fork'
-    ],
-    optionsAr: [
-      'git checkout',
-      'git clone',
-      'git pull',
-      'git fork'
-    ],
-    correctAnswer: [1],
-    explanation: 'The git clone command clones (downloads) an existing Git repository from a remote server (like GitHub) to your local environment, setting up active origin tracking automatically.',
-    explanationAr: 'يقوم الأمر git clone بنسخ (تحميل) مستودع جيت موجود بالفعل من خادم بعيد إلى بيئتك المحلية، مهيئاً المسارات تلقائياً.'
   }
 ];
 
-// DYNAMIC QUESTION POOL GENERATION SYSTEM
-// This dynamically outputs high-quality questions for search/practice filters so that we fully simulate 300+ HTML, 400+ CSS, 600+ JS, etc.
-// It generates deterministic questions on the fly using parameterized logic, allowing pagination and heavy search.
 export function generateProceduralQuestions(
   category: 'html' | 'css' | 'javascript' | 'react' | 'bootstrap' | 'english',
   countNeeded = 300
@@ -870,7 +655,39 @@ export function generateProceduralQuestions(
   const topics = topicsMap[category] || ['General Concept'];
   const difficulties: Difficulty[] = ['easy', 'medium', 'hard', 'expert'];
 
-  // Seeded formula to keep them stable and realistic
+  const ENGLISH_VOCABULARY = [
+    { word: 'Asynchronous', meaningAr: 'غير متزامن (تنفيذ مهام برمجية بشكل مستقل دون حظر واجهة المستخدم)', definition: 'Executing tasks independently of the main program flow, allowing the UI to remain responsive.' },
+    { word: 'Deployment', meaningAr: 'النشر والتثبيت (عملية نقل وتثبيت التطبيق على خادم الويب ليكون متاحاً للمستخدمين)', definition: 'The process of distributing and running an application on a target server.' },
+    { word: 'Inheritance', meaningAr: 'الوراثة البرمجية (انتقال الخصائص والوظائف من كائن أب إلى كائن ابن)', definition: 'A mechanism in OOP where a subclass inherits properties and behaviors from a superclass.' },
+    { word: 'Framework', meaningAr: 'إطار عمل (هيكل برمجي جاهز يسهل ويسرع عملية التطوير باستخدام أدوات مدمجة)', definition: 'A structured environment or set of libraries providing a pre-built foundation for developers.' },
+    { word: 'Compiler', meaningAr: 'المترجم (أداة برمجية تقوم بتحويل الكود البرمجي بالكامل إلى لغة الآلة)', definition: 'A specialized program that translates high-level code into executable machine code.' },
+    { word: 'Responsive', meaningAr: 'متجاوب (توافق وسلاسة واجهة التطبيق لتناسب كافة مقاسات الشاشات المختلفة)', definition: 'An interface design that automatically adjusts and scales to fit all screen sizes.' },
+    { word: 'Debugging', meaningAr: 'تصحيح الأخطاء (عملية تتبع وتحديد مواضع الأخطاء البرمجية ومعالجتها)', definition: 'The systematic process of finding, analyzing, and resolving bugs inside software.' },
+    { word: 'Endpoint', meaningAr: 'نقطة النهاية (العنوان أو الرابط الذي يستقبل طلبات واجهة البرمجيات على الخادم)', definition: 'A specific URL representing a target API resource where a server receives requests.' },
+    { word: 'Variable', meaningAr: 'المتغير (مكان مخصص ومحجوز في الذاكرة لتخزين قيمة قابلة للتعديل والتحديث)', definition: 'A named storage location in memory designed to hold data that can change over time.' },
+    { word: 'Refactoring', meaningAr: 'إعادة الهيكلة (تعديل وتعديل الكود داخلياً دون تغيير الوظائف لتحسين قراءته)', definition: 'Reorganizing and optimizing existing source code without changing its external behavior.' },
+    { word: 'Callback', meaningAr: 'دالة استدعاء ذاتي (دالة يتم تمريرها كمعامل لدالة أخرى ليتم تنفيذها لاحقاً)', definition: 'A function passed as an argument to another function, to be executed once a task completes.' },
+    { word: 'Repository', meaningAr: 'المستودع (المكان السحابي أو المحلي الذي يخزن الكود المصدري وسجل التعديلات فيه)', definition: 'A storage space (like GitHub) housing code files and their entire revision history.' },
+    { word: 'Exception', meaningAr: 'الاستثناء (خطأ غير متوقع يحدث أثناء تشغيل البرنامج ويتم التقاطه لمنع الانهيار)', definition: 'An abnormal event occurring during program execution that disrupts the normal instruction flow.' },
+    { word: 'Semantic', meaningAr: 'دلالي (استخدام عناصر تصف المعنى والوظيفة بوضوح لمتصفحات الويب وقارئات الشاشة)', definition: 'HTML elements that carry explicit meaning about their content, aiding screen readers and SEO.' },
+    { word: 'Library', meaningAr: 'مكتبة برمجية (مجموعة وظائف وأدوات مسبقة الصنع قابلة لإعادة الاستخدام في مشروعك)', definition: 'A collection of pre-written functions or routines that developers can reuse to save time.' },
+    { word: 'Database', meaningAr: 'قاعدة بيانات (نظام مخصص لتنظيم وتخزين واسترجاع كميات كبيرة من البيانات بفعالية)', definition: 'A structured, organized collection of data stored electronically for rapid querying.' },
+    { word: 'Encryption', meaningAr: 'التشفير (تحويل البيانات والرسائل إلى رموز غير مقروءة لحمايتها من المتطفلين)', definition: 'The process of encoding messages or information so that only authorized parties can read it.' },
+    { word: 'Algorithm', meaningAr: 'الخوارزمية (مجموعة خطوات منطقية متسلسلة بدقة لحل مشكلة أو إنجاز مهمة معينة)', definition: 'A finite set of precise, step-by-step instructions designed to solve a specific problem.' },
+    { word: 'Authentication', meaningAr: 'التحقق من الهوية (إجراءات تأكيد هوية المستخدم كالبريد وكلمة المرور للدخول)', definition: 'The process of verifying the identity of a user or system trying to access resources.' },
+    { word: 'Authorization', meaningAr: 'التحقق من الصلاحيات (تحديد الصلاحيات والميزات المسموح للمستخدم القيام بها)', definition: 'The process of determining what actions or data an authenticated user has permission to access.' },
+    { word: 'Deprecation', meaningAr: 'إهمال الميزات (الإشارة إلى ميزة أو دالة أصبحت قديمة وسيتم حذفها مستقبلاً)', definition: 'The discouragement of using a software feature, function, or API because it is obsolete.' },
+    { word: 'Boilerplate', meaningAr: 'الأكواد الجاهزة الافتراضية (هيكل الكود القياسي الذي يتكرر في بداية كل مشروع جديد)', definition: 'Standard blocks of code that are reused in many places with little or no modification.' },
+    { word: 'Linting', meaningAr: 'التحليل الساكن للكود (عملية فحص الكود للعثور على أخطاء التنسيق أو الثغرات تلقائياً)', definition: 'The automated scanning of code to find formatting issues, syntax warnings, or styling errors.' },
+    { word: 'Cache', meaningAr: 'الذاكرة المؤقتة (مكان حفظ البيانات الشائعة سريعاً لتسريع استرجاعها لاحقاً)', definition: 'A high-speed data storage layer storing subset of data temporarily for faster access.' },
+    { word: 'State', meaningAr: 'الحالة البرمجية (البيانات النشطة حالياً داخل المكون والتي تحدد شكل وظهور الواجهة)', definition: 'An object or reactive value holding data about the current condition of a component.' },
+    { word: 'Syntax', meaningAr: 'النحو البرمجي (القواعد والتركيبات اللغوية التي تحكم طريقة كتابة الكود البرمجي)', definition: 'The set of rules defining the combinations of symbols that are considered to be correctly structured.' },
+    { word: 'Iteration', meaningAr: 'التكرار (تنفيذ مجموعة من التعليمات عدة مرات مثل الحلقات التكرارية)', definition: 'The repetition of a process or block of code, typically executed using loops.' },
+    { word: 'Object', meaningAr: 'الكائن (وحدة برمجية تجمع بين البيانات والوظائف المتعلقة بها في البرمجة الكائنية)', definition: 'An instance of a class that contains real values and functions operating on those values.' },
+    { word: 'Array', meaningAr: 'المصفوفة (هيكل بيانات لتخزين مجموعة مرتبة من العناصر تحت اسم متغير واحد)', definition: 'A data structure consisting of a collection of elements, each identified by at least one array index.' },
+    { word: 'String', meaningAr: 'السلسلة النصية (مجموعة من الأحرف والرموز المتتالية المستخدمة لتمثيل النصوص)', definition: 'A sequence of characters, either as a literal constant or as some kind of variable.' }
+  ];
+
   for (let i = result.length; i < countNeeded; i++) {
     const topic = topics[i % topics.length];
     const difficulty = difficulties[i % difficulties.length];
@@ -886,7 +703,6 @@ export function generateProceduralQuestions(
     let correctAnswer: number[] | string = [0];
     let codeSnippet: string | undefined;
 
-    // We can vary templates based on i % 3 or i % 4
     const templateIdx = i % 4;
 
     if (category === 'html') {
@@ -906,8 +722,8 @@ export function generateProceduralQuestions(
           `لإدارة بيانات الخادم المشفرة والآمنة.`
         ];
         correctAnswer = [0];
-        explanation = `Using semantic tags helps accessibility software and search crawlers identify content layout roles instantly.`;
-        explanationAr = `يساعد استخدام العلامات الدلالية البرامج المساعدة وزواحف البحث في تحديد أدوار تخطيط المحتوى على الفور.`;
+        explanation = `Semantic HTML5 elements allow screen readers and search engines to understand the structural content layout.`;
+        explanationAr = `تسمح عناصر HTML5 الدلالية لقارئات الشاشة ومحركات البحث بفهم تخطيط المحتوى الهيكلي.`;
       } else if (templateIdx === 1) {
         type = 'true-false';
         questionText = `For optimal HTML accessibility, you must always provide an "alt" text attribute on <img> elements, even if it is left empty (alt="") for decorative images.`;
@@ -928,70 +744,45 @@ export function generateProceduralQuestions(
       }
     } else if (category === 'css') {
       if (templateIdx === 0) {
-        questionText = `In ${topic}, which rule defines properties that override all other styling declarations, including inline styles?`;
-        questionTextAr = `في موضوع ${topic}، أي قاعدة تحدد التنسيقات التي تتجاوز جميع إعلانات الأنماط الأخرى، بما في ذلك الأنماط المضمنة؟`;
-        options = ['!important', '#id selectors', 'inline style tags', '@media directives'];
-        optionsAr = ['!important', 'محددات المعرف #id', 'علامات النمط المضمنة', 'توجيهات @media'];
-        correctAnswer = [0];
-        explanation = `The !important keyword forces properties to take precedence, breaking default cascading specificity rules. Use with caution.`;
-        explanationAr = `تجبر الكلمة الرئيسية !important الخصائص على أخذ الأسبقية، مما يكسر قواعد تسلسل الخصوصية الافتراضية. استخدمها بحذر.`;
-      } else if (templateIdx === 1) {
-        questionText = `What is the layout output of a container set with "display: flex" and "flex-direction: column-reverse"?`;
-        questionTextAr = `ما هي مخرجات التخطيط لحاوية تم تعيينها بـ "display: flex" و "flex-direction: column-reverse"؟`;
+        questionText = `Under ${topic}, how does CSS Specificity calculate which styles are applied to an element when multiple rules conflict?`;
+        questionTextAr = `ضمن موضوع ${topic}، كيف تحسب خصوصية (Specificity) CSS أي الأنماط يتم تطبيقها على عنصر عندما تتعارض عدة قواعد؟`;
         options = [
-          `Children are stacked vertically, starting from the bottom of the container.`,
-          `Children are laid out horizontally in reverse row order.`,
-          `Children are overlapping on top of each other.`,
-          `Children are hidden by default.`
+          `By assigning weight categories: inline styles (high), IDs, classes/attributes, and elements (low).`,
+          `By selecting the rule that was written first in the stylesheet index.`,
+          `By measuring the absolute pixel size of the elements dynamically.`,
+          `By consulting the browser's operating system environment theme.`
         ];
         optionsAr = [
-          `يتم تكديس العناصر الفرعية رأسياً، بدءاً من الجزء السفلي من الحاوية.`,
-          `يتم وضع العناصر الفرعية أفقياً بترتيب صف عكسي.`,
-          `تتداخل العناصر الفرعية فوق بعضها البعض.`,
-          `يتم إخفاء العناصر الفرعية افتراضياً.`
+          `عن طريق تعيين فئات وزن: الأنماط المضمنة (الأعلى)، المعرفات IDs، الفئات/السمات، والعناصر (الأقل).`,
+          `عن طريق تحديد القاعدة التي تمت كتابتها أولاً في فهرس ورقة الأنماط.`,
+          `عن طريق قياس حجم البكسل المطلق للعناصر ديناميكياً.`,
+          `عن طريق استشارة مظهر نظام تشغيل المتصفح.`
         ];
         correctAnswer = [0];
-        explanation = `column-reverse changes the main flex axis to vertical and reverses the flow, pushing items to anchor at the bottom and stack upwards.`;
-        explanationAr = `يقوم column-reverse بتغيير المحور المرن الرئيسي إلى رأسي ويعكس التدفق، مما يدفع العناصر للارتساء في الأسفل والتكديس لأعلى.`;
-      } else {
-        type = 'code-output';
-        codeSnippet = `.grid-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}`;
-        questionText = `How many columns of equal width are created by the CSS class above?`;
-        questionTextAr = `كم عدد الأعمدة متساوية العرض التي يتم إنشاؤها بواسطة فئة CSS أعلاه؟`;
-        options = ['3 columns', '1 column', '12 columns', 'None'];
-        optionsAr = ['3 أعمدة', 'عمود واحد', '12 عموداً', 'لا شيء'];
+        explanation = `Specificity is calculated based on a weight matrix of inline styles, ID selectors, class/attribute selectors, and element tag selectors.`;
+        explanationAr = `يتم حساب الخصوصية بناءً على مصفوفة وزن من الأنماط المضمنة، ومحددات المعرف (ID)، ومحددات الفئة/السمة، ومحددات عناصر العلامات.`;
+      } else if (templateIdx === 1) {
+        type = 'true-false';
+        questionText = `In the CSS Box Model, setting "box-sizing: border-box" ensures that padding and borders are included within the element's total declared width and height.`;
+        questionTextAr = `في نموذج صندوق CSS (Box Model)، يضمن تعيين "box-sizing: border-box" تضمين الحشوة والحدود ضمن العرض والارتفاع الإجماليين للمسجلين للعنصر.`;
+        options = ['True / صحيح', 'False / خطأ'];
+        optionsAr = ['True / صحيح', 'False / خطأ'];
         correctAnswer = [0];
-        explanation = `repeat(3, 1fr) splits the grid area into 3 equal fractional pieces.`;
-        explanationAr = `repeat(3, 1fr) يقسم مساحة الشبكة إلى 3 أجزاء كسرية متساوية.`;
+        explanation = `border-box forces the browser to calculate padding and border inside the declared dimensions, rather than expanding the box outwardly.`;
+        explanationAr = `يجبر border-box المتصفح على حساب الحشو والحدود داخل الأبعاد المعلنة، بدلاً من توسيع الصندوق إلى الخارج.`;
+      } else {
+        questionText = `Which CSS display property values are essential for activating a 2D grid-based layout system that handles both columns and rows seamlessly?`;
+        questionTextAr = `أي من قيم خاصية العرض (display) في CSS ضروري لتنشيط نظام تخطيط شبكي ثنائي الأبعاد يتعامل مع كل من الأعمدة والصفوف بسلاسة؟`;
+        options = ['grid', 'flex', 'block', 'inline-block'];
+        optionsAr = ['grid', 'flex', 'block', 'inline-block'];
+        correctAnswer = [0];
+        explanation = `Setting "display: grid" initiates a grid formatting context, allowing columns and rows to be declared via grid-template properties.`;
+        explanationAr = `يؤدي تعيين "display: grid" إلى بدء سياق تنسيق الشبكة، مما يسمح بالإعلان عن الأعمدة والصفوف عبر خصائص grid-template.`;
       }
     } else if (category === 'javascript') {
       if (templateIdx === 0) {
-        questionText = `In JavaScript ${topic}, what value is returned when evaluating a variable that has been declared but never assigned an active value?`;
-        questionTextAr = `في جافا سكريبت ${topic}، ما القيمة التي يتم إرجاعها عند تقييم متغير تم الإعلان عنه ولكن لم يتم تخصيص قيمة نشطة له أبداً؟`;
-        options = ['undefined', 'null', 'NaN', 'ReferenceError'];
-        optionsAr = ['undefined', 'null', 'NaN', 'ReferenceError'];
-        correctAnswer = [0];
-        explanation = `JavaScript automatically initializes declared variables without a value to "undefined".`;
-        explanationAr = `تقوم جافا سكريبت تلقائياً بتهيئة المتغيرات المعلنة دون قيمة إلى "undefined".`;
-      } else if (templateIdx === 1) {
-        type = 'code-output';
-        codeSnippet = `const arr = [10, 20, 30];
-const [x, ...y] = arr;
-console.log(y);`;
-        questionText = `What will be printed in the console from executing the array rest-parameter code above?`;
-        questionTextAr = `ما الذي سيتم طباعته في وحدة التحكم من تشغيل كود معامل الباقي للمصفوفة أعلاه؟`;
-        options = ['[20, 30]', '10', '[10, 20]', 'undefined'];
-        optionsAr = ['[20, 30]', '10', '[10, 20]', 'undefined'];
-        correctAnswer = [0];
-        explanation = `Rest syntax takes all remaining items in the array and binds them into a fresh array slice y = [20, 30].`;
-        explanationAr = `تأخذ صياغة الباقي (Rest syntax) جميع العناصر المتبقية في المصفوفة وتجمعها في جزء مصفوفة جديد يسمى y = [20, 30].`;
-      } else {
-        questionText = `Which of the following describes the difference between == and ===?`;
-        questionTextAr = `أي مما يلي يصف الفرق بين معامل المقارنة الثنائي (==) والثلاثي (===)؟`;
+        questionText = `Under ${topic}, what is the main functional difference between the loose (==) and strict (===) equality operators in JavaScript?`;
+        questionTextAr = `ضمن موضوع ${topic}، ما الفرق الوظيفي الأساسي بين مشغلي المساواة غير الصارمة (==) والصارمة (===) في جافا سكريبت؟`;
         options = [
           `== allows type coercion, whereas === checks both value and type strictly.`,
           `=== performs compilation, while == runs asynchronously.`,
@@ -1007,6 +798,36 @@ console.log(y);`;
         correctAnswer = [0];
         explanation = `Strict equality (===) prevents type coercion, avoiding bugs caused by silent variable conversion.`;
         explanationAr = `تمنع المساواة الصارمة (===) تحويل نوع البيانات قسرياً، مما يتجنب الأخطاء الناتجة عن التحويل الصامت للمتغيرات.`;
+      } else if (templateIdx === 1) {
+        questionText = `Which of the following is correct regarding hoisting in JavaScript?`;
+        questionTextAr = `أي مما يلي صحيح فيما يتعلق بالرفع (hoisting) في جافا سكريبت؟`;
+        options = [
+          `Functions declared with "function" are hoisted with their definitions, while "var" is hoisted with "undefined".`,
+          `Variables declared with "let" and "const" are not hoisted at all.`,
+          `All declarations are hoisted with their values.`,
+          `Only functions are hoisted.`
+        ];
+        optionsAr = [
+          `يتم رفع الدوال المعلن عنها بـ "function" مع تعريفاتها، بينما يتم رفع "var" بـ "undefined".`,
+          `المتغيرات المعلن عنها بـ "let" و "const" لا يتم رفعها على الإطلاق.`,
+          `يتم رفع جميع الإعلانات مع قيمها.`,
+          `يتم رفع الدوال فقط.`
+        ];
+        correctAnswer = [0];
+        explanation = `Function declarations and var are hoisted. However, let and const are hoisted but remain in the temporal dead zone (TDZ) and cannot be accessed before declaration.`;
+        explanationAr = `يتم رفع إعلانات الدوال وvar. ومع ذلك، يتم رفع let وconst أيضاً ولكنهما يظلان في المنطقة الميتة المؤقتة (TDZ) ولا يمكن الوصول إليهما قبل الإعلان.`;
+      } else {
+        type = 'code-output';
+        codeSnippet = `const arr = [1, 2, 3];
+const newArr = arr.map(x => x * 2);
+console.log(arr);`;
+        questionText = `What is the console output of the code block above?`;
+        questionTextAr = `ما هي مخرجات وحدة التحكم (console) لمجموعة الكود أعلاه؟`;
+        options = ['[1, 2, 3]', '[2, 4, 6]', 'undefined', 'ReferenceError'];
+        optionsAr = ['[1, 2, 3]', '[2, 4, 6]', 'undefined', 'ReferenceError'];
+        correctAnswer = [0];
+        explanation = `.map() is non-destructive; it returns a new array and leaves the original array unmodified.`;
+        explanationAr = `الدالة .map() غير مدمرة؛ فهي ترجع مصفوفة جديدة وتترك المصفوفة الأصلية دون تعديل.`;
       }
     } else if (category === 'react') {
       if (templateIdx === 0) {
@@ -1096,41 +917,30 @@ console.log(y);`;
       }
     } else {
       // English for Developers
-      if (templateIdx === 0) {
-        questionText = `What is the correct spelling and developer meaning of the term used to describe writing code step-by-step or investigating errors in execution logs?`;
-        questionTextAr = `ما الهجاء الصحيح والمعنى البرمجي للمصطلح المستخدم لوصف كتابة الكود خطوة بخطوة أو فحص الأخطاء في سجلات التشغيل؟`;
-        options = ['Debugging', 'Refactering', 'Develpment', 'Copyling'];
-        optionsAr = ['Debugging', 'Refactering', 'Develpment', 'Copyling'];
-        correctAnswer = [0];
-        explanation = `"Debugging" is the process of locating, identifying, and correcting bugs or errors inside code routines.`;
-        explanationAr = `"Debugging" (إصلاح الأخطاء) هي عملية تحديد وتصحيح العيوب أو الأخطاء البرمجية داخل التعليمات البرمجية.`;
-      } else if (templateIdx === 1) {
-        questionText = `In documentation sentences, what does the abbreviation "API" stand for?`;
-        questionTextAr = `في الجمل والتوثيقات البرمجية، إلام يرمز الاختصار "API"؟`;
-        options = [
-          `Application Programming Interface`,
-          `Analytical Program Integration`,
-          `Automatic Process Identifier`,
-          `Apex Protocol Instruction`
-        ];
-        optionsAr = [
-          `واجهة برمجة التطبيقات (Application Programming Interface)`,
-          `دمج البرامج التحليلية (Analytical Program Integration)`,
-          `معرف العملية التلقائي (Automatic Process Identifier)`,
-          `تعليمات بروتوكول القمة (Apex Protocol Instruction)`
-        ];
-        correctAnswer = [0];
-        explanation = `API stands for Application Programming Interface, which allows separate softwares to exchange data and request operations.`;
-        explanationAr = `يرمز API إلى واجهة برمجة التطبيقات، والتي تسمح للبرمجيات المنفصلة بتبادل البيانات وطلب العمليات.`;
-      } else {
-        questionText = `Complete the development team request sentence: "We need to ________ a new branch on GitHub to start working on the responsive sidebar UI safely."`;
-        questionTextAr = `أكمل جملة طلب فريق التطوير: "نحن بحاجة إلى ________ فرع جديد على GitHub لبدء العمل على الواجهة الجانبية المتجاوبة بأمان."`;
-        options = ['create', 'push', 'commit', 'resolve'];
-        optionsAr = ['إنشاء (create)', 'دفع (push)', 'حفظ (commit)', 'حل (resolve)'];
-        correctAnswer = [0];
-        explanation = `The verb "create" fits grammatically and functionally when initiating a branch in Git workflows.`;
-        explanationAr = `يناسب الفعل "إنشاء" (create) الصياغة النحوية والعملية عند بدء فرع جديد في تدفقات عمل Git.`;
-      }
+      const vocab = ENGLISH_VOCABULARY[i % ENGLISH_VOCABULARY.length];
+      const others = ENGLISH_VOCABULARY.filter((v) => v.word !== vocab.word);
+      const other1 = others[i % others.length];
+      const other2 = others[(i + 1) % others.length];
+      const other3 = others[(i + 2) % others.length];
+
+      questionText = `What is the correct professional meaning of the developer term "${vocab.word}"?`;
+      questionTextAr = `ما هو المعنى المهني الصحيح للمصطلح البرمجي "${vocab.word}"؟`;
+
+      const opt1 = `"${vocab.word}" -> ${vocab.definition}`;
+      const opt2 = `"${other1.word}" -> ${other1.definition}`;
+      const opt3 = `"${other2.word}" -> ${other2.definition}`;
+      const opt4 = `"${other3.word}" -> ${other3.definition}`;
+
+      options = [opt1, opt2, opt3, opt4];
+      optionsAr = [
+        `تعني: ${vocab.meaningAr}`,
+        `تعني: ${other1.meaningAr}`,
+        `تعني: ${other2.meaningAr}`,
+        `تعني: ${other3.meaningAr}`
+      ];
+      correctAnswer = [0];
+      explanation = `The technical term "${vocab.word}" translates directly to: ${vocab.meaningAr}.`;
+      explanationAr = `المصطلح التقني "${vocab.word}" يترجم مباشرة إلى: ${vocab.meaningAr}.`;
     }
 
     result.push({
@@ -1205,20 +1015,26 @@ export function generateCertificateId(name: string, category: string): string {
 export const PLATFORM_FAQS = [
   {
     qEn: "How does the scoring system work?",
+    qEs: "¿Cómo funciona el sistema de puntuación?",
     qAr: "كيف يعمل نظام تسجيل النقاط؟",
     aEn: "Each question has a different weight based on difficulty: Easy (10 points), Medium (20 points), Hard (30 points), and Expert (50 points). You also receive speed bonuses and a streak difficulty bonus!",
+    aEs: "Cada pregunta tiene un peso diferente según la dificultad: Fácil (10 puntos), Medio (20 puntos), Difícil (30 puntos) y Experto (50 puntos). ¡También recibes bonificaciones por velocidad y racha!",
     aAr: "كل سؤال له وزن مختلف بناءً على الصعوبة: سهل (10 نقاط)، متوسط (20 نقطة)، صعب (30 نقطة)، وخبير (50 نقطة). ستحصل أيضاً على مكافآت السرعة ومكافأة صعوبة المتتالية!"
   },
   {
     qEn: "Can I earn a certificate for any category?",
+    qEs: "¿Puedo obtener un certificado para cualquier categoría?",
     qAr: "هل يمكنني الحصول على شهادة لأي فئة؟",
     aEn: "Yes! Completing any category test with an overall score of 70% or higher unlocks a professional, printable/downloadable PDF certificate generated live.",
+    aEs: "¡Sí! Completar cualquier prueba de categoría con una puntuación del 70% o más desbloquea un certificado PDF profesional e imprimible generado en vivo.",
     aAr: "نعم! يؤدي إكمال أي اختبار فئة بنسبة 70٪ أو أكثر إلى فتح شهادة PDF احترافية قابلة للطباعة والتحميل يتم إنشاؤها مباشرة."
   },
   {
     qEn: "What is the difference between Exam, Study, and Daily Challenge modes?",
+    qEs: "¿Cuál es la diferencia entre los modos Examen, Estudio y Desafío Diario?",
     qAr: "ما الفرق بين أوضاع الامتحان والدراسة والتحدي اليومي؟",
     aEn: "Exam mode enforces strict timing and hides explanations until submit. Study mode lets you check answers instantly with explanations. Daily challenge is a randomized 5-question test that boosts your learning streak!",
+    aEs: "El modo Examen aplica un tiempo estricto y oculta explicaciones hasta enviar. El modo Estudio permite verificar respuestas al instante con explicaciones. ¡El desafío diario es una prueba aleatoria de 5 preguntas que impulsa tu racha de aprendizaje!",
     aAr: "يفرض وضع الامتحان توقيتاً صارماً ويخفي الشروحات حتى الإرسال. يتيح لك وضع الدراسة التحقق من الإجابات فوراً مع الشرح. التحدي اليومي هو اختبار عشوائي من 5 أسئلة يعزز سلسلة تعلمك!"
   }
 ];

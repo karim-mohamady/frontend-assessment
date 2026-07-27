@@ -13,6 +13,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Assessment } from './pages/Assessment';
 import { Report } from './pages/Report';
 import { CodingSandbox } from './pages/CodingSandbox';
+import { InterviewPrep } from './pages/InterviewPrep';
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
               <Route path="/assessment" element={<RouteTransition><Assessment /></RouteTransition>} />
               <Route path="/report" element={<RouteTransition><Report /></RouteTransition>} />
               <Route path="/sandbox" element={<RouteTransition><CodingSandbox /></RouteTransition>} />
+              <Route path="/interview" element={<RouteTransition><InterviewPrep /></RouteTransition>} />
             </Routes>
           </main>
 

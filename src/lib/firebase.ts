@@ -4,7 +4,16 @@
  */
 
 import { initializeApp, getApp, getApps, FirebaseApp } from 'firebase/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider, Auth, UserCredential } from 'firebase/auth';
+import { 
+  getAuth, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  Auth, 
+  UserCredential,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile
+} from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc, Firestore } from 'firebase/firestore';
 import { UserProgress } from '../types';
 
@@ -116,3 +125,20 @@ export async function fetchProgressFromCloud(userId: string): Promise<UserProgre
   }
   return null;
 }
+
+export async function registerWithEmailAndPassword(email: string, pass: string, name: string): Promise<UserCredential | null> {
+  if (!isFirebaseConfigured()) return null;
+  const auth = getFirebaseAuth();
+  const creds = await createUserWithEmailAndPassword(auth, email, pass);
+  if (creds.user) {
+    await updateProfile(creds.user, { displayName: name });
+  }
+  return creds;
+}
+
+export async function loginWithEmailAndPasswordCustom(email: string, pass: string): Promise<UserCredential | null> {
+  if (!isFirebaseConfigured()) return null;
+  const auth = getFirebaseAuth();
+  return await signInWithEmailAndPassword(auth, email, pass);
+}
+

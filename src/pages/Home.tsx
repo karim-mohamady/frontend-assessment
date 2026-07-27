@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { CORE_QUESTIONS, PLATFORM_FAQS, getQuestionsByCategory } from '../data/questions';
 import { 
-  ArrowRight, ShieldCheck, HelpCircle, GraduationCap, Code2, Sparkles, BookOpen, Search, Filter, BookMarked, Layers, Clock, Zap
+  ArrowRight, ShieldCheck, HelpCircle, GraduationCap, Code2, Sparkles, BookOpen, Search, Filter, BookMarked, Layers, Clock, Zap, Brain
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -128,6 +128,15 @@ export const Home: React.FC = () => {
             >
               <Code2 className="w-4.5 h-4.5 text-amber-500" />
               <span>{t('sandbox')}</span>
+            </button>
+
+            <button
+              onClick={() => navigate('/interview')}
+              className="px-8 py-4 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 hover:border-purple-500/40 text-purple-400 font-bold rounded-2xl flex items-center space-x-2 rtl:space-x-reverse transition-all text-sm"
+              id="hero-interview-cta"
+            >
+              <Brain className="w-4.5 h-4.5 text-purple-400" />
+              <span>{t('interviewPrep')}</span>
             </button>
           </motion.div>
 
@@ -300,7 +309,7 @@ export const Home: React.FC = () => {
                           <span className="text-[9px] text-slate-500">Format: {q.type}</span>
                         </div>
                         <h4 className="text-xs md:text-sm text-slate-200 font-medium leading-relaxed">
-                          {isRtl ? q.questionTextAr : q.questionText}
+                          {lang === 'ar' ? q.questionTextAr : (lang === 'es' && q.questionTextEs ? q.questionTextEs : q.questionText)}
                         </h4>
                       </div>
 
@@ -326,15 +335,20 @@ export const Home: React.FC = () => {
 
                     {/* Explanatory prompt preview */}
                     <p className="text-[11px] text-slate-500 italic bg-slate-900/20 p-2 rounded-lg">
-                      <strong className="text-slate-400 font-bold uppercase text-[9px] not-italic mr-1">Explanation Preview:</strong>
-                      {isRtl ? q.explanationAr : q.explanation}
+                      <strong className="text-slate-400 font-bold uppercase text-[9px] not-italic mr-1">
+                        {lang === 'ar' ? 'معاينة الشرح:' : (lang === 'es' ? 'Vista previa de explicación:' : 'Explanation Preview:')}
+                      </strong>
+                      {lang === 'ar' ? q.explanationAr : (lang === 'es' && q.explanationEs ? q.explanationEs : q.explanation)}
                     </p>
                   </div>
                 );
               })
             ) : (
               <div className="text-center py-6 text-slate-500 text-xs">
-                No matching questions found in our custom database. Try shifting your filters or queries.
+                {lang === 'ar' 
+                  ? 'لم يتم العثور على أسئلة تطابق الفلتر.' 
+                  : (lang === 'es' ? 'No se encontraron preguntas que coincidan con tus filtros.' : 'No matching questions found in our custom database. Try shifting your filters or queries.')
+                }
               </div>
             )}
           </div>
@@ -345,7 +359,7 @@ export const Home: React.FC = () => {
                 onClick={() => setVisibleCount((prev) => prev + 10)}
                 className="px-6 py-2.5 bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 text-amber-500 hover:text-amber-400 font-extrabold text-xs rounded-xl transition-all shadow-md cursor-pointer"
               >
-                {isRtl ? 'تحميل المزيد من الأسئلة' : 'Load More Questions'}
+                {lang === 'ar' ? 'تحميل المزيد من الأسئلة' : (lang === 'es' ? 'Cargar más preguntas' : 'Load More Questions')}
               </button>
             </div>
           )}
@@ -407,12 +421,12 @@ export const Home: React.FC = () => {
                 onClick={() => setShowFaqIdx(showFaqIdx === idx ? null : idx)}
                 className="w-full text-left rtl:text-right p-4 font-bold text-slate-200 text-xs md:text-sm hover:bg-slate-800/40 transition-colors flex justify-between items-center"
               >
-                <span>{isRtl ? faq.qAr : faq.qEn}</span>
+                <span>{lang === 'ar' ? faq.qAr : (lang === 'es' ? faq.qEs : faq.qEn)}</span>
                 <span className="text-xs text-amber-500 font-mono">{showFaqIdx === idx ? '−' : '+'}</span>
               </button>
               {showFaqIdx === idx && (
                 <div className="p-4 bg-slate-950/60 border-t border-slate-800 text-xs md:text-sm text-slate-400 leading-relaxed">
-                  {isRtl ? faq.aAr : faq.aEn}
+                  {lang === 'ar' ? faq.aAr : (lang === 'es' ? faq.aEs : faq.aEn)}
                 </div>
               )}
             </div>

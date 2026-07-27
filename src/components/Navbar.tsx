@@ -3,14 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { Sun, Moon, Globe, Award, Zap, Code, User } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Sun, Moon, Globe, Award, Zap, Code, User, LogOut, CheckCircle2, Shield, RefreshCw } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { LoginModal } from './LoginModal';
 
 export const Navbar: React.FC = () => {
-  const { theme, toggleTheme, lang, setLang, t, isRtl, progress } = useApp();
+  const { theme, toggleTheme, lang, setLang, t, isRtl, progress, currentUser, logout } = useApp();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const activeStyle = "text-amber-500 font-bold border-b-2 border-amber-500 pb-1";
   const inactiveStyle = "text-slate-300 hover:text-white transition-colors duration-200 pb-1";
@@ -40,6 +43,9 @@ export const Navbar: React.FC = () => {
             </NavLink>
             <NavLink to="/sandbox" className={({ isActive }) => isActive ? activeStyle : inactiveStyle}>
               {t('sandbox')}
+            </NavLink>
+            <NavLink to="/interview" className={({ isActive }) => isActive ? activeStyle : inactiveStyle}>
+              {t('interviewPrep')}
             </NavLink>
           </nav>
 
@@ -76,13 +82,19 @@ export const Navbar: React.FC = () => {
 
             {/* Language Switcher */}
             <button
-              onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
+              onClick={() => {
+                if (lang === 'en') setLang('es');
+                else if (lang === 'es') setLang('ar');
+                else setLang('en');
+              }}
               className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors flex items-center space-x-1 rtl:space-x-reverse"
               title="Switch Language"
               id="lang-toggle"
             >
               <Globe className="w-5 h-5" />
-              <span className="text-xs uppercase font-bold">{lang === 'en' ? 'AR' : 'EN'}</span>
+              <span className="text-xs uppercase font-bold">
+                {lang === 'en' ? 'ES' : lang === 'es' ? 'AR' : 'EN'}
+              </span>
             </button>
 
             {/* Theme Toggle */}
@@ -96,19 +108,104 @@ export const Navbar: React.FC = () => {
             </button>
 
             {/* User Avatar Badge */}
-            <div className="flex items-center space-x-2 rtl:space-x-reverse pl-2 border-l border-slate-800 rtl:border-l-0 rtl:border-r rtl:pl-0 rtl:pr-2">
-              <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-200">
-                <User className="w-4 h-4" />
-              </div>
-              <span className="text-xs text-slate-300 font-medium max-w-[80px] truncate hidden md:inline-block">
-                {progress.userName}
-              </span>
+            <div className="relative flex items-center pl-2 border-l border-slate-800 rtl:border-l-0 rtl:border-r rtl:pl-0 rtl:pr-2">
+              {currentUser ? (
+                <>
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="flex items-center space-x-2 rtl:space-x-reverse hover:bg-slate-800/60 p-1 px-2 rounded-xl transition-all"
+                    id="profile-dropdown-btn"
+                  >
+                    {progress.customAvatar || currentUser.photoURL ? (
+                      <img
+                        src={progress.customAvatar || currentUser.photoURL}
+                        alt="Profile"
+                        referrerPolicy="no-referrer"
+                        className="w-8 h-8 rounded-full border border-amber-500/20 object-cover"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-slate-950 font-black flex items-center justify-center text-xs">
+                        {(progress.userName || currentUser.displayName || 'DV').slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <span className="text-xs text-slate-200 font-bold max-w-[80px] truncate hidden md:inline-block">
+                      {progress.userName || currentUser.displayName}
+                    </span>
+                  </button>
+
+                  {/* Dropdown Popover */}
+                  <AnimatePresence>
+                    {isDropdownOpen && (
+                      <>
+                        {/* Click backdrop to close */}
+                        <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
+                        
+                        <motion.div
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute right-0 rtl:left-0 rtl:right-auto top-12 w-64 bg-slate-900 border border-slate-800 rounded-2xl shadow-xl p-4 z-20 space-y-3 text-slate-300"
+                          id="profile-dropdown-popover"
+                        >
+                          <div className="space-y-1">
+                            <h4 className="text-sm font-extrabold text-white truncate">{progress.userName || currentUser.displayName}</h4>
+                            {currentUser.email && (
+                              <p className="text-[11px] text-slate-400 truncate">{currentUser.email}</p>
+                            )}
+                          </div>
+
+                          <div className="h-px bg-slate-800" />
+
+                          {/* Connection Status */}
+                          <div className="flex items-center space-x-2 rtl:space-x-reverse p-2 bg-slate-950/40 rounded-xl border border-slate-800/50">
+                            <Shield className={`w-4 h-4 ${currentUser.isMock ? 'text-slate-400' : 'text-emerald-400'}`} />
+                            <div className="text-[11px] leading-tight text-right rtl:text-right ltr:text-left">
+                              <p className="font-bold text-slate-200">
+                                {currentUser.isMock ? (lang === 'ar' ? 'جلسة مطور محلية' : (lang === 'es' ? 'Sesión de Desarrollo Local' : 'Local Dev Session')) : (lang === 'ar' ? 'جلسة فايربيز نشطة' : (lang === 'es' ? 'Sesión de Firebase Activa' : 'Firebase Session'))}
+                              </p>
+                              <p className="text-[9px] text-slate-500">
+                                {currentUser.isMock ? (lang === 'ar' ? 'تخزين أوفلاين مؤمن' : (lang === 'es' ? 'Almacenamiento local offline' : 'Offline local storage')) : (lang === 'ar' ? 'مزامنة سحابية مستمرة' : (lang === 'es' ? 'Sincronización en la nube continua' : 'Continuous cloud sync'))}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <button
+                            onClick={() => {
+                              logout();
+                              setIsDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center justify-between p-2 text-xs font-bold text-rose-400 hover:text-white hover:bg-rose-500/10 rounded-xl transition-all"
+                          >
+                            <span>{t('signOut')}</span>
+                            <LogOut className="w-4 h-4" />
+                          </button>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
+                </>
+              ) : (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setIsLoginOpen(true)}
+                  className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-slate-950 text-xs font-black shadow-md shadow-amber-500/10 transition-all flex items-center space-x-1.5 rtl:space-x-reverse"
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span>{t('signIn')}</span>
+                </motion.button>
+              )}
             </div>
 
           </div>
 
         </div>
       </div>
+
+      {/* Login Modal */}
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
     </header>
   );
 };

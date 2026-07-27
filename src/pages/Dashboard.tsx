@@ -6,27 +6,27 @@
 import React, { useState } from 'react';
 import { useApp, ACHIEVEMENTS } from '../context/AppContext';
 import { InteractiveChart } from '../components/InteractiveChart';
+import { RadarChart } from '../components/RadarChart';
+import { RechartsPerformanceChart } from '../components/RechartsPerformanceChart';
+import { RecentAttemptsTable } from '../components/RecentAttemptsTable';
+import { Leaderboard } from '../components/Leaderboard';
+import { UserProfile } from '../components/UserProfile';
 import { 
-  Award, Clock, CheckCircle2, AlertTriangle, Lightbulb, Settings, Download, Upload, Trash2, Edit2, Zap, Target
+  Award, Clock, CheckCircle2, AlertTriangle, Lightbulb, Settings, Download, Upload, Trash2, Edit2, Zap, Target, BarChart2, Compass, Activity, User
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
 export const Dashboard: React.FC = () => {
   const { 
-    t, isRtl, progress, setUserName, clearAllProgress, exportProgress, importProgress, unlockAchievement 
+    t, lang, isRtl, progress, setUserName, clearAllProgress, exportProgress, importProgress, unlockAchievement 
   } = useApp();
 
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [tempName, setTempName] = useState(progress.userName);
   const [importStr, setImportStr] = useState('');
   const [showImportArea, setShowImportArea] = useState(false);
   const [copiedExport, setCopiedExport] = useState(false);
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
-
-  const handleSaveName = () => {
-    setUserName(tempName);
-    setIsEditingName(false);
-  };
+  const [chartType, setChartType] = useState<'radar' | 'bar' | 'recharts'>('recharts');
+  const [compareGlobal, setCompareGlobal] = useState(false);
 
   const handleExport = () => {
     const data = exportProgress();
@@ -73,9 +73,19 @@ export const Dashboard: React.FC = () => {
     english: '#10b981' // Green
   };
 
-  // Find average percentages for each category
+  // Find average percentages and previous scores for each category
   const categoryScores = categoriesList.map((cat) => {
     const matchingTests = progress.completedAssessments.filter((t) => t.category === cat);
+    const sortedTests = [...matchingTests].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    const latestScore = sortedTests.length > 0
+      ? sortedTests[sortedTests.length - 1].percentage
+      : 0;
+
+    const previousScore = sortedTests.length > 1
+      ? sortedTests[sortedTests.length - 2].percentage
+      : null;
+
     const avgScore = matchingTests.length > 0
       ? matchingTests.reduce((acc, curr) => acc + curr.percentage, 0) / matchingTests.length
       : 0;
@@ -83,7 +93,9 @@ export const Dashboard: React.FC = () => {
     return {
       id: cat,
       label: categoryNames[cat],
-      value: avgScore,
+      value: latestScore,
+      previousValue: previousScore,
+      avgValue: avgScore,
       color: categoryColors[cat],
       count: matchingTests.length
     };
@@ -184,74 +196,60 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10" id="dashboard-root">
       
-      {/* 1. Header Profile & Settings Area */}
-      <section className="bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-3xl backdrop-blur-md flex flex-col md:flex-row justify-between items-start md:items-center gap-6" id="dashboard-header-profile">
-        <div className="space-y-3">
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            {isEditingName ? (
-              <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                <input
-                  type="text"
-                  value={tempName}
-                  onChange={(e) => setTempName(e.target.value)}
-                  className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-amber-500"
-                />
-                <button
-                  onClick={handleSaveName}
-                  className="bg-amber-500 hover:bg-amber-600 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold"
-                >
-                  {t('save')}
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                <h1 className="text-xl md:text-2xl font-black text-white">{progress.userName}</h1>
-                <button
-                  onClick={() => setIsEditingName(true)}
-                  className="p-1 text-slate-500 hover:text-slate-300 transition-colors"
-                  title="Rename Profile"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-          </div>
-          <p className="text-xs text-slate-400">
-            Last Active: <span className="font-mono">{progress.lastActive}</span> | Learning Streak: <span className="text-amber-500 font-bold">{progress.streak} days</span>
-          </p>
-        </div>
-
-        {/* State sync & settings buttons */}
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={handleExport}
-            className="flex items-center space-x-1.5 rtl:space-x-reverse bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-all"
-            title="Copy state backup code"
-          >
-            <Download className="w-4 h-4" />
-            <span>{copiedExport ? 'Copied!' : t('exportData')}</span>
-          </button>
-
-          <button
-            onClick={() => setShowImportArea(!showImportArea)}
-            className="flex items-center space-x-1.5 rtl:space-x-reverse bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-all"
-          >
-            <Upload className="w-4 h-4" />
-            <span>{t('importData')}</span>
-          </button>
-
-          <button
-            onClick={() => {
-              if (window.confirm('Delete all records and achievements? This action is irreversible.')) {
-                clearAllProgress();
+      {/* 1. Candidate Interactive User Profile Section */}
+      <section id="dashboard-user-profile-section" className="space-y-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
+              <User className="w-6 h-6 text-amber-500" />
+              <span>
+                {lang === 'ar' ? 'الملف الشخصي للمطور' : lang === 'es' ? 'Perfil del Desarrollador' : 'Developer Profile Area'}
+              </span>
+            </h2>
+            <p className="text-xs text-slate-400">
+              {lang === 'ar' 
+                ? 'إدارة صورتك الشخصية والاعتمادات والشهادات المكتسبة' 
+                : lang === 'es'
+                ? 'Administra tus credenciales de certificación, avatares personalizados y calificaciones.'
+                : 'Manage your digital credentials, custom avatar webcam feeds, and certified grades'
               }
-            }}
-            className="flex items-center space-x-1.5 rtl:space-x-reverse bg-red-950/40 hover:bg-red-900/40 text-red-400 border border-red-900/30 px-4 py-2 rounded-xl text-xs font-bold transition-all"
-          >
-            <Trash2 className="w-4 h-4" />
-            <span>{t('clearData')}</span>
-          </button>
+            </p>
+          </div>
+
+          {/* State sync & settings buttons */}
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={handleExport}
+              className="flex items-center space-x-1.5 rtl:space-x-reverse bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+              title="Copy state backup code"
+            >
+              <Download className="w-4 h-4" />
+              <span>{copiedExport ? 'Copied!' : t('exportData')}</span>
+            </button>
+
+            <button
+              onClick={() => setShowImportArea(!showImportArea)}
+              className="flex items-center space-x-1.5 rtl:space-x-reverse bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+            >
+              <Upload className="w-4 h-4" />
+              <span>{t('importData')}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                if (window.confirm('Delete all records and achievements? This action is irreversible.')) {
+                  clearAllProgress();
+                }
+              }}
+              className="flex items-center space-x-1.5 rtl:space-x-reverse bg-red-950/40 hover:bg-red-900/40 text-red-400 border border-red-900/30 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>{t('clearData')}</span>
+            </button>
+          </div>
         </div>
+
+        <UserProfile />
       </section>
 
       {/* Import input tray */}
@@ -352,13 +350,117 @@ export const Dashboard: React.FC = () => {
       {/* 4. Chart Visualizer & Weakest/Strongest panel */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6" id="dashboard-charts-panel">
         
-        {/* Left column: SVG Interactive Chart */}
+        {/* Left column: SVG Interactive Chart with toggle */}
         <div className="lg:col-span-2 bg-slate-900 border border-slate-800/80 p-6 rounded-2xl space-y-4">
-          <div className="space-y-1">
-            <h3 className="font-bold text-white text-sm md:text-base">Skill Category Performance Score</h3>
-            <p className="text-xs text-slate-400">Displays weighted category averages for passed assessments.</p>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2 border-b border-slate-950/40">
+            <div className="space-y-1">
+              <h3 className="font-bold text-white text-sm md:text-base">
+                {chartType === 'radar' 
+                  ? (lang === 'ar' ? 'خريطة مهارات المطور' : lang === 'es' ? 'Mapa de Competencia de Habilidades' : 'Skill Competency Map') 
+                  : chartType === 'bar'
+                  ? (lang === 'ar' ? 'نتائج أداء فئات المهارات' : lang === 'es' ? 'Puntaje de Rendimiento de Categoría' : 'Skill Category Performance Score')
+                  : (lang === 'ar' ? 'تحليلات الأداء التفاعلية' : lang === 'es' ? 'Análisis de Rendimiento Interactivo' : 'Interactive Performance Analytics')
+                }
+              </h3>
+              <p className="text-xs text-slate-400">
+                {chartType === 'radar'
+                  ? (lang === 'ar' ? 'عرض مقارنة المهارات بنموذج شبكة الرادار السداسية.' : lang === 'es' ? 'Cuadrícula de radar hexagonal que compara pesos de habilidades multidimensionales.' : 'Hexagonal radar grid comparing multi-dimensional skill weights.')
+                  : chartType === 'bar'
+                  ? (lang === 'ar' ? 'يعرض متوسط النسب المئوية المرجحة لتقييمات الفئات المكتملة.' : lang === 'es' ? 'Muestra promedios ponderados por categoría para evaluaciones aprobadas.' : 'Displays weighted category averages for passed assessments.')
+                  : (lang === 'ar' ? 'تحليلات تفاعلية متقدمة مدعومة بمكتبة Recharts الشهيرة.' : lang === 'es' ? 'Análisis interactivos avanzados con Recharts con tendencias de araña y lineales.' : 'Advanced interactive analytics powered by Recharts with spider & linear trends.')
+                }
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4 self-end sm:self-auto">
+              {/* Compare with Global Average Toggle */}
+              <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-slate-300 hover:text-white" id="global-average-toggle-label">
+                <input
+                  type="checkbox"
+                  checked={compareGlobal}
+                  onChange={(e) => setCompareGlobal(e.target.checked)}
+                  className="sr-only peer"
+                  id="global-average-toggle-input"
+                />
+                <span className="relative w-8 h-4 bg-slate-950 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 peer-checked:after:bg-indigo-500 after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500/10 border border-slate-800 peer-checked:border-indigo-500/50" />
+                <span>{lang === 'ar' ? 'المقارنة بالمعدل العالمي' : lang === 'es' ? 'Comparar con Promedio Global' : 'Compare with Global Avg'}</span>
+              </label>
+
+              {/* Toggle tabs */}
+              <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800/80">
+                <button
+                  onClick={() => setChartType('recharts')}
+                  className={`flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    chartType === 'recharts'
+                      ? 'bg-amber-500 text-slate-900 shadow-md'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                  }`}
+                  title="View Recharts Map"
+                >
+                  <Activity className="w-3.5 h-3.5" />
+                  <span>{lang === 'ar' ? 'مخطط Recharts' : lang === 'es' ? 'Gráfico Recharts' : 'Recharts Map'}</span>
+                </button>
+                <button
+                  onClick={() => setChartType('radar')}
+                  className={`flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    chartType === 'radar'
+                      ? 'bg-amber-500 text-slate-900 shadow-md'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                  }`}
+                  title="View Radar Chart Map"
+                >
+                  <Compass className="w-3.5 h-3.5" />
+                  <span>{lang === 'ar' ? 'خريطة الرادار' : lang === 'es' ? 'Mapa de Radar' : 'Radar Map'}</span>
+                </button>
+                <button
+                  onClick={() => setChartType('bar')}
+                  className={`flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    chartType === 'bar'
+                      ? 'bg-amber-500 text-slate-900 shadow-md'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                  }`}
+                  title="View Bar Score Chart"
+                >
+                  <BarChart2 className="w-3.5 h-3.5" />
+                  <span>{lang === 'ar' ? 'مخطط الأعمدة' : lang === 'es' ? 'Gráfico de Barras' : 'Bar Chart'}</span>
+                </button>
+              </div>
+            </div>
           </div>
-          <InteractiveChart data={categoryScores} />
+
+          <AnimatePresence mode="wait">
+            {chartType === 'recharts' ? (
+              <motion.div
+                key="recharts"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <RechartsPerformanceChart data={categoryScores} compareGlobal={compareGlobal} />
+              </motion.div>
+            ) : chartType === 'radar' ? (
+              <motion.div
+                key="radar"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <RadarChart data={categoryScores} compareGlobal={compareGlobal} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="bar"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <InteractiveChart data={categoryScores} compareGlobal={compareGlobal} />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Right column: Strongest / Weakest block */}
@@ -395,6 +497,12 @@ export const Dashboard: React.FC = () => {
         </div>
 
       </section>
+
+      {/* Global Leaderboard Panel */}
+      <Leaderboard />
+
+      {/* Recent Attempts History log */}
+      <RecentAttemptsTable />
 
       {/* 5. Smart Study Recommendations & AI Feedback */}
       <section className="bg-slate-900 border border-slate-800/80 p-6 md:p-8 rounded-3xl space-y-6" id="ai-recs-panel">

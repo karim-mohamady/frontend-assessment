@@ -9,8 +9,10 @@ export interface CodingChallenge {
   id: string;
   titleEn: string;
   titleAr: string;
+  titleEs?: string;
   descEn: string;
   descAr: string;
+  descEs?: string;
   category: 'html' | 'css' | 'javascript' | 'react';
   difficulty: Difficulty;
   boilerplateCode: string;
@@ -18,6 +20,7 @@ export interface CodingChallenge {
   points: number;
   hintEn: string;
   hintAr: string;
+  hintEs?: string;
 }
 
 export const CODING_CHALLENGES: CodingChallenge[] = [

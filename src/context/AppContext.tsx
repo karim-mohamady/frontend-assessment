@@ -4,7 +4,8 @@
  */
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { UserProgress, Achievement } from '../types';
+import { UserProgress, Achievement, MockInterviewResult } from '../types';
+import { BADGES } from '../data/badges';
 
 // Localization Dictionary
 export const TRANSLATIONS = {
@@ -97,6 +98,11 @@ export const TRANSLATIONS = {
     clearData: 'Reset All Progress',
     dangerZone: 'Danger Zone',
     achievements: 'Platform Achievements',
+    signIn: 'Sign In',
+    signOut: 'Sign Out',
+    loginDesc: 'Sync your achievements, coding challenges, and assessment scores securely to the cloud.',
+    firebaseActive: 'Cloud Sync Active',
+    firebaseOffline: 'Local Session',
     
     // UI Theme & Lang
     lightMode: 'Light Mode',
@@ -105,6 +111,7 @@ export const TRANSLATIONS = {
     dashboard: 'Dashboard',
     home: 'Home',
     sandbox: 'Coding Arena',
+    interviewPrep: 'Interview Prep',
     assessments: 'Assessments',
     viewCert: 'View Certificate',
     printCert: 'Print / Export',
@@ -199,6 +206,11 @@ export const TRANSLATIONS = {
     clearData: 'حذف وإعادة ضبط كافة التقدم',
     dangerZone: 'منطقة الخطر الإداري',
     achievements: 'إنجازات وأوسمة المنصة',
+    signIn: 'تسجيل الدخول',
+    signOut: 'تسجيل الخروج',
+    loginDesc: 'احفظ إنجازاتك وتحديات الكود ودرجاتك البرمجية بأمان في السحابة ومزامنتها تلقائياً.',
+    firebaseActive: 'المزامنة السحابية نشطة',
+    firebaseOffline: 'جلسة تخزين محلية (أوفلاين)',
 
     // UI Theme & Lang
     lightMode: 'المظهر المضيء',
@@ -207,10 +219,119 @@ export const TRANSLATIONS = {
     dashboard: 'لوحة التحكم',
     home: 'الرئيسية',
     sandbox: 'تحديات الكود',
+    interviewPrep: 'التحضير للمقابلات',
     assessments: 'التقييمات',
     viewCert: 'استعراض الشهادة المعتمدة',
     printCert: 'طباعة / تصدير PDF',
     verifiedCert: 'شهادة معتمدة لتقييم مطوري الواجهة الأمامية'
+  },
+  es: {
+    title: 'Plataforma de Evaluación Frontend',
+    heroTitle: 'Evalúa y Certifica tus Habilidades de Desarrollador Front-End',
+    heroSub: 'Desde etiquetas para principiantes hasta hooks para expertos. Identifica tus fortalezas, aborda tus debilidades y verifica tu preparación laboral con pruebas reales y exhaustivas.',
+    startBtn: 'Iniciar Evaluación',
+    continueBtn: 'Continuar evaluación',
+    dailyChallenge: 'Desafío Diario',
+    dailyChallengeDesc: '¡Una mezcla rápida de 5 preguntas para mantener tu racha de aprendizaje!',
+    certificates: 'Certificados',
+    certSub: 'Supera cualquier examen con más del 70% para desbloquear tu certificado profesional y verificable.',
+    aboutTitle: 'Sobre la Plataforma',
+    aboutText: 'Este motor interactivo evalúa estructuras estándar de HTML5, especificidad avanzada de CSS, cuadrículas responsivas, pipelines de JS asíncronos, React 19 moderno y vocabulario técnico profesional para desarrolladores. Totalmente alineado con las expectativas de certificación comercial.',
+    faqTitle: 'Preguntas Frecuentes',
+    footerRights: 'Todos los derechos reservados. Creado como un punto de referencia premium para la evaluación de desarrolladores.',
+    
+    // Categories
+    catHtml: 'HTML5 y Semántica',
+    catCss: 'CSS3, Grid y Flexbox',
+    catJs: 'JavaScript y ES6+ Asíncrono',
+    catReact: 'React, Hooks y Arquitectura',
+    catBs: 'Bootstrap 5 y Diseños',
+    catEng: 'Inglés Técnico para Desarrolladores',
+
+    // Category descriptions
+    catHtmlDesc: 'Estructuras semánticas, formularios, entradas, atributos ARIA, SEO y pautas de accesibilidad.',
+    catCssDesc: 'Modelo de caja, especificidad en cascada, Flexbox, diseños de Grid, transiciones y variables CSS.',
+    catJsDesc: 'Closures, alcance (scope), promesas, pipelines de async/await, eventos del DOM y prototipos.',
+    catReactDesc: 'Ciclo de vida de Hooks, closures de estado, memorización, Context API y características concurrentes de React 19.',
+    catBsDesc: 'Cuadrículas responsivas, wrappers de diseño de utilidad, sistemas de control de formularios y estructuras modulares.',
+    catEngDesc: 'Lectura de registros de errores, análisis de documentación de APIs, vocabulario de Git y términos de codificación profesionales.',
+
+    // Modes & Stats
+    overallScore: 'Puntuación Front-End Global',
+    completedTests: 'Pruebas Completadas',
+    remainingTests: 'Pruebas Restantes',
+    learningStreak: 'Racha de Aprendizaje',
+    streakDays: '{{count}} Días',
+    avgAccuracy: 'Precisión Promedio',
+    timeSpent: 'Tiempo Total Dedicado',
+    sec: 'seg',
+    min: 'mins',
+    hr: 'horas',
+    strongestSkills: 'Habilidades Clave Fuertes',
+    weakestSkills: 'Habilidades que Requieren Práctica',
+    recommendations: 'Recomendaciones de Estudio de IA',
+    noAssessmentsYet: '¡Aún no se han completado evaluaciones. Realiza tu primera prueba para compilar tus estadísticas!',
+    
+    // Assessment UI
+    question: 'Pregunta',
+    difficulty: 'Dificultad',
+    type: 'Tipo de Pregunta',
+    bookmark: 'Guardar',
+    bookmarked: 'Guardado',
+    next: 'Siguiente Pregunta',
+    prev: 'Pregunta Anterior',
+    submitExam: 'Enviar Evaluación',
+    confirmSubmit: '¿Estás seguro de que deseas enviar? Las preguntas omitidas se contarán como incorrectas.',
+    timer: 'Temporizador',
+    examMode: 'Modo Examen',
+    studyMode: 'Modo Estudio',
+    reviewAnswers: 'Revisar Respuestas',
+    correct: '¡Correcto!',
+    incorrect: 'Incorrecto',
+    explanation: 'Explicación',
+    retryIncorrect: 'Reintentar Preguntas Incorrectas',
+    practiceMode: 'Modo de Práctica',
+
+    // Difficulties
+    easy: 'Fácil',
+    medium: 'Medio',
+    hard: 'Difícil',
+    expert: 'Experto',
+
+    // Technical Job Readiness
+    readinessTitle: 'Veredicto de Preparación Laboral',
+    readyJunior: 'Listo para Puestos Front-End Junior',
+    readyMid: 'Listo para Puestos Front-End Semi-Senior (Mid-Level)',
+    notReadyYet: 'Se Requiere Desarrollo Continuo',
+    readinessDesc: 'Calculado utilizando pesos de precisión, puntuaciones de dificultad experta y cobertura total de categorías.',
+
+    // Settings & Actions
+    profileSettings: 'Configuración del Perfil',
+    developerName: 'Nombre del Desarrollador',
+    save: 'Guardar Cambios',
+    exportData: 'Exportar Progreso',
+    importData: 'Importar Progreso',
+    clearData: 'Restablecer Todo el Progreso',
+    dangerZone: 'Zona de Peligro',
+    achievements: 'Logros de la Plataforma',
+    signIn: 'Iniciar Sesión',
+    signOut: 'Cerrar Sesión',
+    loginDesc: 'Sincroniza tus logros, desafíos de codificación y puntuaciones de evaluación de forma segura en la nube.',
+    firebaseActive: 'Sincronización en la Nube Activa',
+    firebaseOffline: 'Sesión Local',
+    
+    // UI Theme & Lang
+    lightMode: 'Modo Claro',
+    darkMode: 'Modo Oscuro',
+    language: 'Idioma',
+    dashboard: 'Tablero',
+    home: 'Inicio',
+    sandbox: 'Arena de Código',
+    interviewPrep: 'Prep. de Entrevistas',
+    assessments: 'Evaluaciones',
+    viewCert: 'Ver Certificado',
+    printCert: 'Imprimir / Exportar',
+    verifiedCert: 'CERTIFICADO DE EVALUACIÓN DE DESARROLLADOR VERIFICADO'
   }
 };
 
@@ -219,83 +340,136 @@ export const ACHIEVEMENTS: Achievement[] = [
     id: 'ach-first-step',
     titleEn: 'First Steps Taken',
     titleAr: 'الخطوة الأولى',
+    titleEs: 'Primeros Pasos Dados',
     descEn: 'Complete your first skill assessment on the platform.',
     descAr: 'أكمل أول تقييم مهارات لك على المنصة بنجاح.',
+    descEs: 'Completa tu primera evaluación de habilidades en la plataforma.',
     icon: '🚀'
   },
   {
     id: 'ach-html-master',
     titleEn: 'HTML5 Architect',
     titleAr: 'مهندس هيكلة الويب',
+    titleEs: 'Arquitecto HTML5',
     descEn: 'Score 90% or higher on the HTML assessment.',
     descAr: 'احصل على نتيجة 90% أو أعلى في تقييم HTML دلالي.',
+    descEs: 'Obtén un 90% o más en la evaluación de HTML.',
     icon: '🧱'
   },
   {
     id: 'ach-css-wizard',
     titleEn: 'CSS Specificity Wizard',
     titleAr: 'ساحر تصاميم CSS',
+    titleEs: 'Mago de Especificidad CSS',
     descEn: 'Score 90% or higher on the CSS assessment.',
     descAr: 'احصل على نتيجة 90% أو أعلى في تقييم تخطيطات CSS.',
+    descEs: 'Obtén un 90% o más en la evaluación de CSS.',
     icon: '🎨'
   },
   {
     id: 'ach-js-ninja',
     titleEn: 'JS Closure Ninja',
     titleAr: 'محارب جافا سكريبت',
+    titleEs: 'Ninja de Closures JS',
     descEn: 'Score 90% or higher on the JavaScript assessment.',
     descAr: 'احصل على نتيجة 90% أو أعلى في تقييم JavaScript.',
+    descEs: 'Obtén un 90% o más en la evaluación de JavaScript.',
     icon: '⚡'
   },
   {
     id: 'ach-react-expert',
     titleEn: 'React Hook Wizard',
     titleAr: 'خبير مكونات ريأكت',
+    titleEs: 'Mago de Hooks de React',
     descEn: 'Score 90% or higher on the React assessment.',
     descAr: 'احصل على نتيجة 90% أو أعلى في تقييم React 19.',
+    descEs: 'Obtén un 90% o más en la evaluación de React.',
     icon: '⚛️'
   },
   {
     id: 'ach-streak-3',
     titleEn: 'Dedicated Learner',
     titleAr: 'المبرمج الملتزم',
+    titleEs: 'Estudiante Dedicado',
     descEn: 'Maintain a learning streak of 3 days or more.',
     descAr: 'حافظ على سلسلة تعلم نشطة لمدة 3 أيام متتالية أو أكثر.',
+    descEs: 'Mantén una racha de aprendizaje de 3 días o más.',
     icon: '🔥'
   },
   {
     id: 'ach-multilingual',
     titleEn: 'Polyglot Dev',
     titleAr: 'مطور متعدد اللغات',
+    titleEs: 'Desarrollador Políglota',
     descEn: 'Toggle language options to assess in English and Arabic.',
     descAr: 'قم بتبديل خيارات اللغة للتقييم باللغتين العربية والإنجليزية.',
+    descEs: 'Cambia las opciones de idioma para evaluar en inglés, español y árabe.',
     icon: '🌐'
   },
   {
     id: 'ach-speedster',
     titleEn: 'Light Speed Syntax',
     titleAr: 'سرعة البرق البرمجية',
+    titleEs: 'Sintaxis a la Velocidad de la Luz',
     descEn: 'Submit an assessment with average speed under 15s per item.',
     descAr: 'قم بتسليم أي تقييم بمتوسط وقت أقل من 15 ثانية لكل سؤال.',
+    descEs: 'Envía una evaluación con un tiempo promedio menor a 15 segundos por pregunta.',
     icon: '💨'
-  }
+  },
+  ...BADGES.map(b => ({
+    id: b.id,
+    titleEn: b.titleEn,
+    titleAr: b.titleAr,
+    titleEs: b.titleEs,
+    descEn: b.descEn,
+    descAr: b.descAr,
+    descEs: b.descEs,
+    icon: b.icon
+  }))
 ];
+
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { 
+  isFirebaseConfigured, 
+  getFirebaseAuth, 
+  loginWithGoogle as fbLoginWithGoogle, 
+  syncProgressToCloud, 
+  fetchProgressFromCloud,
+  registerWithEmailAndPassword,
+  loginWithEmailAndPasswordCustom
+} from '../lib/firebase';
+
+export interface AppUser {
+  uid: string;
+  displayName: string | null;
+  email: string | null;
+  photoURL: string | null;
+  isMock?: boolean;
+}
 
 interface AppContextType {
   theme: 'light' | 'dark';
   toggleTheme: () => void;
-  lang: 'en' | 'ar';
-  setLang: (l: 'en' | 'ar') => void;
+  lang: 'en' | 'es' | 'ar';
+  setLang: (l: 'en' | 'es' | 'ar') => void;
   t: (key: keyof typeof TRANSLATIONS['en']) => string;
   isRtl: boolean;
   progress: UserProgress;
   setUserName: (name: string) => void;
+  setUserAvatar: (avatarBase64: string) => void;
   saveAssessmentResult: (result: any) => void;
   toggleGlobalBookmark: (qId: string) => void;
   clearAllProgress: () => void;
   importProgress: (jsonStr: string) => boolean;
   exportProgress: () => string;
   unlockAchievement: (id: string) => void;
+  currentUser: AppUser | null;
+  loginWithGoogle: () => Promise<void>;
+  loginCustom: (email: string, name: string) => Promise<void>;
+  loginWithEmail: (email: string, pass: string) => Promise<void>;
+  registerWithEmail: (email: string, pass: string, name: string) => Promise<void>;
+  logout: () => Promise<void>;
+  saveMockInterview: (result: MockInterviewResult) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -308,9 +482,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   // 2. Language state
-  const [lang, setLangState] = useState<'en' | 'ar'>(() => {
+  const [lang, setLangState] = useState<'en' | 'es' | 'ar'>(() => {
     const saved = localStorage.getItem('assess-lang');
-    return (saved as 'en' | 'ar') || 'en';
+    return (saved as 'en' | 'es' | 'ar') || 'en';
   });
 
   // 3. User progress state
@@ -332,6 +506,224 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       userName: 'Elite Developer'
     };
   });
+
+  // 4. Authentication state
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(() => {
+    const saved = localStorage.getItem('assess-user-session');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return null;
+  });
+
+  // Watch for real Firebase auth state changes if configured
+  useEffect(() => {
+    if (isFirebaseConfigured()) {
+      try {
+        const auth = getFirebaseAuth();
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            const appUser: AppUser = {
+              uid: user.uid,
+              displayName: user.displayName || user.email?.split('@')[0] || 'Developer',
+              email: user.email,
+              photoURL: user.photoURL
+            };
+            setCurrentUser(appUser);
+            localStorage.setItem('assess-user-session', JSON.stringify(appUser));
+            
+            // Sync user name
+            if (user.displayName) {
+              setUserName(user.displayName);
+            }
+
+            // Sync from Cloud Firestore if available
+            try {
+              const cloudProgress = await fetchProgressFromCloud(user.uid);
+              if (cloudProgress) {
+                saveProgressState(cloudProgress);
+              }
+            } catch (e) {
+              console.log('Error syncing initial progress from cloud:', e);
+            }
+
+          } else {
+            // Only clear non-mock session
+            const saved = localStorage.getItem('assess-user-session');
+            if (saved) {
+              try {
+                const parsed = JSON.parse(saved);
+                if (!parsed.isMock) {
+                  setCurrentUser(null);
+                  localStorage.removeItem('assess-user-session');
+                }
+              } catch (e) {}
+            }
+          }
+        });
+        return () => unsubscribe();
+      } catch (err) {
+        console.log('Firebase auth subscription failed (offline or setup pending)');
+      }
+    }
+  }, []);
+
+  const loginWithGoogle = async () => {
+    if (isFirebaseConfigured()) {
+      try {
+        const res = await fbLoginWithGoogle();
+        if (res && res.user) {
+          const appUser: AppUser = {
+            uid: res.user.uid,
+            displayName: res.user.displayName || res.user.email?.split('@')[0] || 'Developer',
+            email: res.user.email,
+            photoURL: res.user.photoURL
+          };
+          setCurrentUser(appUser);
+          localStorage.setItem('assess-user-session', JSON.stringify(appUser));
+          if (res.user.displayName) {
+            setUserName(res.user.displayName);
+          }
+        }
+      } catch (e) {
+        console.error('Firebase login error:', e);
+        throw e;
+      }
+    } else {
+      // Offline / Mock fallback
+      const mockUser: AppUser = {
+        uid: 'mock-google-uid-123',
+        displayName: 'Google Dev Champion',
+        email: 'champion.dev@google-mock.com',
+        photoURL: null,
+        isMock: true
+      };
+      setCurrentUser(mockUser);
+      localStorage.setItem('assess-user-session', JSON.stringify(mockUser));
+      setUserName('Google Dev Champion');
+    }
+  };
+
+  const loginCustom = async (email: string, name: string) => {
+    const cleanEmail = email.trim() || 'developer@local.host';
+    const cleanName = name.trim() || 'Elite Developer';
+    const mockUser: AppUser = {
+      uid: `local-dev-${Date.now()}`,
+      displayName: cleanName,
+      email: cleanEmail,
+      photoURL: null,
+      isMock: true
+    };
+    setCurrentUser(mockUser);
+    localStorage.setItem('assess-user-session', JSON.stringify(mockUser));
+    setUserName(cleanName);
+  };
+
+  const loginWithEmail = async (email: string, pass: string) => {
+    if (isFirebaseConfigured()) {
+      try {
+        const res = await loginWithEmailAndPasswordCustom(email, pass);
+        if (res && res.user) {
+          const appUser: AppUser = {
+            uid: res.user.uid,
+            displayName: res.user.displayName || res.user.email?.split('@')[0] || 'Developer',
+            email: res.user.email,
+            photoURL: res.user.photoURL
+          };
+          setCurrentUser(appUser);
+          localStorage.setItem('assess-user-session', JSON.stringify(appUser));
+          if (res.user.displayName) {
+            setUserName(res.user.displayName);
+          }
+        }
+      } catch (e: any) {
+        console.error('Firebase email login error:', e);
+        throw e;
+      }
+    } else {
+      // Offline / Mock fallback
+      const savedMockUser = localStorage.getItem(`mock-user-${email.toLowerCase().trim()}`);
+      if (savedMockUser) {
+        try {
+          const parsed = JSON.parse(savedMockUser);
+          if (parsed.password === pass) {
+            const appUser: AppUser = {
+              uid: parsed.uid,
+              displayName: parsed.displayName,
+              email: parsed.email,
+              photoURL: null,
+              isMock: true
+            };
+            setCurrentUser(appUser);
+            localStorage.setItem('assess-user-session', JSON.stringify(appUser));
+            setUserName(parsed.displayName);
+            return;
+          } else {
+            throw new Error(lang === 'ar' ? 'كلمة المرور غير صحيحة' : 'Incorrect password');
+          }
+        } catch (e: any) {
+          throw new Error(e.message || (lang === 'ar' ? 'فشل تسجيل الدخول' : 'Sign-in failed'));
+        }
+      }
+      throw new Error(lang === 'ar' ? 'لم يتم العثور على حساب بهذا البريد الإلكتروني. يرجى إنشاء حساب أولاً!' : 'No account found with this email. Please sign up first!');
+    }
+  };
+
+  const registerWithEmail = async (email: string, pass: string, name: string) => {
+    if (isFirebaseConfigured()) {
+      try {
+        const res = await registerWithEmailAndPassword(email, pass, name);
+        if (res && res.user) {
+          const appUser: AppUser = {
+            uid: res.user.uid,
+            displayName: name,
+            email: res.user.email,
+            photoURL: res.user.photoURL
+          };
+          setCurrentUser(appUser);
+          localStorage.setItem('assess-user-session', JSON.stringify(appUser));
+          setUserName(name);
+        }
+      } catch (e: any) {
+        console.error('Firebase email register error:', e);
+        throw e;
+      }
+    } else {
+      // Offline / Mock fallback sign up
+      const mockUid = `local-dev-${Date.now()}`;
+      const mockUserData = {
+        uid: mockUid,
+        displayName: name,
+        email: email,
+        password: pass
+      };
+      localStorage.setItem(`mock-user-${email.toLowerCase().trim()}`, JSON.stringify(mockUserData));
+      
+      const appUser: AppUser = {
+        uid: mockUid,
+        displayName: name,
+        email: email,
+        photoURL: null,
+        isMock: true
+      };
+      setCurrentUser(appUser);
+      localStorage.setItem('assess-user-session', JSON.stringify(appUser));
+      setUserName(name);
+    }
+  };
+
+  const logout = async () => {
+    if (isFirebaseConfigured()) {
+      try {
+        const auth = getFirebaseAuth();
+        await signOut(auth);
+      } catch (e) {
+        console.error('Firebase signOut error:', e);
+      }
+    }
+    setCurrentUser(null);
+    localStorage.removeItem('assess-user-session');
+  };
 
   // Synchronize streak on mount
   useEffect(() => {
@@ -363,6 +755,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
 
+  // Auto-unlock badges based on score thresholds in completed assessments
+  useEffect(() => {
+    let unlockedAny = false;
+    const achievementsToUnlock = [...progress.achievements];
+
+    BADGES.forEach((badge) => {
+      if (!achievementsToUnlock.includes(badge.id)) {
+        const meetsThreshold = progress.completedAssessments.some(
+          (result) => result.category === badge.category && result.percentage >= badge.threshold
+        );
+        if (meetsThreshold) {
+          achievementsToUnlock.push(badge.id);
+          unlockedAny = true;
+        }
+      }
+    });
+
+    if (unlockedAny) {
+      saveProgressState({
+        ...progress,
+        achievements: achievementsToUnlock
+      });
+    }
+  }, [progress.completedAssessments, progress.achievements]);
+
   // Sync theme
   useEffect(() => {
     localStorage.setItem('assess-theme', theme);
@@ -388,7 +805,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     unlockAchievement('ach-night-owl');
   };
 
-  const setLang = (l: 'en' | 'ar') => {
+  const setLang = (l: 'en' | 'es' | 'ar') => {
     setLangState(l);
     unlockAchievement('ach-multilingual');
   };
@@ -408,6 +825,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     saveProgressState({
       ...progress,
       userName: name || 'Elite Developer'
+    });
+  };
+
+  const setUserAvatar = (avatar: string) => {
+    saveProgressState({
+      ...progress,
+      customAvatar: avatar
     });
   };
 
@@ -479,6 +903,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
+  const saveMockInterview = (result: MockInterviewResult) => {
+    const updatedHistory = [result, ...(progress.mockInterviews || [])];
+    saveProgressState({
+      ...progress,
+      mockInterviews: updatedHistory
+    });
+  };
+
   const clearAllProgress = () => {
     const defaultProgress: UserProgress = {
       streak: 1,
@@ -486,7 +918,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       completedAssessments: [],
       bookmarks: [],
       achievements: [],
-      userName: 'Elite Developer'
+      userName: 'Elite Developer',
+      mockInterviews: []
     };
     saveProgressState(defaultProgress);
   };
@@ -520,12 +953,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isRtl,
         progress,
         setUserName,
+        setUserAvatar,
         saveAssessmentResult,
         toggleGlobalBookmark,
         clearAllProgress,
         importProgress,
         exportProgress,
-        unlockAchievement
+        unlockAchievement,
+        currentUser,
+        loginWithGoogle,
+        loginCustom,
+        loginWithEmail,
+        registerWithEmail,
+        logout,
+        saveMockInterview
       }}
     >
       {children}

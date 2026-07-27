@@ -22,19 +22,27 @@ export interface Question {
   type: QuestionType;
   questionText: string;
   questionTextAr: string;
+  questionTextEs?: string;
   codeSnippet?: string;
   // For multiple-choice, multiple-answer, true-false
   options?: string[];
   optionsAr?: string[];
+  optionsEs?: string[];
   // Correct answers: indices or strings
   correctAnswer: number[] | string | string[]; // numbers for indices, or strings/objects
   // For match columns format
   matchLeft?: string[];
   matchLeftAr?: string[];
+  matchLeftEs?: string[];
   matchRight?: string[]; // correct matches correspond to indices in matchLeft
   matchRightAr?: string[];
+  matchRightEs?: string[];
   explanation: string;
   explanationAr: string;
+  explanationEs?: string;
+  hint?: string;
+  hintAr?: string;
+  hintEs?: string;
 }
 
 export interface AssessmentResult {
@@ -60,6 +68,23 @@ export interface AssessmentResult {
     expert: { correct: number; total: number };
   };
   mode: 'exam' | 'study' | 'daily';
+  hintsUsed?: string[]; // IDs of questions where hints were revealed
+}
+
+export interface MockInterviewResult {
+  id: string;
+  category: string;
+  difficulty: string;
+  language: string;
+  date: string;
+  score: number; // 0-100 percentage
+  overallSummary: string;
+  qaHistory: {
+    question: string;
+    answer: string;
+    feedback: string;
+    score: number;
+  }[];
 }
 
 export interface UserProgress {
@@ -69,14 +94,18 @@ export interface UserProgress {
   bookmarks: string[]; // globally bookmarked question IDs
   achievements: string[]; // IDs of unlocked achievements
   userName: string;
+  mockInterviews?: MockInterviewResult[];
+  customAvatar?: string;
 }
 
 export interface Achievement {
   id: string;
   titleEn: string;
   titleAr: string;
+  titleEs?: string;
   descEn: string;
   descAr: string;
+  descEs?: string;
   icon: string;
   unlockedAt?: string;
 }
@@ -84,6 +113,8 @@ export interface Achievement {
 export interface FAQItem {
   qEn: string;
   qAr: string;
+  qEs?: string;
   aEn: string;
   aAr: string;
+  aEs?: string;
 }

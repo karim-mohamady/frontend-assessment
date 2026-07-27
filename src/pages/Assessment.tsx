@@ -9,14 +9,85 @@ import { useApp } from '../context/AppContext';
 import { generateProceduralQuestions, getQuestionsByCategory, generateCertificateId } from '../data/questions';
 import { Question, Difficulty, QuestionType } from '../types';
 import { 
-  Play, Pause, BookMarked, ChevronLeft, ChevronRight, Check, AlertCircle, HelpCircle, Flame, Clock, RefreshCw, Bookmark, Award, GraduationCap
+  Play, Pause, BookMarked, ChevronLeft, ChevronRight, Check, AlertCircle, HelpCircle, Flame, Clock, RefreshCw, Bookmark, Award, GraduationCap, ClipboardList, Edit, Eye, Lightbulb
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
+const getCodingQuestionHint = (q: Question, isRtl: boolean): string => {
+  if (isRtl && q.hintAr) return q.hintAr;
+  if (!isRtl && q.hint) return q.hint;
+
+  // Specific high-fidelity hints for core benchmark questions
+  if (q.id === 'css-1') {
+    return isRtl 
+      ? 'تذكر أن الخصوصية تُحسب بالترتيب: (ID, Class, Element). قارن دقة div#main-text.text-card مقابل #main-text.'
+      : 'Remember specificity is calculated in order: (ID, Class, Element). Compare div#main-text.text-card versus #main-text.';
+  }
+  if (q.id === 'js-1') {
+    return isRtl
+      ? 'العمليات المتزامنة تنفذ أولاً. ثم الوعود (Microtasks)، ثم المؤقتات (Macrotasks).'
+      : 'Synchronous code runs first. Then microtasks (Promises), and finally macrotasks (setTimeout callbacks).';
+  }
+  if (q.id === 'js-2') {
+    return isRtl
+      ? 'كل استدعاء لـ makeCounter ينشئ مغلف نطاق (closure scope) مستقل خاص به. تتبع متى يتم استدعاء c1 ومتى c2.'
+      : 'Each call to makeCounter creates its own independent closure scope. Track when c1 is called versus c2.';
+  }
+  if (q.id === 'js-6') {
+    return isRtl
+      ? 'تحقق من السلوك التاريخي الشهير لـ typeof null في JS، وتذكر أن === لا تقوم بتحويل نوع البيانات.'
+      : 'Check the famous historical quirk of typeof null in JS, and remember that === performs no type coercion.';
+  }
+  if (q.id === 'react-1') {
+    return isRtl
+      ? 'تعمل دوال التنبيه alert والمؤقتات setTimeout في لقطة مغلقة (closure snapshot) للحالة عند وقت النقر.'
+      : 'The alert and setTimeout run inside a closure snapshot of the state value at the exact time of clicking.';
+  }
+
+  // Fallback messages for other questions of coding category
+  if (q.category === 'javascript') {
+    return isRtl
+      ? `تلميح لـ ${q.topic}: انتبه لطريقة عمل النطاقات (scope)، المراجع، والوظائف غير المتزامنة في جافا سكريبت.`
+      : `Hint for ${q.topic}: Pay attention to scoping, reference types, and asynchronous execution in JS.`;
+  }
+  if (q.category === 'react') {
+    return isRtl
+      ? `تلميح لـ ${q.topic}: تذكر أن تحديثات الحالة في ريأكت تتم بشكل غير متزامن وتعتمد على دورة حياة المكون.`
+      : `Hint for ${q.topic}: Remember that state updates in React are queued and components capture state at render time.`;
+  }
+  if (q.category === 'css') {
+    return isRtl
+      ? `تلميح لـ ${q.topic}: تحقق من تراتبية القواعد، الخصائص الموروثة، وتأثير نموذج الصندوق (Box Model).`
+      : `Hint for ${q.topic}: Verify the cascading hierarchy, inherited properties, and the box-model metrics.`;
+  }
+
+  return isRtl 
+    ? `تلميح لـ ${q.topic}: ركز على المطلوب بدقة وتحقق من بناء الكود البرمجي (Syntax).`
+    : `Hint for ${q.topic}: Focus on the precise requirements and inspect the code syntax/logic flow carefully.`;
+};
+
 export const Assessment: React.FC = () => {
-  const { t, isRtl, toggleGlobalBookmark, progress, saveAssessmentResult } = useApp();
+  const { t, lang, isRtl, toggleGlobalBookmark, progress, saveAssessmentResult } = useApp();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const getQuestionText = (q: Question) => {
+    if (lang === 'ar') return q.questionTextAr;
+    if (lang === 'es' && q.questionTextEs) return q.questionTextEs;
+    return q.questionText;
+  };
+
+  const getQuestionOptions = (q: Question) => {
+    if (lang === 'ar') return q.optionsAr || [];
+    if (lang === 'es' && q.optionsEs) return q.optionsEs;
+    return q.options || [];
+  };
+
+  const getQuestionExplanation = (q: Question) => {
+    if (lang === 'ar') return q.explanationAr;
+    if (lang === 'es' && q.explanationEs) return q.explanationEs;
+    return q.explanation;
+  };
 
   const categoryParam = searchParams.get('category') || 'javascript';
   const modeParam = searchParams.get('mode') || 'exam'; // 'exam' | 'study' | 'daily'
@@ -35,6 +106,10 @@ export const Assessment: React.FC = () => {
   };
 
   // State
+  const STORAGE_KEY = `dev_assessment_session_${categoryParam}_${modeParam}`;
+  const [hasSavedSession, setHasSavedSession] = useState(false);
+  const [savedSessionData, setSavedSessionData] = useState<any>(null);
+
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [userAnswers, setUserAnswers] = useState<{ [qId: string]: any }>({});
@@ -42,12 +117,81 @@ export const Assessment: React.FC = () => {
   const [isAssessmentSubmitted, setIsAssessmentSubmitted] = useState(false);
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty>('medium');
   const [isQuizConfiguring, setIsQuizConfiguring] = useState(true);
+  const [showReviewMode, setShowReviewMode] = useState(false);
+  const [hintsUsed, setHintsUsed] = useState<string[]>([]);
 
   // Timer states
   const [isTimerActive, setIsTimerActive] = useState(true);
   const [timeRemaining, setTimeRemaining] = useState(600); // 10 minutes default
   const [timeElapsed, setTimeElapsed] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Load saved session on mount
+  useEffect(() => {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.questions && parsed.questions.length > 0) {
+          setHasSavedSession(true);
+          setSavedSessionData(parsed);
+
+          // For daily challenge, automatically restore immediately on mount
+          if (modeParam === 'daily') {
+            setQuestions(parsed.questions);
+            setCurrentIdx(parsed.currentIdx);
+            setUserAnswers(parsed.userAnswers || {});
+            setLocalBookmarks(parsed.localBookmarks || []);
+            setTimeRemaining(parsed.timeRemaining);
+            setTimeElapsed(parsed.timeElapsed || 0);
+            setDifficultyFilter(parsed.difficultyFilter || 'medium');
+            setShowReviewMode(parsed.showReviewMode || false);
+            setHintsUsed(parsed.hintsUsed || []);
+            setIsQuizConfiguring(false);
+          }
+        }
+      } catch (err) {
+        console.error("Error reading saved session:", err);
+      }
+    } else {
+      setHasSavedSession(false);
+      setSavedSessionData(null);
+    }
+  }, [STORAGE_KEY, modeParam]);
+
+  // Auto-save effect
+  useEffect(() => {
+    if (isQuizConfiguring || isAssessmentSubmitted || questions.length === 0) {
+      return;
+    }
+
+    const sessionData = {
+      questions,
+      currentIdx,
+      userAnswers,
+      localBookmarks,
+      timeRemaining,
+      timeElapsed,
+      difficultyFilter,
+      showReviewMode,
+      hintsUsed
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessionData));
+  }, [
+    isQuizConfiguring,
+    isAssessmentSubmitted,
+    questions,
+    currentIdx,
+    userAnswers,
+    localBookmarks,
+    timeRemaining,
+    timeElapsed,
+    difficultyFilter,
+    showReviewMode,
+    hintsUsed,
+    STORAGE_KEY
+  ]);
 
   // Load questions based on wizard configuration
   const handleStartQuiz = () => {
@@ -73,9 +217,19 @@ export const Assessment: React.FC = () => {
   // Trigger setup immediately for daily challenge
   useEffect(() => {
     if (modeParam === 'daily') {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.questions && parsed.questions.length > 0) {
+            // Already handled by mount effect, do not start fresh
+            return;
+          }
+        } catch (e) {}
+      }
       handleStartQuiz();
     }
-  }, [modeParam]);
+  }, [modeParam, STORAGE_KEY]);
 
   // Handle countdown Timer
   useEffect(() => {
@@ -266,14 +420,128 @@ export const Assessment: React.FC = () => {
       strengths: finalStrengths.length > 0 ? finalStrengths : [getCategoryTitle(categoryParam) + " Fundamentals"],
       weaknesses: finalWeaknesses.length > 0 ? finalWeaknesses : ["Advanced speed timers"],
       difficultyBreakdown,
-      mode: modeParam
+      mode: modeParam,
+      hintsUsed
     };
 
     saveAssessmentResult(result);
 
+    // Clear active session upon successful completion
+    localStorage.removeItem(STORAGE_KEY);
+
     // Redirect to custom Report View
     navigate('/report', { state: { result, questions } });
   };
+
+  // Keyboard Shortcuts Hook for Accessibility & Speed
+  useEffect(() => {
+    if (isQuizConfiguring || isAssessmentSubmitted || !isTimerActive) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const key = e.key;
+      const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+
+      // 1. GLOBAL SHORTCUT: Ctrl+Enter or Cmd+Enter to submit the quiz from anywhere
+      if (isCtrlOrCmd && key === 'Enter') {
+        e.preventDefault();
+        handleSubmitQuiz();
+        return;
+      }
+
+      // Check if user is typing in an input, textarea, or select
+      const active = document.activeElement;
+      const isTypingInInput = active && (
+        active.tagName === 'INPUT' || 
+        active.tagName === 'TEXTAREA' || 
+        active.tagName === 'SELECT' ||
+        active.getAttribute('contenteditable') === 'true'
+      );
+
+      if (isTypingInInput) {
+        // 2. INPUT SHORTCUT: Enter in fill-in-the-blank input moves to next question or review mode
+        if (key === 'Enter' && active.tagName === 'INPUT') {
+          const currentQuestion = questions[currentIdx];
+          if (currentQuestion && currentQuestion.type === 'fill-in-blank') {
+            e.preventDefault();
+            if (currentIdx < questions.length - 1) {
+              setCurrentIdx((prev) => prev + 1);
+            } else {
+              setShowReviewMode(true);
+            }
+          }
+        }
+        return;
+      }
+
+      const currentQuestion = questions[currentIdx];
+      if (!currentQuestion) return;
+
+      // 3. Question Navigation: Arrows or P/N keys
+      if (key === 'ArrowLeft' || key.toLowerCase() === 'p') {
+        e.preventDefault();
+        setCurrentIdx((prev) => Math.max(prev - 1, 0));
+      } else if (key === 'ArrowRight' || key.toLowerCase() === 'n') {
+        e.preventDefault();
+        if (currentIdx < questions.length - 1) {
+          setCurrentIdx((prev) => prev + 1);
+        } else {
+          setShowReviewMode(true);
+        }
+      }
+
+      // 4. Bookmark Toggle
+      if (key.toLowerCase() === 'm') {
+        e.preventDefault();
+        toggleLocalBookmarkState(currentQuestion.id);
+      }
+
+      // 5. Option Selection for supported question types
+      if (
+        currentQuestion.type === 'multiple-choice' ||
+        currentQuestion.type === 'true-false' ||
+        currentQuestion.type === 'multiple-answer' ||
+        currentQuestion.type === 'code-output' ||
+        currentQuestion.type === 'bug-fixing'
+      ) {
+        const currentOptions = getQuestionOptions(currentQuestion);
+        const numOptions = currentOptions.length;
+
+        // Number keys (1 to 9)
+        const numValue = parseInt(key, 10);
+        if (!isNaN(numValue) && numValue >= 1 && numValue <= numOptions) {
+          e.preventDefault();
+          const optionIdx = numValue - 1;
+          const isMulti = currentQuestion.type === 'multiple-answer';
+          handleSelectOption(currentQuestion.id, optionIdx, isMulti);
+        }
+
+        // Letter keys (A to Z)
+        const letterCode = key.toUpperCase().charCodeAt(0);
+        if (key.length === 1 && letterCode >= 65 && letterCode < 65 + numOptions) {
+          e.preventDefault();
+          const optionIdx = letterCode - 65;
+          const isMulti = currentQuestion.type === 'multiple-answer';
+          handleSelectOption(currentQuestion.id, optionIdx, isMulti);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [
+    isQuizConfiguring, 
+    isAssessmentSubmitted, 
+    isTimerActive, 
+    currentIdx, 
+    questions, 
+    isRtl, 
+    toggleLocalBookmarkState, 
+    handleSelectOption, 
+    handleSubmitQuiz, 
+    setShowReviewMode
+  ]);
 
   if (isQuizConfiguring && modeParam !== 'daily') {
     return (
@@ -284,6 +552,63 @@ export const Assessment: React.FC = () => {
           <h1 className="text-2xl md:text-3xl font-black text-white">Assessment Wizard</h1>
           <p className="text-sm text-slate-400">Configure your parameters for "{getCategoryTitle(categoryParam)}" evaluation.</p>
         </div>
+
+        {hasSavedSession && savedSessionData && (
+          <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 p-5 rounded-2xl space-y-3 relative overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300" id="resume-session-banner">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-amber-500/20 text-amber-500 rounded-xl">
+                <Clock className="w-5 h-5 animate-pulse" />
+              </div>
+              <div className="text-left rtl:text-right flex-1">
+                <h3 className="font-extrabold text-white text-sm">
+                  {isRtl ? 'لديك جلسة اختبار غير مكتملة!' : 'Unfinished Session Found!'}
+                </h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  {isRtl 
+                    ? `لقد أجبت على ${Object.keys(savedSessionData.userAnswers || {}).length} من أصل ${savedSessionData.questions?.length} أسئلة في هذه الفئة.`
+                    : `You have an active session with ${Object.keys(savedSessionData.userAnswers || {}).length} of ${savedSessionData.questions?.length} questions answered.`}
+                </p>
+                <div className="text-[10px] text-slate-500 font-mono mt-1">
+                  {isRtl 
+                    ? `الوقت المتبقي: ${Math.floor(savedSessionData.timeRemaining / 60)}:${String(savedSessionData.timeRemaining % 60).padStart(2, '0')}`
+                    : `Time Remaining: ${Math.floor(savedSessionData.timeRemaining / 60)}:${String(savedSessionData.timeRemaining % 60).padStart(2, '0')}`}
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={() => {
+                  setQuestions(savedSessionData.questions);
+                  setCurrentIdx(savedSessionData.currentIdx);
+                  setUserAnswers(savedSessionData.userAnswers || {});
+                  setLocalBookmarks(savedSessionData.localBookmarks || []);
+                  setTimeRemaining(savedSessionData.timeRemaining);
+                  setTimeElapsed(savedSessionData.timeElapsed || 0);
+                  setDifficultyFilter(savedSessionData.difficultyFilter || 'medium');
+                  setShowReviewMode(savedSessionData.showReviewMode || false);
+                  setHintsUsed(savedSessionData.hintsUsed || []);
+                  setIsQuizConfiguring(false);
+                }}
+                className="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-900 font-black py-2.5 px-3 rounded-xl text-xs transition-all shadow-md shadow-amber-500/10 cursor-pointer"
+              >
+                {isRtl ? 'استئناف الجلسة السابقة ⚡' : 'Resume Saved Session ⚡'}
+              </button>
+              <button
+                onClick={() => {
+                  if (window.confirm(isRtl ? 'هل أنت متأكد أنك تريد حذف الجلسة المحفوظة وبدء اختبار جديد؟' : 'Are you sure you want to discard your saved session and start a new evaluation?')) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    setHasSavedSession(false);
+                    setSavedSessionData(null);
+                  }
+                }}
+                className="bg-slate-950 hover:bg-red-950/40 border border-slate-800 hover:border-red-900/30 text-slate-400 hover:text-red-400 font-bold px-3 py-2.5 rounded-xl text-xs transition-colors cursor-pointer"
+              >
+                {isRtl ? 'بدء جديد' : 'Discard'}
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-6">
           
@@ -329,6 +654,41 @@ export const Assessment: React.FC = () => {
     );
   }
 
+  // Get a short preview of the user's selected answer for review mode
+  const getAnswerPreview = (q: Question, ans: any) => {
+    if (ans === undefined || ans === null || (Array.isArray(ans) && ans.length === 0) || (typeof ans === 'object' && Object.keys(ans).length === 0)) {
+      return isRtl ? 'لم تتم الإجابة بعد' : 'Not answered yet';
+    }
+
+    if (q.type === 'multiple-choice' || q.type === 'true-false' || q.type === 'code-output' || q.type === 'bug-fixing') {
+      const optIdx = Array.isArray(ans) ? ans[0] : ans;
+      const opts = getQuestionOptions(q);
+      return opts && opts[optIdx] ? opts[optIdx] : (isRtl ? 'تم تحديد خيار' : 'Option selected');
+    }
+
+    if (q.type === 'multiple-answer') {
+      const opts = getQuestionOptions(q);
+      if (Array.isArray(ans)) {
+        const selectedTexts = ans.map(idx => opts?.[idx] || '').filter(Boolean);
+        return selectedTexts.join(', ');
+      }
+      return isRtl ? 'تم تحديد خيارات متعددة' : 'Multiple options selected';
+    }
+
+    if (q.type === 'fill-in-blank') {
+      return String(ans);
+    }
+
+    if (q.type === 'match-columns') {
+      const matchesCount = Object.keys(ans).length;
+      return isRtl 
+        ? `تم مطابقة ${matchesCount} من العناصر` 
+        : `Matched ${matchesCount} items`;
+    }
+
+    return isRtl ? 'تمت الإجابة' : 'Answered';
+  };
+
   // Active quiz render
   const currentQuestion = questions[currentIdx];
   if (!currentQuestion) return null;
@@ -348,12 +708,20 @@ export const Assessment: React.FC = () => {
             <span>Evaluating: {getCategoryTitle(categoryParam)} ({modeParam.toUpperCase()})</span>
           </h2>
           <p className="text-[10px] text-slate-400">
-            {t('question')} {currentIdx + 1} of {questions.length}
+            {showReviewMode 
+              ? (isRtl ? 'وضع مراجعة كافة الإجابات وتعديلها' : 'Reviewing All Answers Mode')
+              : `${t('question')} ${currentIdx + 1} of ${questions.length}`
+            }
           </p>
         </div>
 
         {/* Timer UI block */}
         <div className="flex items-center space-x-3 rtl:space-x-reverse">
+          <div className="hidden sm:flex items-center space-x-1 rtl:space-x-reverse text-[9px] text-emerald-500 font-mono font-bold bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full select-none" id="autosave-indicator">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>{isRtl ? 'حفظ تلقائي' : 'Auto-saved'}</span>
+          </div>
+
           <div className="flex items-center space-x-1.5 rtl:space-x-reverse bg-slate-950 border border-slate-800 px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold text-slate-300">
             <Clock className="w-4 h-4 text-amber-500 animate-pulse" />
             <span>{Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}</span>
@@ -370,6 +738,20 @@ export const Assessment: React.FC = () => {
             title={isTimerActive ? 'Pause Assessment' : 'Resume Assessment'}
           >
             {isTimerActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+          </button>
+
+          {/* Review Answers Toggle Button */}
+          <button
+            onClick={() => setShowReviewMode(!showReviewMode)}
+            className={`flex items-center space-x-1.5 rtl:space-x-reverse px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+              showReviewMode 
+                ? 'bg-amber-500 text-slate-900 border border-amber-400' 
+                : 'bg-slate-950 hover:bg-slate-900 border border-slate-800 text-slate-300 hover:text-white'
+            }`}
+            title={isRtl ? 'مراجعة وتعديل الإجابات' : 'Review and Edit Answers'}
+          >
+            <ClipboardList className="w-4 h-4" />
+            <span className="hidden md:inline">{showReviewMode ? (isRtl ? 'الأسئلة' : 'View Questions') : t('reviewAnswers')}</span>
           </button>
 
           {/* Global Submit trigger */}
@@ -399,7 +781,126 @@ export const Assessment: React.FC = () => {
       )}
 
       {isTimerActive && (
-        <div className="space-y-6">
+        showReviewMode ? (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-3xl space-y-6"
+            id="assessment-review-mode-panel"
+          >
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-800">
+              <div>
+                <h2 className="text-xl font-black text-white flex items-center gap-2">
+                  <ClipboardList className="w-6 h-6 text-amber-500" />
+                  <span>{isRtl ? 'مراجعة كافة إجاباتك' : 'Review All Your Answers'}</span>
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  {isRtl 
+                    ? 'يرجى مراجعة وتعديل إجاباتك قبل تسليم التقييم النهائي. انقر على أي سؤال للعودة وتعديل الإجابة.' 
+                    : 'Please check and edit your answers before final submission. Click any question card to return and change its answer.'}
+                </p>
+              </div>
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowReviewMode(false)}
+                  className="bg-slate-950 hover:bg-slate-900 border border-slate-800 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                >
+                  {isRtl ? 'العودة للاختبار' : 'Back to Test'}
+                </button>
+                <button
+                  onClick={() => handleSubmitQuiz()}
+                  className="bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-extrabold px-5 py-2 rounded-xl text-xs shadow-lg shadow-emerald-500/15 transition-colors"
+                >
+                  {t('submitExam')}
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {questions.map((q, idx) => {
+                const ans = userAnswers[q.id];
+                const isAnswered = ans !== undefined && ans !== null && !(Array.isArray(ans) && ans.length === 0) && !(typeof ans === 'object' && Object.keys(ans).length === 0);
+                const isBookmarkedLocal = localBookmarks.includes(q.id) || progress.bookmarks.includes(q.id);
+
+                return (
+                  <div 
+                    key={q.id}
+                    onClick={() => {
+                      setCurrentIdx(idx);
+                      setShowReviewMode(false);
+                    }}
+                    className={`group relative p-4 rounded-2xl border text-left rtl:text-right cursor-pointer transition-all duration-300 hover:scale-[1.01] ${
+                      isAnswered 
+                        ? 'bg-slate-950/40 border-slate-800 hover:border-amber-500/30' 
+                        : 'bg-red-500/5 border-red-950/40 hover:border-red-500/30'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded bg-slate-900 flex items-center justify-center font-mono text-[10px] font-black text-amber-500 border border-slate-800">
+                          {idx + 1}
+                        </span>
+                        <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-slate-950 text-slate-400">
+                          {q.topic}
+                        </span>
+                        <span className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded ${
+                          q.difficulty === 'easy' ? 'bg-emerald-500/10 text-emerald-400' :
+                          q.difficulty === 'medium' ? 'bg-indigo-500/10 text-indigo-400' :
+                          q.difficulty === 'hard' ? 'bg-orange-500/10 text-orange-400' :
+                          'bg-red-500/10 text-red-400'
+                        }`}>
+                          {q.difficulty.toUpperCase()}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        {isBookmarkedLocal && (
+                          <Bookmark className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                        )}
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                          isAnswered ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'
+                        }`}>
+                          {isAnswered ? (isRtl ? 'تمت الإجابة' : 'Answered') : (isRtl ? 'متروك' : 'Skipped')}
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-300 line-clamp-1 group-hover:text-white transition-colors">
+                      {getQuestionText(q)}
+                    </p>
+
+                    <div className="mt-2 pt-2 border-t border-slate-950/60 flex justify-between items-center text-[10px]">
+                      <span className="text-slate-500 font-medium truncate max-w-[70%]">
+                        <span className="text-slate-600 mr-1 rtl:ml-1 font-bold">{isRtl ? 'الإجابة:' : 'Answer:'}</span>
+                        <span className="text-amber-500/90 font-mono font-bold">{getAnswerPreview(q, ans)}</span>
+                      </span>
+                      <span className="text-amber-500 font-bold group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform flex items-center gap-1">
+                        <span>{isRtl ? 'تعديل' : 'Edit'}</span>
+                        <Edit className="w-3 h-3" />
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+              <p>
+                {isRtl 
+                  ? `تم الإجابة على ${questions.filter(q => userAnswers[q.id] !== undefined).length} من أصل ${questions.length} أسئلة.` 
+                  : `Answered ${questions.filter(q => userAnswers[q.id] !== undefined).length} of ${questions.length} questions.`}
+              </p>
+              <button
+                onClick={() => handleSubmitQuiz()}
+                className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-extrabold px-6 py-3 rounded-xl text-xs shadow-lg shadow-emerald-500/10 transition-colors"
+              >
+                {isRtl ? 'تسليم التقييم والنتيجة' : 'Submit and Get Result'}
+              </button>
+            </div>
+          </motion.div>
+        ) : (
+          <div className="space-y-6">
           
           {/* 3. Question Card Box */}
           <div className="bg-slate-900 border border-slate-800/80 p-6 md:p-8 rounded-3xl space-y-6">
@@ -420,7 +921,7 @@ export const Assessment: React.FC = () => {
                   </span>
                 </div>
                 <h3 className="text-base md:text-lg text-slate-100 font-medium leading-relaxed">
-                  {isRtl ? currentQuestion.questionTextAr : currentQuestion.questionText}
+                  {getQuestionText(currentQuestion)}
                 </h3>
               </div>
 
@@ -445,13 +946,43 @@ export const Assessment: React.FC = () => {
               </pre>
             )}
 
+            {/* Hint UI Block for Coding Questions */}
+            {(currentQuestion.type === 'code-output' || currentQuestion.type === 'bug-fixing' || !!currentQuestion.codeSnippet) && (
+              <div className="mt-3" id="coding-question-hint">
+                {!hintsUsed.includes(currentQuestion.id) ? (
+                  <div className="flex justify-start">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!hintsUsed.includes(currentQuestion.id)) {
+                          setHintsUsed([...hintsUsed, currentQuestion.id]);
+                        }
+                      }}
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 text-amber-400 hover:text-amber-300 text-xs font-bold transition-all cursor-pointer shadow-sm shadow-amber-500/5"
+                    >
+                      <Lightbulb className="w-3.5 h-3.5 animate-pulse" />
+                      <span>{isRtl ? 'عرض تلميح ذكي' : 'Reveal Guided Hint'}</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 text-xs text-slate-300 space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center gap-1.5 text-amber-500 font-black uppercase tracking-wide text-[10px]">
+                      <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{isRtl ? 'تلميح موجه' : 'Guided Suggestion'}</span>
+                    </div>
+                    <p className="leading-relaxed font-medium">{getCodingQuestionHint(currentQuestion, isRtl)}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* 4. Active Interactive Answers Rendering */}
             <div className="pt-4 border-t border-slate-950 space-y-3">
               
               {/* Type: Multiple Choice, Multiple Answer, True-False */}
               {(currentQuestion.type === 'multiple-choice' || currentQuestion.type === 'true-false' || currentQuestion.type === 'multiple-answer' || currentQuestion.type === 'code-output' || currentQuestion.type === 'bug-fixing') && (
                 <div className="grid grid-cols-1 gap-3">
-                  {(isRtl ? currentQuestion.optionsAr : currentQuestion.options)!.map((opt, oIdx) => {
+                  {getQuestionOptions(currentQuestion).map((opt, oIdx) => {
                     const isMulti = currentQuestion.type === 'multiple-answer';
                     const isSelected = Array.isArray(currentAns) && currentAns.includes(oIdx);
 
@@ -466,8 +997,14 @@ export const Assessment: React.FC = () => {
                         }`}
                       >
                         <span className="flex items-center space-x-3 rtl:space-x-reverse">
-                          <span className="w-6 h-6 rounded-lg bg-slate-900 flex items-center justify-center font-mono text-[10px] font-bold text-slate-500 group-hover:text-slate-300">
+                          <span 
+                            className="relative w-6 h-6 rounded-lg bg-slate-900 flex items-center justify-center font-mono text-[10px] font-bold text-slate-500 group-hover:text-slate-300"
+                            title={isRtl ? `مفتاح: ${oIdx + 1} أو ${String.fromCharCode(65 + oIdx)}` : `Shortcut: ${oIdx + 1} or ${String.fromCharCode(65 + oIdx)}`}
+                          >
                             {String.fromCharCode(65 + oIdx)}
+                            <span className="absolute -top-1.5 -right-1.5 text-[8px] leading-none px-1 py-0.5 bg-slate-950 text-amber-500 font-black rounded border border-slate-800/80 shadow">
+                              {oIdx + 1}
+                            </span>
                           </span>
                           <span>{opt}</span>
                         </span>
@@ -533,6 +1070,39 @@ export const Assessment: React.FC = () => {
 
             </div>
 
+            {/* Keyboard Shortcuts Legend */}
+            <div className="pt-4 border-t border-slate-950/50 flex flex-wrap justify-center sm:justify-start gap-4 text-[10px] text-slate-500 font-mono" id="keyboard-shortcuts-legend">
+              <span className="flex items-center gap-1.5">
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800/80 text-amber-500 text-[9px] font-bold shadow">1</kbd>-
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800/80 text-amber-500 text-[9px] font-bold shadow">9</kbd> / 
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800/80 text-amber-500 text-[9px] font-bold shadow">A</kbd>-
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800/80 text-amber-500 text-[9px] font-bold shadow">D</kbd>:
+                <span className="text-slate-400">{isRtl ? 'تحديد إجابة' : 'Select Option'}</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800/80 text-amber-500 text-[9px] font-bold shadow">←</kbd> / 
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800/80 text-amber-500 text-[9px] font-bold shadow">→</kbd> /
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800/80 text-amber-500 text-[9px] font-bold shadow">P</kbd> /
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800/80 text-amber-500 text-[9px] font-bold shadow">N</kbd>:
+                <span className="text-slate-400">{isRtl ? 'السابق / التالي' : 'Prev / Next'}</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800/80 text-amber-500 text-[9px] font-bold shadow">M</kbd>:
+                <span className="text-slate-400">{isRtl ? 'حفظ السؤال' : 'Bookmark'}</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800/80 text-amber-500 text-[9px] font-bold shadow">Ctrl</kbd>+
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800/80 text-amber-500 text-[9px] font-bold shadow">Enter</kbd>:
+                <span className="text-slate-400">{isRtl ? 'إنهاء وتسليم' : 'Submit Exam'}</span>
+              </span>
+              {currentQuestion.type === 'fill-in-blank' && (
+                <span className="flex items-center gap-1.5">
+                  <kbd className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800/80 text-amber-500 text-[9px] font-bold shadow">Enter</kbd>:
+                  <span className="text-slate-400">{isRtl ? 'التالي (أثناء الكتابة)' : 'Next (While Typing)'}</span>
+                </span>
+              )}
+            </div>
+
             {/* Study Mode Instant Feedback panel */}
             {modeParam === 'study' && currentAns !== undefined && (
               <motion.div 
@@ -545,7 +1115,7 @@ export const Assessment: React.FC = () => {
                   <span>{t('explanation')}</span>
                 </div>
                 <p className="text-slate-400 leading-relaxed">
-                  {isRtl ? currentQuestion.explanationAr : currentQuestion.explanation}
+                  {getQuestionExplanation(currentQuestion)}
                 </p>
               </motion.div>
             )}
@@ -589,16 +1159,25 @@ export const Assessment: React.FC = () => {
                 <ChevronRight className="w-4 h-4" />
               </button>
             ) : (
-              <button
-                onClick={() => handleSubmitQuiz()}
-                className="bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-lg shadow-emerald-500/10 transition-colors"
-              >
-                {t('submitExam')}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowReviewMode(true)}
+                  className="bg-slate-950 hover:bg-slate-900 border border-slate-800 text-slate-300 hover:text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all"
+                >
+                  {isRtl ? 'مراجعة كافة الإجابات' : 'Review All Answers'}
+                </button>
+                <button
+                  onClick={() => handleSubmitQuiz()}
+                  className="bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-lg shadow-emerald-500/10 transition-colors"
+                >
+                  {t('submitExam')}
+                </button>
+              </div>
             )}
           </div>
 
         </div>
+        )
       )}
 
     </div>
