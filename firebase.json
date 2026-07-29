@@ -1,6 +1,5 @@
 {
   "hosting": {
-    "site": "frontend-assessment-react",
     "public": "dist",
     "ignore": [
       "firebase.json",

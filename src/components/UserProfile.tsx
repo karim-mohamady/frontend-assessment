@@ -588,7 +588,7 @@ export const UserProfile: React.FC = () => {
                       ? 'bg-slate-950/95 border-amber-500/20 shadow-lg shadow-amber-500/5 hover:border-amber-500/40' 
                       : 'bg-slate-950/25 border-slate-800/60 opacity-65'
                   }`}
-                  title={`${lang === 'ar' ? badge.titleAr : (lang === 'es' ? badge.titleEs : badge.titleEn)}: ${lang === 'ar' ? badge.descAr : (lang === 'es' ? badge.descEs : badge.descEn)}`}
+                  title={`${lang === 'ar' ? badge.titleAr : (lang === 'it' ? (badge.titleIt || badge.titleEn) : badge.titleEn)}: ${lang === 'ar' ? badge.descAr : (lang === 'it' ? (badge.descIt || badge.descEn) : badge.descEn)}`}
                 >
                   {/* Glowing background gradient for unlocked badges */}
                   {isUnlocked && (
@@ -623,16 +623,16 @@ export const UserProfile: React.FC = () => {
                     <h4 className={`text-xs font-black truncate max-w-[120px] ${
                       isUnlocked ? 'text-amber-500' : 'text-slate-400'
                     }`}>
-                      {lang === 'ar' ? badge.titleAr : (lang === 'es' ? badge.titleEs : badge.titleEn)}
+                      {lang === 'ar' ? badge.titleAr : (lang === 'it' ? (badge.titleIt || badge.titleEn) : badge.titleEn)}
                     </h4>
                     <p className="text-[10px] text-slate-500 font-mono">
                       {isUnlocked ? (
                         <span className="text-emerald-400 font-bold">
-                          {lang === 'ar' ? `درجة: ${Math.round(bestScore)}%` : lang === 'es' ? `Puntaje: ${Math.round(bestScore)}%` : `Score: ${Math.round(bestScore)}%`}
+                          {lang === 'ar' ? `درجة: ${Math.round(bestScore)}%` : lang === 'it' ? `Punteggio: ${Math.round(bestScore)}%` : `Score: ${Math.round(bestScore)}%`}
                         </span>
                       ) : (
                         <span>
-                          {lang === 'ar' ? `المطلوب: >= ${badge.threshold}%` : lang === 'es' ? `Req: >= ${badge.threshold}%` : `Req: >= ${badge.threshold}%`}
+                          {lang === 'ar' ? `المطلوب: >= ${badge.threshold}%` : lang === 'it' ? `Req: >= ${badge.threshold}%` : `Req: >= ${badge.threshold}%`}
                         </span>
                       )}
                     </p>

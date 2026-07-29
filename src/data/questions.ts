@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Question, Difficulty, QuestionType } from '../types';
+import { Question, Difficulty, QuestionType, QuestionCategory, CareerTrack } from '../types';
+import { INITIAL_BACKEND_QUESTIONS } from './backendQuestions';
 
 // Core High-Fidelity Benchmark Questions (6 per category, 36 total, covering all types)
 export const CORE_QUESTIONS: Question[] = [
@@ -609,11 +610,203 @@ console.log(c1(), c1(), c2());`,
     correctAnswer: [1],
     explanation: 'The align-items-center utility class sets align-items: center in CSS, which aligns child elements vertically in the middle of a flex box row.',
     explanationAr: 'تقوم فئة الأداة align-items-center بتعيين المحاذاة العمودية للعناصر في منتصف صف صندوق المرونة (flex box).'
+  },
+
+  // --- PHP ---
+  {
+    id: 'php-1',
+    category: 'php',
+    topic: 'PHP 8.x Features',
+    difficulty: 'medium',
+    type: 'multiple-choice',
+    questionText: 'Which PHP 8.0 feature allows defining and assigning class properties directly inside constructor parameter signatures?',
+    questionTextAr: 'أي من ميزات PHP 8.0 تسمح بتعريف وتعيين خصائص الكلاس مباشرة داخل توقيع معاملات دالة البناء (constructor)؟',
+    options: [
+      'Constructor Property Promotion',
+      'Named Arguments',
+      'Union Types',
+      'Attributes Annotation'
+    ],
+    optionsAr: [
+      'ترقية خصائص دالة البناء (Constructor Property Promotion)',
+      'المعاملات المسمات (Named Arguments)',
+      'الأنواع المركبة (Union Types)',
+      'الوسوم التوضيحية (Attributes Annotation)'
+    ],
+    correctAnswer: [0],
+    explanation: 'Constructor property promotion reduces boilerplate code by combining property declaration and assignment right in the __construct parameter list.',
+    explanationAr: 'تقلل ترقية خصائص دالة البناء من الأكواد الروتينية عبر دمج إعلان الخصائص وتعيين قيمتها مباشرة داخل قائمة معاملات دالة __construct.'
+  },
+  {
+    id: 'php-2',
+    category: 'php',
+    topic: 'PDO & Security',
+    difficulty: 'hard',
+    type: 'code-output',
+    codeSnippet: `$stmt = $pdo->prepare('SELECT * FROM users WHERE email = :email');
+$stmt->execute(['email' => $userEmail]);`,
+    questionText: 'Why is using PDO prepared statements with bound parameters secure against SQL Injection attacks?',
+    questionTextAr: 'لماذا يُعد استخدام استعلامات PDO المُعدة مسبقاً (prepared statements) مع ربط المعاملات آمناً ضد هجمات حقن SQL (SQL Injection)؟',
+    options: [
+      'Because SQL engine treats parameter data purely as literals, keeping executable SQL logic completely separated from user input.',
+      'Because it automatically encrypts user data using RSA public keys.',
+      'Because it converts the SQL output into HTML escaped entities.',
+      'Because it executes the query in client-side WebAssembly.'
+    ],
+    optionsAr: [
+      'لأن محرك SQL يعامل بيانات المعاملات بنقاء كقيم نصية/رقمية مجردة، مما يفصل منطق SQL القابل للتنفيذ تماماً عن مدخلات المستخدم.',
+      'لأنه يقوم بتشفير بيانات المستخدم تلقائياً باستخدام مفاتيح RSA العامة.',
+      'لأنه يحول مخرجات SQL إلى كيانات HTML آمنة.',
+      'لأنه ينفذ الاستعلام في تقنية WebAssembly على جانب العميل.'
+    ],
+    correctAnswer: [0],
+    explanation: 'Prepared statements separate SQL syntax compilation from parameter binding, making string escapes irrelevant and neutralizing SQL injection.',
+    explanationAr: 'تفصل الاستعلامات المعدة مسبقاً مرحلة تجميع صياغة SQL عن مرحلة ربط البيانات، مما يحيد ثغرات حقن SQL تماماً.'
+  },
+
+  // --- LARAVEL ---
+  {
+    id: 'laravel-1',
+    category: 'laravel',
+    topic: 'Eloquent ORM',
+    difficulty: 'medium',
+    type: 'multiple-choice',
+    questionText: 'In Laravel Eloquent, which relationship method should be declared on the Post model to link it back to its User owner?',
+    questionTextAr: 'في لارفيل Eloquent، ما هي دالة العلاقة التي يجب تعريفها في موديل Post لربطه بموديل المستخدم (User) المالك له؟',
+    options: [
+      'belongsTo(User::class)',
+      'hasOne(User::class)',
+      'hasMany(User::class)',
+      'belongsToMany(User::class)'
+    ],
+    optionsAr: [
+      'belongsTo(User::class)',
+      'hasOne(User::class)',
+      'hasMany(User::class)',
+      'belongsToMany(User::class)'
+    ],
+    correctAnswer: [0],
+    explanation: 'The model that holds the foreign key column (e.g. user_id in the posts table) must use the belongsTo relationship.',
+    explanationAr: 'الموديل الذي يحتوي على عمود المفتاح الأجنبي (مثل user_id في جدول posts) يجب أن يستخدم علاقة belongsTo.'
+  },
+  {
+    id: 'laravel-2',
+    category: 'laravel',
+    topic: 'Service Container',
+    difficulty: 'hard',
+    type: 'multiple-choice',
+    questionText: 'What is the main difference between app()->singleton() and app()->bind() in Laravel\'s Service Container?',
+    questionTextAr: 'ما الفرق الأساسي بين app()->singleton() و app()->bind() في حاوية الخدمات (Service Container) في لارفيل؟',
+    options: [
+      'singleton() resolves the class once and reuses the exact same instance for subsequent requests, while bind() creates a new instance every time.',
+      'bind() attaches database foreign keys, while singleton() compiles Blade views.',
+      'singleton() only works on Windows servers.',
+      'They are completely identical synonyms in Laravel 11.'
+    ],
+    optionsAr: [
+      'يقوم singleton() بإنشاء النمط مرة واحدة وإعادة استخدام نفس الكائن في الطلبات التالية، بينما يقوم bind() بإنشاء كائن جديد في كل استدعاء.',
+      'يقوم bind() بربط المفاتيح الأجنبية لقواعد البيانات، بينما يقوم singleton() بتجميع قوالب Blade.',
+      'يعمل singleton() فقط على خوادم ويندوز.',
+      'هما مرادفات متطابقة تماماً في Laravel 11.'
+    ],
+    correctAnswer: [0],
+    explanation: 'app()->singleton() registers a shared binding where the container instantiates the object once and returns the cached instance on subsequent resolves.',
+    explanationAr: 'يسجل app()->singleton() ربطاً مشاركاً بحيث تُنشئ الحاوية الكائن مرة واحدة فقط وترجع نفس الكائن المحفوظ في الاستدعاءات القادمة.'
+  },
+
+  // --- MYSQL ---
+  {
+    id: 'mysql-1',
+    category: 'mysql',
+    topic: 'SQL JOINs',
+    difficulty: 'medium',
+    type: 'multiple-choice',
+    questionText: 'What is the result of running a LEFT JOIN between a "users" table and an "orders" table?',
+    questionTextAr: 'ما هي نتيجة تشغيل استعلام LEFT JOIN بين جدول "users" وجدول "orders"؟',
+    options: [
+      'It returns all records from the left table (users), along with matching records from the right table (orders). Unmatched orders columns are set to NULL.',
+      'It returns only records that have exact matches in both tables.',
+      'It returns all records from orders and drops users that have no orders.',
+      'It creates a cross Cartesian product of all rows.'
+    ],
+    optionsAr: [
+      'يرجع جميع السجلات من الجدول الأيسر (users)، بالإضافة إلى السجلات المطابقة من الجدول الأيمن (orders). وتكون أعمدة الطلبات غير المطابقة بقيمة NULL.',
+      'يرجع فقط السجلات التي تمتلك تطابقاً تاماً في كلا الجدولين.',
+      'يرجع جميع السجلات من جدول orders ويحذف المستخدمين الذين ليس لديهم طلبات.',
+      'ينشئ حاصل ضرب ديكارتي مقاطع لكافة الصفوف.'
+    ],
+    correctAnswer: [0],
+    explanation: 'LEFT JOIN preserves all rows from the left table regardless of whether a matching record exists in the right table.',
+    explanationAr: 'يحافظ LEFT JOIN على جميع الصفوف من الجدول الأيسر بغض النظر عن وجود سجل مطابق في الجدول الأيمن.'
+  },
+  {
+    id: 'mysql-2',
+    category: 'mysql',
+    topic: 'Indexes & B-Trees',
+    difficulty: 'hard',
+    type: 'true-false',
+    questionText: 'Adding an INDEX to a MySQL column speeds up SELECT queries on that column, but slightly increases write latency during INSERT, UPDATE, and DELETE operations.',
+    questionTextAr: 'إضافة فهرس (INDEX) إلى عمود في MySQL يسرع استعلامات القراءة (SELECT) على ذلك العمود، ولكنه يزيد بشكل طفيف من زمن عمليات الكتابة (INSERT و UPDATE و DELETE).',
+    options: ['True / صحيح', 'False / خطأ'],
+    optionsAr: ['True / صحيح', 'False / خطأ'],
+    correctAnswer: [0],
+    explanation: 'Indexes build B-tree search structures for O(log N) lookup speeds, but every write operation must also update the corresponding index tree structures.',
+    explanationAr: 'تبني الفهارس هياكل أشجار B-tree لسرعة البحث، ولكن كل عملية كتابة يجب أن تقوم بتحديث شجرة الفهرس المقابلة أيضاً.'
+  },
+
+  // --- BACKEND ARCHITECTURE ---
+  {
+    id: 'backend-1',
+    category: 'backend',
+    topic: 'REST & HTTP Status Codes',
+    difficulty: 'medium',
+    type: 'multiple-choice',
+    questionText: 'Which HTTP status code should a RESTful API return after successfully creating a new database resource?',
+    questionTextAr: 'ما هو رمز حالة HTTP الذي يجب أن ترجعه واجهة برمجية RESTful API بعد إنشاء مورد جديد بنجاح في قاعدة البيانات؟',
+    options: [
+      '201 Created',
+      '200 OK',
+      '204 No Content',
+      '202 Accepted'
+    ],
+    optionsAr: [
+      '201 Created (تم الإنشاء)',
+      '200 OK (موافق)',
+      '204 No Content (لا يوجد محتوى)',
+      '202 Accepted (تم القبول)'
+    ],
+    correctAnswer: [0],
+    explanation: 'HTTP 201 Created signifies that the request succeeded and resulted in the creation of a new resource.',
+    explanationAr: 'يدل رمز HTTP 201 Created على أن الطلب نجح وأدى إلى إنشاء مورد جديد بالفعل.'
+  },
+  {
+    id: 'backend-2',
+    category: 'backend',
+    topic: 'Security & CORS',
+    difficulty: 'hard',
+    type: 'multiple-choice',
+    questionText: 'What is the main role of Cross-Origin Resource Sharing (CORS) security headers in backend web APIs?',
+    questionTextAr: 'ما هو الدور الأساسي لترويسات أمان مشاركة الموارد عبر الأصول (CORS) في واجهات برمجية الباك إند؟',
+    options: [
+      'CORS allows servers to specify which external browser origins are permitted to access their restricted API resources.',
+      'CORS encrypts database tables using AES-256 keys.',
+      'CORS automatically compresses JSON responses into gzip format.',
+      'CORS manages server load balancing across multiple Kubernetes nodes.'
+    ],
+    optionsAr: [
+      'تسمح CORS للخوادم بتحديد أصول المتصفحات الخارجية المسموح لها بالوصول إلى موارد واجهات البرمجة المحمية.',
+      'تقوم CORS بتشفير جداول قواعد البيانات باستخدام مفاتيح AES-256.',
+      'تقوم CORS بضغط استجابات JSON تلقائياً بتنسيق gzip.',
+      'تدير CORS موازنة الأحمال على الخادم عبر عقد Kubernetes المتعددة.'
+    ],
+    correctAnswer: [0],
+    explanation: 'CORS is a browser enforcement mechanism where HTTP headers (like Access-Control-Allow-Origin) tell browsers if cross-domain requests are authorized.',
+    explanationAr: 'CORS هي آلية حماية بالمتصفحات حيث تخبر ترويسات HTTP المتصفح بمدى السماح بالطلبات القادمة من نطاقات مختلفة.'
   }
 ];
 
 export function generateProceduralQuestions(
-  category: 'html' | 'css' | 'javascript' | 'react' | 'bootstrap' | 'english',
+  category: QuestionCategory,
   countNeeded = 300
 ): Question[] {
   const result: Question[] = [];
@@ -622,7 +815,7 @@ export function generateProceduralQuestions(
   const matchedCore = CORE_QUESTIONS.filter((q) => q.category === category);
   result.push(...matchedCore);
 
-  const topicsMap = {
+  const topicsMap: Record<QuestionCategory, string[]> = {
     html: [
       'Semantic HTML', 'Forms & Inputs', 'Accessibility', 'SEO & Meta Tags',
       'HTML5 APIs', 'Canvas & SVG', 'Iframes', 'Best Practices', 'Performance'
@@ -646,9 +839,48 @@ export function generateProceduralQuestions(
       'Grid & Columns', 'Containers', 'Utilities', 'Buttons & Cards',
       'Navbar & Navs', 'Alerts & Modals', 'Spacing Utilities', 'Flexbox Utilities'
     ],
+    php: [
+      'PHP 8.x Syntax & Types', 'OOP & Classes', 'Namespaces & Autoloading',
+      'PDO & Database Drivers', 'Exception Handling', 'Composer & Dependencies',
+      'Sessions & Cookies', 'PHP PCRE & Arrays'
+    ],
+    laravel: [
+      'Routing & Controllers', 'Blade Templates', 'Middleware & Requests',
+      'Eloquent ORM & Relationships', 'Service Container & Providers',
+      'API Resources & JSON', 'Queues, Jobs & Events', 'Migrations & Seeders'
+    ],
+    mysql: [
+      'SQL Queries & SELECT', 'JOIN Operations', 'GROUP BY & Aggregations',
+      'Indexes & Performance', 'ACID Transactions & Locks', 'Normalization (1NF-3NF)',
+      'Stored Procedures & Triggers', 'Foreign Keys & Constraints'
+    ],
+    backend: [
+      'RESTful API Architecture', 'JWT & OAuth Authentication', 'CORS & CSRF Security',
+      'Caching with Redis', 'Microservices vs Monolith', 'Rate Limiting & WebSockets',
+      'SQL Injection Prevention', 'HTTP Status Codes & Headers'
+    ],
     english: [
       'Programming Vocabulary', 'Technical Terms', 'Error Messages',
       'Git & GitHub terms', 'Developer Expressions', 'API Documentation understanding'
+    ],
+    uiux: [
+      'Visual Hierarchy', 'Color Theory & Contrast', 'Typography & Layout',
+      'User Personas & Journeys', 'Wireframing & Prototyping', 'WCAG Accessibility (a11y)',
+      'Information Architecture', 'Usability Testing & Analytics'
+    ],
+    figma: [
+      'Figma Auto-Layout 5.0', 'Component Variants & Properties', 'Design Tokens & Styles',
+      'Interactive Prototypes', 'Design Systems Governance', 'Developer Handoff Workflows'
+    ],
+    web3: [
+      'Blockchain Fundamentals', 'EVM Architecture', 'Web3 Wallets & Metamask',
+      'Gas Fees & Network Congestion', 'Layer 2 Scaling & Rollups', 'ERC-20 & ERC-721 Tokens',
+      'Decentralized Storage (IPFS)'
+    ],
+    solidity: [
+      'Solidity Syntax & Data Types', 'Smart Contract Security', 'Reentrancy Guard',
+      'Ethers.js & Wagmi Integration', 'DeFi Liquidity Pools', 'DAO Governance Protocols',
+      'Bytecode & Gas Optimization'
     ]
   };
 
@@ -915,6 +1147,240 @@ console.log(arr);`;
         explanation = `The outline buttons have border highlights and active hover fills representing their color scheme.`;
         explanationAr = `تتميز أزرار التحديد (outline) بإبراز حدودها وتعبئة كاملة عند التمرير تمثل نظام الألوان المخصص لها.`;
       }
+    } else if (category === 'php') {
+      if (templateIdx === 0) {
+        questionText = `Under ${topic}, how does PHP handle type hints and strict types mode (declare(strict_types=1))?`;
+        questionTextAr = `ضمن موضوع ${topic}، كيف تتعامل لغة PHP مع تلميحات الأنواع ووضع الأنواع الصارمة (declare(strict_types=1))؟`;
+        options = [
+          `Strict types mode forces strict scalar type checking for function arguments and return values within that file.`,
+          `It converts scalar values into array primitives silently.`,
+          `It forces all variables to be declared as global.`,
+          `It is only effective when running on HHVM engines.`
+        ];
+        optionsAr = [
+          `يجبر وضع الأنواع الصارمة الفحص الدقيق لأنواع القيم القياسية لمعاملات الدوال والقيم المرجعة داخل ذلك الملف.`,
+          `يحول القيم السلمية إلى مصفوفات أولية بصمت.`,
+          `يجبر جميع المتغيرات على الإعلان كمتغيرات عامة (global).`,
+          `يكون فعالاً فقط عند التشغيل على محركات HHVM.`
+        ];
+        correctAnswer = [0];
+        explanation = `declare(strict_types=1) prevents type coercion for function parameters and return types within the file where declared.`;
+        explanationAr = `يمنع declare(strict_types=1) تحويل الأنواع التلقائي لمعاملات الدوال وأنواع الإرجاع داخل الملف المحدد.`;
+      } else if (templateIdx === 1) {
+        type = 'true-false';
+        questionText = `In PHP 8+, namespaces allow developers to organize classes, functions, and constants into logical groups, preventing naming collisions.`;
+        questionTextAr = `في PHP 8+، تسمح مساحات الأسماء (namespaces) للمطورين بتنظيم الكلاسات والدوال والتوابت في مجموعات منطقية لمنع تضارب الأسماء.`;
+        options = ['True / صحيح', 'False / خطأ'];
+        optionsAr = ['True / صحيح', 'False / خطأ'];
+        correctAnswer = [0];
+        explanation = `Namespaces solve class/function name collisions in modular codebases and match PSR-4 autoloading standards.`;
+        explanationAr = `تحل مساحات الأسماء تضارب أسماء الكلاسات والدوال وتتوافق مع معايير التحميل التلقائي PSR-4.`;
+      } else {
+        questionText = `Which PSR standard defines the autoloading specification widely adopted by Composer in modern PHP development?`;
+        questionTextAr = `ما هو معيار PSR الذي يحدد مواصفات التحميل التلقائي (autoloading) المعتمدة على نطاق واسع في Composer؟`;
+        options = ['PSR-4', 'PSR-12', 'PSR-7', 'PSR-11'];
+        optionsAr = ['PSR-4', 'PSR-12', 'PSR-7', 'PSR-11'];
+        correctAnswer = [0];
+        explanation = `PSR-4 specifies the standard for autoloading classes from file paths based on namespace prefix rules.`;
+        explanationAr = `يحدد PSR-4 المعيار القياسي للتحميل التلقائي للكلاسات من مسارات الملفات بناءً على قواعد البادئة.`;
+      }
+    } else if (category === 'laravel') {
+      if (templateIdx === 0) {
+        questionText = `In Laravel ${topic}, what is the role of HTTP Middleware in processing incoming web requests?`;
+        questionTextAr = `في لارفيل ${topic}، ما هو دور وسائط HTTP (Middleware) في معالجة طلبات الويب الواردة؟`;
+        options = [
+          `Middleware provides a convenient mechanism for inspecting and filtering HTTP requests entering your application.`,
+          `Middleware compiles MySQL databases into JavaScript modules.`,
+          `Middleware generates CSS utility grids automatically.`,
+          `Middleware replaces the need for controllers completely.`
+        ];
+        optionsAr = [
+          `يوفر الـ Middleware آلية مريحة لفحص وتصفية طلبات HTTP الواردة إلى تطبيقك.`,
+          `يقوم الـ Middleware بتجميع قواعد بيانات MySQL في وحدات جافا سكريبت.`,
+          `ينشئ الـ Middleware شبكات CSS تلقائياً.`,
+          `يلغي الـ Middleware الحاجة للمتحكمات (controllers) تماماً.`
+        ];
+        correctAnswer = [0];
+        explanation = `Laravel Middleware intercepts requests before they hit controller actions, ideal for authentication, CORS, and rate limiting.`;
+        explanationAr = `يعترض لارفيل ميديول وير الطلبات قبل وصولها إلى أفعال المتحكم، وهو مثالي للمصادقة وCORS وتحديد معدل الطلبات.`;
+      } else if (templateIdx === 1) {
+        type = 'code-output';
+        codeSnippet = `Route::get('/users/{id}', [UserController::class, 'show'])
+  ->middleware('auth');`;
+        questionText = `What happens if an unauthenticated user attempts to access the route above in Laravel?`;
+        questionTextAr = `ماذا يحدث إذا حاول مستخدم غير مسجل الدخول الوصول إلى المسار أعلاه في لارفيل؟`;
+        options = [
+          `The auth middleware intercepts the request and redirects to login (or returns 401 JSON for API requests).`,
+          `It executes the show controller action and returns empty HTML.`,
+          `It throws a fatal MySQL syntax exception.`,
+          `It renders the public Blade home page.`
+        ];
+        optionsAr = [
+          `يعترض الـ auth middleware الطلب ويقوم بالتحويل لصفحة الدخول (أو يرجع 401 JSON لطلبات API).`,
+          `ينفذ فعل المتحكم show ويرجع HTML فارغ.`,
+          `يرفع استثناء خطيراً في صياغة MySQL.`,
+          `يعرض صفحة Blade الرئيسية العامة.`
+        ];
+        correctAnswer = [0];
+        explanation = `The 'auth' middleware verifies authentication credentials and prevents unauthorized route execution.`;
+        explanationAr = `يتحقق الـ auth middleware من بيانات المصادقة ويمنع تنفيذ المسار للمستخدمين غير المصرح لهم.`;
+      } else {
+        questionText = `Which Artisan CLI command creates a new migration, model, controller, and database factory all together in Laravel?`;
+        questionTextAr = `أي من أوامر Artisan CLI يُنشئ ملف هجرة (migration) وموديل ومتحكم ومصنع بيانات معاً في لارفيل؟`;
+        options = ['php artisan make:model Product -mcf', 'php artisan create:all Product', 'php artisan generate:scaffold Product', 'php artisan build:product'];
+        optionsAr = ['php artisan make:model Product -mcf', 'php artisan create:all Product', 'php artisan generate:scaffold Product', 'php artisan build:product'];
+        correctAnswer = [0];
+        explanation = `Using the flags -m (migration), -c (controller), and -f (factory) generates the full stack files for the model.`;
+        explanationAr = `تولّد الرايات -m (هجرة) و -c (متحكم) و -f (مصنع) جميع ملفات الموديل المتكاملة بسرعة.`;
+      }
+    } else if (category === 'mysql') {
+      if (templateIdx === 0) {
+        questionText = `In MySQL ${topic}, what guarantees that a database transaction will either complete entirely or roll back completely on failure?`;
+        questionTextAr = `في MySQL ${topic}، ما الذي يضمن أن معالجة قاعدة البيانات إما أن تكتمل بالكامل أو تعود إلى حالتها السابقة تماماً عند الفشل؟`;
+        options = [
+          `Atomicity (A in ACID)`,
+          `Consistency (C in ACID)`,
+          `Isolation (I in ACID)`,
+          `Durability (D in ACID)`
+        ];
+        optionsAr = [
+          `الذرية (Atomicity - حرف A في ACID)`,
+          `الاتساق (Consistency - حرف C في ACID)`,
+          `العزل (Isolation - حرف I in ACID)`,
+          `الاستمرارية (Durability - حرف D in ACID)`
+        ];
+        correctAnswer = [0];
+        explanation = `Atomicity ensures that all statements within an all-or-nothing transaction block succeed or fail together.`;
+        explanationAr = `تضمن الذرية (Atomicity) أن جميع الاستعلامات داخل كتل المعاملات تنجح كلها أو تفشل وتلغى معاً.`;
+      } else if (templateIdx === 1) {
+        type = 'true-false';
+        questionText = `Database Normalization up to 3NF (Third Normal Form) reduces data redundancy and eliminates update anomalies.`;
+        questionTextAr = `تنسيق قواعد البيانات (Normalization) حتى المستوى الثالث (3NF) يقلل تكرار البيانات ويقضي على شذوذ التحديث.`;
+        options = ['True / صحيح', 'False / خطأ'];
+        optionsAr = ['True / صحيح', 'False / خطأ'];
+        correctAnswer = [0];
+        explanation = `3NF ensures attributes depend solely on the primary key, eliminating transitive functional dependencies.`;
+        explanationAr = `يضمن المستوي الثالث 3NF اعتماد الصفات بشكل كامل ومباشر على المفتاح الرئيسي لمنع التكرار الشاذ.`;
+      } else {
+        questionText = `Which SQL aggregate function counts the total number of non-null rows matching a condition?`;
+        questionTextAr = `أي من دالتي التجميع في SQL تحسب العدد الإجمالي للصفوف غير الخالية المطابقة لشرط معين؟`;
+        options = ['COUNT()', 'SUM()', 'AVG()', 'TOTAL()'];
+        optionsAr = ['COUNT()', 'SUM()', 'AVG()', 'TOTAL()'];
+        correctAnswer = [0];
+        explanation = `COUNT() evaluates matching non-null rows in dataset queries.`;
+        explanationAr = `تحسب الدالة COUNT() عدد الصفوف المطابقة غير الخالية.`;
+      }
+    } else if (category === 'backend') {
+      if (templateIdx === 0) {
+        questionText = `Under ${topic}, what is the primary advantage of using JWT (JSON Web Tokens) for stateless user authentication?`;
+        questionTextAr = `ضمن موضوع ${topic}، ما هي الميزة الأساسية لاستخدام توكنات JWT للمصادقة عديمة الحالة (stateless)?`;
+        options = [
+          `The server does not need to store active user sessions in memory or database; claims are cryptographically signed inside the token payload itself.`,
+          `JWT automatically encrypts all backend database tables.`,
+          `JWT replaces the need for HTTPS connections.`,
+          `JWT automatically compiles PHP code into C++ binaries.`
+        ];
+        optionsAr = [
+          `لا يحتاج الخادم لتخزين الجلسات في الذاكرة؛ البيانات موقعة مشفرة داخل التوكن نفسه.`,
+          `تقوم JWT بتشفير كافة جداول قاعدة بيانات الباك إند تلقائياً.`,
+          `تلغي JWT الحاجة إلى اتصالات HTTPS الآمنة.`,
+          `تقوم JWT بتجميع كود PHP إلى ثنائيات C++.`
+        ];
+        correctAnswer = [0];
+        explanation = `JWTs contain self-contained signed user claims, allowing decentralized, stateless authorization across API microservices.`;
+        explanationAr = `تحتوي توكنات JWT على البيانات الموقعة ذاتياً، مما يسمح بمصادقة عديمة الحالة وموزعة عبر خدمات الباك إند.`;
+      } else if (templateIdx === 1) {
+        type = 'true-false';
+        questionText = `Redis is an in-memory key-value data store frequently used in backend architectures for high-speed caching and rate limiting.`;
+        questionTextAr = `يُعد Redis مخزناً لبيانات المفتاح والقيمة في الذاكرة (In-Memory)، ويُستخدم بثرة في الباك إند للتخزين المؤقت وتحديد معدل الطلبات.`;
+        options = ['True / صحيح', 'False / خطأ'];
+        optionsAr = ['True / صحيح', 'False / خطأ'];
+        correctAnswer = [0];
+        explanation = `Redis serves sub-millisecond data reads from RAM, drastically relieving primary MySQL database loads.`;
+        explanationAr = `يوفر Redis سرعة قراءةائقة بالأجزاء من الملي ثانية من RAM، مما يخفف الحمل عن قواعد البيانات الرئيسية.`;
+      } else {
+        questionText = `Which HTTP header is sent by clients to supply Bearer JWT authentication tokens to backend APIs?`;
+        questionTextAr = `أي ترويسة HTTP يتم إرسالها بواسطة العميل لتزويد توكنات مصادقة Bearer JWT لـ REST APIs في الباك إند؟`;
+        options = ['Authorization', 'Authentication', 'X-Api-Key', 'Accept-Token'];
+        optionsAr = ['Authorization', 'Authentication', 'X-Api-Key', 'Accept-Token'];
+        correctAnswer = [0];
+        explanation = `The Authorization header carries "Bearer <token>" values per standard HTTP API conventions.`;
+        explanationAr = `تحمل الترويسة Authorization القيمة "Bearer <token>" وفقاً للمعايير المعتمدة.`;
+      }
+    } else if (category === 'uiux' || category === 'figma') {
+      if (templateIdx === 0) {
+        questionText = `Under ${topic}, what is the main purpose of establishing a Design Token system in Figma and design systems?`;
+        questionTextAr = `ضمن موضوع ${topic}، ما هو الغرض الأساسي من إنشاء نظام متغيرات التصميم (Design Tokens) في Figma وأنظمة التصميم؟`;
+        options = [
+          `To store atomic design values (colors, typography, spacing) as reusable variables that synchronize seamlessly between Figma and code base (CSS/Tailwind).`,
+          `To automatically compress exported PNG and SVG images.`,
+          `To compile Figma vector layers into backend SQL database tables.`,
+          `To replace the need for user testing and wireframing.`
+        ];
+        optionsAr = [
+          `لتخزين قيم التصميم الذرية (الألوان، الخطوط، المسافات) كمتغيرات قابلة لإعادة الاستخدام تتزامن بسهولة بين Figma والكود.`,
+          `لضغط صور PNG و SVG المصدّرة تلقائياً.`,
+          `لتجميع طبقات المتجهات في Figma إلى جداول قواعد بيانات SQL.`,
+          `لإلغاء الحاجة إلى اختبارات المستخدم والتخطيط السلكي.`
+        ];
+        correctAnswer = [0];
+        explanation = `Design tokens serve as the single source of truth for visual attributes across design tools and front-end code bases.`;
+        explanationAr = `تُعد متغيرات التصميم المصدر الوحيد للحقائق للمكونات البصرية بين أدوات التصميم وكود الواجهة الأمامية.`;
+      } else if (templateIdx === 1) {
+        type = 'true-false';
+        questionText = `In Figma, Auto-Layout 5.0 enables elements inside a frame to automatically adapt padding and alignment when content changes dynamically.`;
+        questionTextAr = `في Figma، يتيح التخطيط التلقائي Auto-Layout 5.0 للعناصر داخل الإطار التكيف تلقائياً مع الهوامش والمحاذاة عند تغيير المحتوى ديناميكياً.`;
+        options = ['True / صحيح', 'False / خطأ'];
+        optionsAr = ['True / صحيح', 'False / خطأ'];
+        correctAnswer = [0];
+        explanation = `Auto Layout turns frames into flexbox-like responsive layout containers within Figma.`;
+        explanationAr = `يحول Auto Layout الإطارات إلى حاويات تخطيط متجاوبة تشبه Flexbox داخل Figma.`;
+      } else {
+        questionText = `Which WCAG contrast ratio is required for standard body text to pass AA accessibility compliance?`;
+        questionTextAr = `ما هي نسبة تباين الألوان المطلوبة في إرشادات WCAG للنص العادي للوصول إلى مستوى التوافق AA؟`;
+        options = ['4.5:1', '3.0:1', '7.0:1', '2.1:1'];
+        optionsAr = ['4.5:1', '3.0:1', '7.0:1', '2.1:1'];
+        correctAnswer = [0];
+        explanation = `WCAG AA standard requires a minimum contrast ratio of 4.5:1 for normal body text and 3:1 for large text (18pt+ or 14pt bold).`;
+        explanationAr = `يتطلب معيار WCAG AA نسبة تباين لا تقل عن 4.5:1 للنص العادي و 3:1 للنص الكبير.`;
+      }
+    } else if (category === 'web3' || category === 'solidity') {
+      if (templateIdx === 0) {
+        questionText = `Under ${topic}, what is the main function of the EVM (Ethereum Virtual Machine) in Web3 networks?`;
+        questionTextAr = `ضمن موضوع ${topic}، ما هي الوظيفة الأساسية للآلة الافتراضية لـ Ethereum (EVM) في شبكات Web3؟`;
+        options = [
+          `To serve as a decentralized execution environment that deterministically processes smart contract bytecode across all Ethereum network nodes.`,
+          `To store client-side React code inside Metamask extension memory.`,
+          `To substitute for standard MySQL relational database indexes.`,
+          `To convert SVG design tokens into Solidity interfaces.`
+        ];
+        optionsAr = [
+          `لتكون بيئة تنفيذ لامركزية تعالج كود العقود الذكية بشكل محدد عبر جميع عقد شبكة إيثريوم.`,
+          `لتخزين كود ريأكت في ذاكرة إضافة Metamask.`,
+          `لتكون بديلاً عن فهارس قواعد بيانات MySQL.`,
+          `لتويل متغيرات تصميم SVG إلى واجهات Solidity.`
+        ];
+        correctAnswer = [0];
+        explanation = `The EVM runs smart contract bytecode globally on all consensus nodes, ensuring immutable and deterministic state changes.`;
+        explanationAr = `تقوم EVM بتشغيل كود العقود الذكية عالمياً على كافة العقد المشتركة، مما يضمن تغييرات حالة مؤكدة وغير قابلة للتغيير.`;
+      } else if (templateIdx === 1) {
+        type = 'true-false';
+        questionText = `In Solidity smart contracts, applying a Reentrancy Guard (like OpenZeppelin\'s nonReentrant modifier) prevents malicious fallback loops from draining contract funds.`;
+        questionTextAr = `في عقود Solidity الذكية، يمنع تطبيق موجه Reentrancy Guard (مثل nonReentrant من OpenZeppelin) الحلقات الخبيثة من سحب أموال العقد.`;
+        options = ['True / صحيح', 'False / خطأ'];
+        optionsAr = ['True / صحيح', 'False / خطأ'];
+        correctAnswer = [0];
+        explanation = `Reentrancy protection locks state execution during external call invocations, neutralizing reentrancy exploit vectors.`;
+        explanationAr = `يحمي قفل Reentrancy تنفيذ الحالة أثناء الاستدعاءات الخارجية، مما يحيد ثغرات إعادة الدخول.`;
+      } else {
+        questionText = `Which standard defines divisible fungible token implementation logic on Ethereum (e.g., ERC-20)?`;
+        questionTextAr = `أي معيار يحدد منطق تنفيذ التوكنات القابلة للتقسيم والاستبدال على إيثريوم؟`;
+        options = ['ERC-20', 'ERC-721', 'ERC-1155', 'EIP-1559'];
+        optionsAr = ['ERC-20', 'ERC-721', 'ERC-1155', 'EIP-1559'];
+        correctAnswer = [0];
+        explanation = `ERC-20 is the technical standard for fungible tokens, defining functions like transfer(), balanceOf(), and approve().`;
+        explanationAr = `معيار ERC-20 هو المعيار التقني للتوكنات القابلة للاستبدال ويحدد دوال مثل transfer و balanceOf و approve.`;
+      }
     } else {
       // English for Developers
       const vocab = ENGLISH_VOCABULARY[i % ENGLISH_VOCABULARY.length];
@@ -964,18 +1430,78 @@ console.log(arr);`;
 }
 
 // Category-specific maximum question bank sizes matching the UI descriptions exactly
-const CATEGORY_BANK_SIZES = {
+const CATEGORY_BANK_SIZES: Record<QuestionCategory, number> = {
   html: 300,
   css: 400,
   javascript: 600,
   react: 500,
   bootstrap: 200,
-  english: 150
+  php: 350,
+  laravel: 400,
+  mysql: 350,
+  backend: 450,
+  english: 150,
+  uiux: 300,
+  figma: 250,
+  web3: 350,
+  solidity: 300
 };
 
 // Global Questions Indexer / Search Engine
+export function getTrackCategories(track: CareerTrack): QuestionCategory[] {
+  if (track === 'backend') {
+    return ['php', 'laravel', 'mysql', 'backend', 'english'];
+  }
+  if (track === 'frontend') {
+    return ['html', 'css', 'javascript', 'react', 'bootstrap', 'english'];
+  }
+  if (track === 'uiux') {
+    return ['uiux', 'figma', 'html', 'css', 'english'];
+  }
+  if (track === 'web3') {
+    return ['web3', 'solidity', 'javascript', 'react', 'english'];
+  }
+  return ['html', 'css', 'javascript', 'react', 'bootstrap', 'php', 'laravel', 'mysql', 'backend', 'uiux', 'figma', 'web3', 'solidity', 'english'];
+}
+
+export function getQuestionsByTrack(
+  track: CareerTrack,
+  count = 10,
+  searchQuery = '',
+  difficulty?: Difficulty
+): Question[] {
+  const cats = getTrackCategories(track);
+  let all: Question[] = [];
+  
+  if (track === 'backend' || track === 'fullstack') {
+    all.push(...INITIAL_BACKEND_QUESTIONS);
+  }
+
+  cats.forEach((c) => {
+    const bankSize = CATEGORY_BANK_SIZES[c] || 150;
+    const bank = generateProceduralQuestions(c, Math.min(bankSize, 50));
+    all.push(...bank);
+  });
+
+  if (difficulty) {
+    all = all.filter((q) => q.difficulty === difficulty);
+  }
+
+  if (searchQuery.trim()) {
+    const s = searchQuery.toLowerCase();
+    all = all.filter(
+      (q) =>
+        q.questionText.toLowerCase().includes(s) ||
+        q.questionTextAr.includes(s) ||
+        q.topic.toLowerCase().includes(s)
+    );
+  }
+
+  return all.slice(0, count);
+}
+
 export function getQuestionsByCategory(
-  category: 'html' | 'css' | 'javascript' | 'react' | 'bootstrap' | 'english',
+  category: QuestionCategory,
   count = 10,
   searchQuery = '',
   difficulty?: Difficulty

@@ -6,13 +6,20 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
-  Award, Clock, CheckCircle, HelpCircle, ArrowLeft, RefreshCw, MessageSquare, Play, Sparkles, AlertCircle, FileText, ChevronRight, ChevronLeft, Calendar, Brain, CheckSquare, Target
+  Award, Clock, CheckCircle, HelpCircle, ArrowLeft, RefreshCw, MessageSquare, Play, Sparkles, AlertCircle, FileText, ChevronRight, ChevronLeft, Calendar, Brain, CheckSquare, Target, Star, Database
 } from 'lucide-react';
-import { MockInterviewResult } from '../types';
+import { MockInterviewResult, AppLanguage } from '../types';
 import { processInterviewStep } from '../lib/interviewService';
+import { ResumeAnalyzerModal } from '../components/ResumeAnalyzerModal';
+import { STARInterviewStudio } from '../components/STARInterviewStudio';
+import { SQLQueryOptimizerModal } from '../components/SQLQueryOptimizerModal';
 
 export const InterviewPrep: React.FC = () => {
-  const { progress, isRtl, saveMockInterview, lang } = useApp();
+  const { progress, isRtl, saveMockInterview, lang, selectedTrack } = useApp();
+
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState<boolean>(false);
+  const [isSqlModalOpen, setIsSqlModalOpen] = useState<boolean>(false);
+  const [interviewMode, setInterviewMode] = useState<'mock' | 'star'>('mock');
 
   // Screen states: 'config' | 'active' | 'summary'
   const [screen, setScreen] = useState<'config' | 'active' | 'summary'>('config');
@@ -20,7 +27,7 @@ export const InterviewPrep: React.FC = () => {
   // Config form states
   const [category, setCategory] = useState<string>('react');
   const [difficulty, setDifficulty] = useState<string>('Mid-Level');
-  const [interviewLang, setInterviewLang] = useState<'en' | 'es' | 'ar'>(lang);
+  const [interviewLang, setInterviewLang] = useState<AppLanguage>(lang);
 
   // Active Interview state
   const [questionCount, setQuestionCount] = useState<number>(1);
@@ -50,19 +57,37 @@ export const InterviewPrep: React.FC = () => {
   const [viewingHistoryItem, setViewingHistoryItem] = useState<MockInterviewResult | null>(null);
 
   const categories = [
-    { id: 'react', labelEn: 'React & Front-End Frameworks', labelAr: 'مكتبة ريأكت وإطارات العمل', icon: '⚛️' },
-    { id: 'javascript', labelEn: 'JavaScript & Async ES6+', labelAr: 'جافا سكريبت والمزامنة', icon: '⚡' },
-    { id: 'html_css', labelEn: 'HTML5, CSS3 & Responsive Web', labelAr: 'هيكلة الويب والتصميم المتجاوب', icon: '🎨' },
-    { id: 'performance', labelEn: 'Web Performance & Security', labelAr: 'الأداء الفائق وحماية الويب', icon: '💨' },
-    { id: 'system_design', labelEn: 'Front-End System Design', labelAr: 'تصميم أنظمة الواجهة الأمامية', icon: '🏗️' }
+    { id: 'react', labelEn: 'React & Front-End Frameworks', labelAr: 'مكتبة ريأكت وإطارات العمل', labelIt: 'React & Framework Front-End', track: 'frontend', icon: '⚛️' },
+    { id: 'javascript', labelEn: 'JavaScript & Async ES6+', labelAr: 'جافا سكريبت والمزامنة', labelIt: 'JavaScript & Async ES6+', track: 'frontend', icon: '⚡' },
+    { id: 'html_css', labelEn: 'HTML5, CSS3 & Responsive Web', labelAr: 'هيكلة الويب والتصميم المتجاوب', labelIt: 'HTML5, CSS3 & Design Responsive', track: 'frontend', icon: '🎨' },
+    { id: 'php', labelEn: 'PHP 8.x, OOP & Security', labelAr: 'برمجة PHP 8 والأمان', labelIt: 'PHP 8.x, OOP & Sicurezza', track: 'backend', icon: '🐘' },
+    { id: 'laravel', labelEn: 'Laravel 11 & Eloquent ORM', labelAr: 'إطار Laravel 11 و Eloquent', labelIt: 'Laravel 11 & Eloquent ORM', track: 'backend', icon: '🔴' },
+    { id: 'mysql', labelEn: 'MySQL, Relational SQL & JOINs', labelAr: 'قواعد بيانات MySQL و SQL', labelIt: 'MySQL, SQL Relazionale & JOIN', track: 'backend', icon: '🐬' },
+    { id: 'backend', labelEn: 'Backend Architecture & REST APIs', labelAr: 'معمارية الباك إند والواجهات', labelIt: 'Architettura Backend & REST API', track: 'backend', icon: '⚙️' },
+    { id: 'uiux', labelEn: 'UI/UX Design & Design Systems', labelAr: 'تصميم الواجهات وأنظمة التصميم', labelIt: 'UI/UX Design & Design Systems', track: 'uiux', icon: '🎨' },
+    { id: 'figma', labelEn: 'Figma Auto-Layout & Variants', labelAr: 'أداة فيجما والتصميم المتجاوب', labelIt: 'Figma Auto-Layout & Varianti', track: 'uiux', icon: '📐' },
+    { id: 'web3', labelEn: 'Web3 & Blockchain Fundamentals', labelAr: 'أساسيات البلوكشين والويب 3', labelIt: 'Web3 & Fondamenti Blockchain', track: 'web3', icon: '🪙' },
+    { id: 'solidity', labelEn: 'Solidity & EVM Smart Contracts', labelAr: 'لغة Solidity والعقود الذكية', labelIt: 'Solidity & Smart Contract EVM', track: 'web3', icon: '📜' },
+    { id: 'performance', labelEn: 'Web Performance & Security', labelAr: 'الأداء الفائق وحماية الويب', labelIt: 'Prestazioni Web & Sicurezza', track: 'frontend', icon: '💨' },
+    { id: 'system_design', labelEn: 'Full-Stack System Design', labelAr: 'تصميم أنظمة الويب الشاملة', labelIt: 'Progettazione Sistemi Web', track: 'fullstack', icon: '🏗️' }
   ];
 
+  const filteredCategories = categories.filter(c => {
+    if (selectedTrack === 'fullstack') return true;
+    if (c.track === 'fullstack') return true;
+    return c.track === selectedTrack;
+  });
+
   const categoryNames: Record<string, string> = {
-    react: isRtl ? 'ريأكت والخطافات' : 'React & Frameworks',
-    javascript: isRtl ? 'جافا سكريبت والمزامنة' : 'JavaScript & Async',
-    html_css: isRtl ? 'تنسيق وتصميم الويب' : 'HTML5 & CSS3',
+    react: isRtl ? 'ريأكت والخطافات' : (lang === 'it' ? 'React & Framework' : 'React & Frameworks'),
+    javascript: isRtl ? 'جافا سكريبت والمزامنة' : (lang === 'it' ? 'JavaScript & Async' : 'JavaScript & Async'),
+    html_css: isRtl ? 'تنسيق وتصميم الويب' : (lang === 'it' ? 'HTML5 & CSS3' : 'HTML5 & CSS3'),
+    php: isRtl ? 'لغة PHP 8 والبرمجة الكائنية' : 'PHP 8 & OOP',
+    laravel: isRtl ? 'إطار لارفيل 11' : 'Laravel 11 & Eloquent',
+    mysql: isRtl ? 'قواعد بيانات MySQL' : 'MySQL & SQL Databases',
+    backend: isRtl ? 'معمارية الباك إند و REST APIs' : 'Backend & REST APIs',
     performance: isRtl ? 'الأداء والحماية' : 'Web Performance',
-    system_design: isRtl ? 'تصميم النظم' : 'Front-End System Design'
+    system_design: isRtl ? 'تصميم النظم' : 'System Design'
   };
 
   const loadingMessages = isRtl 
@@ -110,7 +135,8 @@ export const InterviewPrep: React.FC = () => {
         language: interviewLang,
         currentQuestion: '',
         userResponse: '',
-        questionCount: 0
+        questionCount: 0,
+        track: selectedTrack
       });
 
       setCurrentQuestion(data.question);
@@ -139,7 +165,8 @@ export const InterviewPrep: React.FC = () => {
         language: interviewLang,
         currentQuestion,
         userResponse,
-        questionCount
+        questionCount,
+        track: selectedTrack
       });
 
       // Save this QA pair to the active session history
@@ -217,19 +244,41 @@ export const InterviewPrep: React.FC = () => {
           </p>
         </div>
 
-        {screen !== 'config' && (
-          <button
-            onClick={() => {
-              if (window.confirm(isRtl ? 'هل تريد بالتأكيد إنهاء الجلسة والعودة؟' : 'Are you sure you want to exit this interview session?')) {
-                setScreen('config');
-              }
-            }}
-            className="flex items-center space-x-2 rtl:space-x-reverse bg-slate-900 hover:bg-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold border border-slate-800 cursor-pointer transition-all"
-          >
-            {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-            <span>{isRtl ? 'إنهاء والعودة' : 'Exit Session'}</span>
-          </button>
-        )}
+        <div className="flex flex-wrap items-center gap-3">
+          {screen === 'config' && (
+            <>
+              <button
+                onClick={() => setIsResumeModalOpen(true)}
+                className="flex items-center space-x-2 rtl:space-x-reverse bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all shadow-md"
+              >
+                <FileText className="w-4 h-4" />
+                <span>{isRtl ? 'تحليل السيرة الذاتية الـ ATS' : 'Analyze Resume (ATS)'}</span>
+              </button>
+
+              <button
+                onClick={() => setIsSqlModalOpen(true)}
+                className="flex items-center space-x-2 rtl:space-x-reverse bg-slate-900 hover:bg-slate-800 text-cyan-400 border border-slate-800 hover:border-cyan-500/30 px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all shadow-md"
+              >
+                <Database className="w-4 h-4" />
+                <span>{isRtl ? 'محلل استعلامات SQL' : 'SQL EXPLAIN Optimizer'}</span>
+              </button>
+            </>
+          )}
+
+          {screen !== 'config' && (
+            <button
+              onClick={() => {
+                if (window.confirm(isRtl ? 'هل تريد بالتأكيد إنهاء الجلسة والعودة؟' : 'Are you sure you want to exit this interview session?')) {
+                  setScreen('config');
+                }
+              }}
+              className="flex items-center space-x-2 rtl:space-x-reverse bg-slate-900 hover:bg-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold border border-slate-800 cursor-pointer transition-all"
+            >
+              {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+              <span>{isRtl ? 'إنهاء والعودة' : 'Exit Session'}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* 2. Loading state */}
@@ -268,8 +317,42 @@ export const InterviewPrep: React.FC = () => {
         </div>
       )}
 
+      {/* Mode Selector Header */}
+      {screen === 'config' && (
+        <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
+          <button
+            onClick={() => setInterviewMode('mock')}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 ${
+              interviewMode === 'mock'
+                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
+                : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+            }`}
+          >
+            <Brain className="w-4 h-4" />
+            <span>{isRtl ? 'محاكاة المقابلات التقنية (Technical Interview)' : 'Technical Interview AI Simulation'}</span>
+          </button>
+
+          <button
+            onClick={() => setInterviewMode('star')}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 ${
+              interviewMode === 'star'
+                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20'
+                : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+            }`}
+          >
+            <Star className="w-4 h-4" />
+            <span>{isRtl ? 'ورشة المقابلات السلوكية (STAR Method)' : 'Behavioral STAR Workshop'}</span>
+          </button>
+        </div>
+      )}
+
+      {/* Render STAR Studio if active */}
+      {screen === 'config' && interviewMode === 'star' && (
+        <STARInterviewStudio />
+      )}
+
       {/* 4. CONFIGURATION VIEW */}
-      {!isLoading && screen === 'config' && (
+      {!isLoading && screen === 'config' && interviewMode === 'mock' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8" id="config-view-wrapper">
           
           {/* Main Config Form */}
@@ -282,10 +365,10 @@ export const InterviewPrep: React.FC = () => {
             {/* Select Category Cards */}
             <div className="space-y-3">
               <label className="text-xs font-black uppercase text-slate-400 tracking-wider block">
-                {isRtl ? '1. اختر التخصص التقني' : '1. Choose Technical Domain'}
+                {isRtl ? '1. اختر التخصص التقني' : (lang === 'it' ? '1. Scegli Dominio Tecnico' : '1. Choose Technical Domain')}
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {categories.map((cat) => (
+                {filteredCategories.map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => setCategory(cat.id)}
@@ -297,7 +380,7 @@ export const InterviewPrep: React.FC = () => {
                   >
                     <span className="text-2xl mr-3 rtl:mr-0 rtl:ml-3 shrink-0">{cat.icon}</span>
                     <div>
-                      <h4 className="font-bold text-xs">{isRtl ? cat.labelAr : cat.labelEn}</h4>
+                      <h4 className="font-bold text-xs">{isRtl ? cat.labelAr : (lang === 'it' ? cat.labelIt : cat.labelEn)}</h4>
                       <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide font-mono">
                         {cat.id.replace('_', ' ')}
                       </p>
@@ -311,7 +394,7 @@ export const InterviewPrep: React.FC = () => {
               {/* Select Seniority / Difficulty */}
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase text-slate-400 tracking-wider block">
-                  {isRtl ? '2. مستوى الأقدمية الوظيفية' : '2. Seniority Level'}
+                  {isRtl ? '2. مستوى الأقدمية الوظيفية' : (lang === 'it' ? '2. Livello di Esperienza' : '2. Seniority Level')}
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {['Junior', 'Mid-Level', 'Senior'].map((lvl) => (
@@ -333,12 +416,12 @@ export const InterviewPrep: React.FC = () => {
               {/* Language Selection */}
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase text-slate-400 tracking-wider block">
-                  {lang === 'ar' ? '3. لغة المقابلة والمحادثة' : (lang === 'es' ? '3. Idioma de la Entrevista' : '3. Interview Language')}
+                  {lang === 'ar' ? '3. لغة المقابلة والمحادثة' : (lang === 'it' ? '3. Lingua dell\'Intervista' : '3. Interview Language')}
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     { id: 'en', label: 'English' },
-                    { id: 'es', label: 'Español' },
+                    { id: 'it', label: 'Italiano' },
                     { id: 'ar', label: 'العربية' }
                   ].map((l) => (
                     <button
@@ -771,6 +854,18 @@ export const InterviewPrep: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Resume ATS Analyzer Modal */}
+      <ResumeAnalyzerModal
+        isOpen={isResumeModalOpen}
+        onClose={() => setIsResumeModalOpen(false)}
+      />
+
+      {/* SQL EXPLAIN Optimizer Modal */}
+      <SQLQueryOptimizerModal
+        isOpen={isSqlModalOpen}
+        onClose={() => setIsSqlModalOpen(false)}
+      />
 
     </div>
   );

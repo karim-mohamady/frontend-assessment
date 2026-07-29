@@ -6,18 +6,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { QuestionCategory } from '../types';
 import { CORE_QUESTIONS, PLATFORM_FAQS, getQuestionsByCategory } from '../data/questions';
 import { 
-  ArrowRight, ShieldCheck, HelpCircle, GraduationCap, Code2, Sparkles, BookOpen, Search, Filter, BookMarked, Layers, Clock, Zap, Brain
+  ArrowRight, ShieldCheck, HelpCircle, GraduationCap, Code2, Sparkles, BookOpen, Search, Filter, BookMarked, Layers, Clock, Zap, Brain, Briefcase, Globe
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export const Home: React.FC = () => {
-  const { t, lang, isRtl, progress, toggleGlobalBookmark } = useApp();
+  const { t, lang, isRtl, progress, toggleGlobalBookmark, selectedTrack } = useApp();
   const navigate = useNavigate();
 
   // Search & Filter state for the Interactive Questions Explorer
-  const [explorerCategory, setExplorerCategory] = useState<'html' | 'css' | 'javascript' | 'react' | 'bootstrap' | 'english'>('javascript');
+  const [explorerCategory, setExplorerCategory] = useState<QuestionCategory>('javascript');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<any>('');
   const [showFaqIdx, setShowFaqIdx] = useState<number | null>(null);
@@ -28,14 +29,28 @@ export const Home: React.FC = () => {
     setVisibleCount(5);
   }, [explorerCategory, searchQuery, selectedDifficulty]);
 
-  const categories = [
-    { id: 'html', title: t('catHtml'), desc: t('catHtmlDesc'), icon: '🧱', color: 'from-orange-500 to-red-600', totalQ: '300+' },
-    { id: 'css', title: t('catCss'), desc: t('catCssDesc'), icon: '🎨', color: 'from-blue-500 to-cyan-600', totalQ: '400+' },
-    { id: 'javascript', title: t('catJs'), desc: t('catJsDesc'), icon: '⚡', color: 'from-yellow-400 to-amber-600', totalQ: '600+' },
-    { id: 'react', title: t('react'), desc: t('catReactDesc'), icon: '⚛️', color: 'from-sky-400 to-blue-600', totalQ: '500+' },
-    { id: 'bootstrap', title: t('catBs'), desc: t('catBsDesc'), icon: '⚙️', color: 'from-purple-500 to-indigo-600', totalQ: '200+' },
-    { id: 'english', title: t('catEng'), desc: t('catEngDesc'), icon: '📝', color: 'from-emerald-500 to-teal-600', totalQ: '150+' }
+  const allCategories = [
+    { id: 'html' as const, title: t('catHtml'), desc: t('catHtmlDesc'), icon: '🧱', color: 'from-orange-500 to-red-600', totalQ: '300+', track: 'frontend' },
+    { id: 'css' as const, title: t('catCss'), desc: t('catCssDesc'), icon: '🎨', color: 'from-blue-500 to-cyan-600', totalQ: '400+', track: 'frontend' },
+    { id: 'javascript' as const, title: t('catJs'), desc: t('catJsDesc'), icon: '⚡', color: 'from-yellow-400 to-amber-600', totalQ: '600+', track: 'frontend' },
+    { id: 'react' as const, title: t('catReact'), desc: t('catReactDesc'), icon: '⚛️', color: 'from-sky-400 to-blue-600', totalQ: '500+', track: 'frontend' },
+    { id: 'bootstrap' as const, title: t('catBs'), desc: t('catBsDesc'), icon: '⚙️', color: 'from-purple-500 to-indigo-600', totalQ: '200+', track: 'frontend' },
+    { id: 'php' as const, title: t('catPhp'), desc: t('catPhpDesc'), icon: '🐘', color: 'from-indigo-600 to-violet-700', totalQ: '350+', track: 'backend' },
+    { id: 'laravel' as const, title: t('catLaravel'), desc: t('catLaravelDesc'), icon: '🔴', color: 'from-red-600 to-rose-700', totalQ: '400+', track: 'backend' },
+    { id: 'mysql' as const, title: t('catMysql'), desc: t('catMysqlDesc'), icon: '🐬', color: 'from-blue-600 to-teal-700', totalQ: '350+', track: 'backend' },
+    { id: 'backend' as const, title: t('catBackend'), desc: t('catBackendDesc'), icon: '🖥️', color: 'from-slate-700 to-emerald-800', totalQ: '450+', track: 'backend' },
+    { id: 'uiux' as const, title: t('catUiux'), desc: t('catUiuxDesc'), icon: '🎨', color: 'from-pink-500 to-rose-600', totalQ: '300+', track: 'uiux' },
+    { id: 'figma' as const, title: t('catFigma'), desc: t('catFigmaDesc'), icon: '📐', color: 'from-purple-600 to-fuchsia-600', totalQ: '250+', track: 'uiux' },
+    { id: 'web3' as const, title: t('catWeb3'), desc: t('catWeb3Desc'), icon: '🪙', color: 'from-amber-500 to-yellow-600', totalQ: '350+', track: 'web3' },
+    { id: 'solidity' as const, title: t('catSolidity'), desc: t('catSolidityDesc'), icon: '📜', color: 'from-cyan-600 to-blue-700', totalQ: '300+', track: 'web3' },
+    { id: 'english' as const, title: t('catEng'), desc: t('catEngDesc'), icon: '📝', color: 'from-emerald-500 to-teal-600', totalQ: '150+', track: 'fullstack' }
   ];
+
+  const categories = allCategories.filter(c => {
+    if (selectedTrack === 'fullstack') return true;
+    if (c.track === 'fullstack') return true;
+    return c.track === selectedTrack;
+  });
 
   // Fetch all matching search results to calculate total matched count
   const allExploredQuestions = getQuestionsByCategory(
@@ -131,12 +146,30 @@ export const Home: React.FC = () => {
             </button>
 
             <button
+              onClick={() => navigate('/assessment')}
+              className="px-8 py-4 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 text-emerald-400 font-bold rounded-2xl flex items-center space-x-2 rtl:space-x-reverse transition-all text-sm"
+              id="hero-takehome-cta"
+            >
+              <Briefcase className="w-4.5 h-4.5 text-emerald-400" />
+              <span>{isRtl ? 'تاسك اختبار القبول الوظيفي' : 'Take-Home Project Task'}</span>
+            </button>
+
+            <button
               onClick={() => navigate('/interview')}
               className="px-8 py-4 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 hover:border-purple-500/40 text-purple-400 font-bold rounded-2xl flex items-center space-x-2 rtl:space-x-reverse transition-all text-sm"
               id="hero-interview-cta"
             >
               <Brain className="w-4.5 h-4.5 text-purple-400" />
               <span>{t('interviewPrep')}</span>
+            </button>
+
+            <button
+              onClick={() => navigate('/english-placement')}
+              className="px-8 py-4 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 hover:border-indigo-500/50 text-indigo-400 font-bold rounded-2xl flex items-center space-x-2 rtl:space-x-reverse transition-all text-sm"
+              id="hero-english-cta"
+            >
+              <Globe className="w-4.5 h-4.5 text-indigo-400" />
+              <span>{isRtl ? 'اختبار تحديد مستوى اللغة الإنجليزية' : 'Global English Placement'}</span>
             </button>
           </motion.div>
 

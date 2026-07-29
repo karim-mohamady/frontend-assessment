@@ -11,7 +11,7 @@ import { Confetti } from '../components/Confetti';
 import { RadarChart } from '../components/RadarChart';
 import { generateCertificateId } from '../data/questions';
 import { 
-  Award, CheckCircle2, XCircle, HelpCircle, ArrowLeft, RefreshCw, LayoutDashboard, Brain, BookOpen, Clock, Target, ShieldCheck, Lightbulb, Share2, Copy, Check
+  Award, CheckCircle2, XCircle, HelpCircle, ArrowLeft, RefreshCw, LayoutDashboard, Brain, BookOpen, Clock, Target, ShieldCheck, Lightbulb, Share2, Copy, Check, Printer, Download, FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -131,6 +131,85 @@ Evaluate your real-world development skills now! 💻🚀`;
 
   const triggerConfetti = () => {
     setConfettiKey((prev) => prev + 1);
+  };
+
+  const handleExportPDF = () => {
+    window.print();
+  };
+
+  const handleDownloadTextSummary = () => {
+    if (!result) return;
+    const catName = categoryNames[result.category as keyof typeof categoryNames] || String(result.category).toUpperCase();
+    const durationText = `${Math.floor(result.timeSpent / 60)}m ${result.timeSpent % 60}s`;
+    const totalQs = result.correctCount + result.incorrectCount + result.skippedCount;
+    const dateStr = new Date().toLocaleString();
+
+    let textContent = `==================================================\n`;
+    textContent += `      CODING SANDBOX - PERFORMANCE REPORT         \n`;
+    textContent += `==================================================\n\n`;
+    textContent += `Developer: ${progress.userName || 'Developer'}\n`;
+    textContent += `Assessment Category: ${catName}\n`;
+    textContent += `Date Generated: ${dateStr}\n`;
+    textContent += `Overall Score: ${Math.round(result.percentage)}% (${feedback.grade})\n`;
+    textContent += `Performance Level: ${feedback.rating}\n\n`;
+
+    textContent += `--------------------------------------------------\n`;
+    textContent += `1. EXECUTION METRICS\n`;
+    textContent += `--------------------------------------------------\n`;
+    textContent += `- Total Questions: ${totalQs}\n`;
+    textContent += `- Correct Answers: ${result.correctCount}\n`;
+    textContent += `- Incorrect Answers: ${result.incorrectCount}\n`;
+    textContent += `- Skipped Questions: ${result.skippedCount}\n`;
+    textContent += `- Total Time Spent: ${durationText}\n\n`;
+
+    textContent += `--------------------------------------------------\n`;
+    textContent += `2. INTELLIGENT AI EVALUATION\n`;
+    textContent += `--------------------------------------------------\n`;
+    textContent += `English: "${feedback.commentEn}"\n`;
+    textContent += `Arabic:  "${feedback.commentAr}"\n\n`;
+
+    textContent += `--------------------------------------------------\n`;
+    textContent += `3. CATEGORY SKILLS BREAKDOWN\n`;
+    textContent += `--------------------------------------------------\n`;
+    radarData.forEach(item => {
+      textContent += `- ${item.label}: ${Math.round(item.value)}% (${item.count} assessment(s))\n`;
+    });
+    textContent += `\n`;
+
+    if (questions && questions.length > 0) {
+      textContent += `--------------------------------------------------\n`;
+      textContent += `4. DETAILED QUESTION REVIEW\n`;
+      textContent += `--------------------------------------------------\n`;
+      questions.forEach((q: any, idx: number) => {
+        const review = getAnswerReviewDetails(q);
+        const status = review.isCorrect ? '[CORRECT]' : (result.answers[q.id] === undefined ? '[SKIPPED]' : '[INCORRECT]');
+        const qText = getQuestionText(q);
+        const exp = getQuestionExplanation(q);
+
+        textContent += `Q${idx + 1}. ${status} ${qText}\n`;
+        textContent += `   Your Answer: ${review.uAnsText}\n`;
+        textContent += `   Correct Answer: ${review.correctText}\n`;
+        if (exp) {
+          textContent += `   Explanation: ${exp}\n`;
+        }
+        textContent += `\n`;
+      });
+    }
+
+    textContent += `==================================================\n`;
+    textContent += `End of Report - CodingSandbox Competency System\n`;
+    textContent += `==================================================\n`;
+
+    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const sanitizedCat = String(result.category).replace(/[^a-z0-9]/gi, '_');
+    link.download = `performance_summary_${sanitizedCat}_${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   useEffect(() => {
@@ -262,7 +341,25 @@ Evaluate your real-world development skills now! 💻🚀`;
           <p className="text-xs text-slate-400">Complete analysis of your performance weights and skills mapping.</p>
         </div>
 
-        <div className="flex space-x-2 rtl:space-x-reverse">
+        <div className="flex flex-wrap items-center gap-2 rtl:space-x-reverse no-print" id="report-header-actions">
+          <button
+            onClick={handleDownloadTextSummary}
+            className="flex items-center space-x-1.5 rtl:space-x-reverse bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+            title={isRtl ? 'تحميل الملخص كملف نصي' : 'Download Summary as Text File'}
+          >
+            <Download className="w-4 h-4 text-amber-400" />
+            <span>{isRtl ? 'تحميل ملخص (.txt)' : 'Download TXT Summary'}</span>
+          </button>
+
+          <button
+            onClick={handleExportPDF}
+            className="flex items-center space-x-1.5 rtl:space-x-reverse bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 px-4 py-2 rounded-xl text-xs font-black transition-all shadow-md shadow-amber-500/10 cursor-pointer"
+            title={isRtl ? 'تصدير التقرير كملف PDF أو طباعة' : 'Export Report as PDF or Print'}
+          >
+            <Printer className="w-4 h-4" />
+            <span>{isRtl ? 'تصدير PDF / طباعة' : 'Export Report PDF'}</span>
+          </button>
+
           <button
             onClick={() => navigate(`/assessment?category=${result.category}`)}
             className="flex items-center space-x-1.5 rtl:space-x-reverse bg-slate-900 hover:bg-slate-800 border border-slate-800 px-4 py-2 rounded-xl text-xs font-bold text-slate-300 transition-colors"
@@ -273,7 +370,7 @@ Evaluate your real-world development skills now! 💻🚀`;
           
           <button
             onClick={() => navigate('/dashboard')}
-            className="flex items-center space-x-1.5 rtl:space-x-reverse bg-amber-500 hover:bg-amber-600 text-slate-900 px-4 py-2 rounded-xl text-xs font-extrabold transition-colors"
+            className="flex items-center space-x-1.5 rtl:space-x-reverse bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-extrabold transition-colors border border-slate-700"
           >
             <LayoutDashboard className="w-4 h-4" />
             <span>Go to Dashboard</span>
@@ -282,7 +379,7 @@ Evaluate your real-world development skills now! 💻🚀`;
       </section>
 
       {/* 2. Custom Tabs navigation */}
-      <nav className="flex space-x-1.5 rtl:space-x-reverse bg-slate-900 p-1.5 rounded-2xl border border-slate-800/80 w-fit mx-auto sm:mx-0">
+      <nav className="flex space-x-1.5 rtl:space-x-reverse bg-slate-900 p-1.5 rounded-2xl border border-slate-800/80 w-fit mx-auto sm:mx-0 no-print">
         <button
           onClick={() => setActiveTab('summary')}
           className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
@@ -376,7 +473,7 @@ Evaluate your real-world development skills now! 💻🚀`;
             </div>
 
             {/* Share & Celebrate Success Card */}
-            <div className="bg-slate-900 border border-slate-800/80 p-6 rounded-3xl grid grid-cols-1 md:grid-cols-3 gap-6 items-center" id="share-results-card">
+            <div className="bg-slate-900 border border-slate-800/80 p-6 rounded-3xl grid grid-cols-1 md:grid-cols-3 gap-6 items-center no-print" id="share-results-card">
               <div className="md:col-span-2 space-y-3 text-left rtl:text-right">
                 <div className="flex items-center gap-2 text-amber-500">
                   <Share2 className="w-4 h-4" />
@@ -405,6 +502,14 @@ Evaluate your real-world development skills now! 💻🚀`;
                       ? (isRtl ? 'تم النسخ!' : 'Copied!') 
                       : (isRtl ? 'نسخ التقرير' : 'Copy Formatted Report')}
                   </span>
+                </button>
+
+                <button
+                  onClick={handleDownloadTextSummary}
+                  className="w-full flex items-center justify-center space-x-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 font-bold py-2.5 rounded-xl text-xs transition-colors cursor-pointer"
+                >
+                  <Download className="w-4 h-4 text-amber-400" />
+                  <span>{isRtl ? 'تحميل الملخص كملف نصي (.txt)' : 'Download Summary (.txt)'}</span>
                 </button>
 
                 <div className="grid grid-cols-2 gap-2">

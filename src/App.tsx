@@ -14,6 +14,9 @@ import { Assessment } from './pages/Assessment';
 import { Report } from './pages/Report';
 import { CodingSandbox } from './pages/CodingSandbox';
 import { InterviewPrep } from './pages/InterviewPrep';
+import { Revision } from './pages/Revision';
+import { SystemDesignStudio } from './pages/SystemDesignStudio';
+import { GlobalEnglishPlacement } from './pages/GlobalEnglishPlacement';
 
 export default function App() {
   return (
@@ -30,9 +33,12 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="/dashboard" element={<RouteTransition><Dashboard /></RouteTransition>} />
               <Route path="/assessment" element={<RouteTransition><Assessment /></RouteTransition>} />
+              <Route path="/revision" element={<RouteTransition><Revision /></RouteTransition>} />
               <Route path="/report" element={<RouteTransition><Report /></RouteTransition>} />
               <Route path="/sandbox" element={<RouteTransition><CodingSandbox /></RouteTransition>} />
               <Route path="/interview" element={<RouteTransition><InterviewPrep /></RouteTransition>} />
+              <Route path="/system-design" element={<RouteTransition><SystemDesignStudio /></RouteTransition>} />
+              <Route path="/english-placement" element={<RouteTransition><GlobalEnglishPlacement /></RouteTransition>} />
             </Routes>
           </main>
 

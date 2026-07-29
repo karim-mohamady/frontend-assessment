@@ -13,7 +13,7 @@ export interface CodingChallenge {
   descEn: string;
   descAr: string;
   descEs?: string;
-  category: 'html' | 'css' | 'javascript' | 'react';
+  category: 'html' | 'css' | 'javascript' | 'react' | 'php' | 'laravel' | 'mysql' | 'backend';
   difficulty: Difficulty;
   boilerplateCode: string;
   testCode: string; // Executable JS assertions that throw on failure
@@ -315,5 +315,248 @@ if (!labelForEmail) throw new Error(\`A label tag with for="\${emailId}" linking
     points: 50,
     hintEn: 'Make sure your `<label for="xxx">` matches the `<input id="xxx">` exactly. The submit button should have `type="submit"` or simply be a `<button>` tag.',
     hintAr: 'تأكد من مطابقة وسم `<label for="xxx">` تماماً مع معرف المدخل `<input id="xxx">`. وزر الإرسال يجب أن يحتوي على الصفة `type="submit"` أو يكون مجرد وسم `<button>`.'
+  },
+  {
+    id: 'challenge-php-array-filter',
+    titleEn: 'PHP Array Filter & Transformer',
+    titleAr: 'تصفية وتحويل المصفوفات في PHP',
+    descEn: 'Write a function `processUsers(users)` that takes an array of user objects `{ id, name, active, role }`. Filter for `active: true` users who have the role `"admin"` or `"developer"`, and return an array of uppercase names.',
+    descAr: 'اكتب دالة `processUsers(users)` تُعالج مصفوفة من كائنات المستخدمين `{ id, name, active, role }`. قم بتصفية المستخدمين النشطين (`active: true`) الذين يمتلكون دور `"admin"` أو `"developer"`، وأرجع مصفوفة بالأسماء بالكتبابة الكبيرة (Upper Case).',
+    category: 'php',
+    difficulty: 'medium',
+    boilerplateCode: `function processUsers(users) {
+  // Filter active users with role 'admin' or 'developer'
+  // and return an array of uppercase names (e.g. "AHMED")
+  return [];
+}`,
+    testCode: `
+const sample = [
+  { id: 1, name: 'Karim', active: true, role: 'developer' },
+  { id: 2, name: 'Sara', active: false, role: 'admin' },
+  { id: 3, name: 'Omar', active: true, role: 'admin' },
+  { id: 4, name: 'Laila', active: true, role: 'user' }
+];
+
+const res = processUsers(sample);
+if (!Array.isArray(res)) throw new Error('processUsers must return an array.');
+if (res.length !== 2) throw new Error('Expected 2 filtered users (Karim, Omar). Got: ' + res.length);
+if (res[0] !== 'KARIM' || res[1] !== 'OMAR') throw new Error('Expected uppercase names ["KARIM", "OMAR"]. Got: ' + JSON.stringify(res));
+`,
+    points: 60,
+    hintEn: 'Filter users where user.active === true and (user.role === "admin" || user.role === "developer"), then map to user.name.toUpperCase().',
+    hintAr: 'قم بتصفية المستخدمين عندما يكون user.active === true وبشرط أن يكون الدور إما admin أو developer، ثم استخدم map لإرجاع الاسم بحروف كبيرة.'
+  },
+  {
+    id: 'challenge-mysql-sql-builder',
+    titleEn: 'MySQL Aggregation SQL Builder',
+    titleAr: 'بناء استعلام SQL التجميعي لـ MySQL',
+    descEn: 'Write a function `buildSalesQuery(minTotal)` that returns a valid MySQL SQL query string. The query must select `customer_id` and the total spent as `total_spent` from the `orders` table, grouping by `customer_id`, where status is `"completed"`, and having `SUM(amount) >= minTotal`.',
+    descAr: 'اكتب دالة `buildSalesQuery(minTotal)` تُرجع نص استعلام SQL صحيح لـ MySQL. يجب أن يحدد الاستعلام `customer_id` ومجموع المبالغ كـ `total_spent` من جدول `orders` مع التجميع حسب `customer_id` بحالة `"completed"` وبشرط `SUM(amount) >= minTotal`.',
+    category: 'mysql',
+    difficulty: 'hard',
+    boilerplateCode: `function buildSalesQuery(minTotal) {
+  // Construct and return the SQL query string
+  return "";
+}`,
+    testCode: `
+const sql = buildSalesQuery(500);
+if (typeof sql !== 'string') throw new Error('buildSalesQuery must return a string.');
+const cleaned = sql.toLowerCase().replace(/\\s+/g, ' ');
+
+if (!cleaned.includes('select')) throw new Error('SQL query must contain SELECT clause.');
+if (!cleaned.includes('customer_id')) throw new Error('SQL query must select customer_id.');
+if (!cleaned.includes('total_spent')) throw new Error('SQL query must alias total sum as total_spent.');
+if (!cleaned.includes('from orders')) throw new Error('SQL query must query FROM orders table.');
+if (!cleaned.includes("where status = 'completed'") && !cleaned.includes('where status="completed"')) {
+  throw new Error('SQL query must filter WHERE status = "completed".');
+}
+if (!cleaned.includes('group by customer_id')) throw new Error('SQL query must include GROUP BY customer_id.');
+if (!cleaned.includes('having sum(amount) >= 500')) throw new Error('SQL query must filter HAVING SUM(amount) >= 500.');
+`,
+    points: 70,
+    hintEn: 'SELECT customer_id, SUM(amount) AS total_spent FROM orders WHERE status = "completed" GROUP BY customer_id HAVING SUM(amount) >= 500',
+    hintAr: 'صغ الاستعلام بالترتيب: SELECT customer_id, SUM(amount) AS total_spent FROM orders WHERE status = "completed" GROUP BY customer_id HAVING SUM(amount) >= 500'
+  },
+  {
+    id: 'challenge-laravel-pipeline',
+    titleEn: 'Laravel API Response & Status Builder',
+    titleAr: 'منشئ استجابات API في Laravel',
+    descEn: 'Write a function `formatApiResponse(data, message, statusCode)` that creates a standard Laravel JSON API response object with `{ success: boolean, message: string, data: object, code: number }`. If statusCode is between 200 and 299, success is true; otherwise false.',
+    descAr: 'اكتب دالة `formatApiResponse(data, message, statusCode)` تُنشئ كائن استجابة JSON موحد في لارفيل يحتوي على `{ success: boolean, message: string, data: object, code: number }`. إذا كانت حالة الرمز بين 200 و 299 تكون success بـ true، وإلا false.',
+    category: 'laravel',
+    difficulty: 'medium',
+    boilerplateCode: `function formatApiResponse(data, message, statusCode = 200) {
+  // Construct standard Laravel API response structure
+  return {};
+}`,
+    testCode: `
+const okRes = formatApiResponse({ id: 10, name: 'Laravel' }, 'Fetched successfully', 200);
+if (!okRes.success) throw new Error('Status code 200 must set success to true.');
+if (okRes.code !== 200) throw new Error('Code field must equal 200.');
+if (okRes.message !== 'Fetched successfully') throw new Error('Message field mismatch.');
+if (okRes.data.name !== 'Laravel') throw new Error('Data payload mismatch.');
+
+const errRes = formatApiResponse(null, 'Resource not found', 404);
+if (errRes.success !== false) throw new Error('Status code 404 must set success to false.');
+if (errRes.code !== 404) throw new Error('Code field must equal 404.');
+`,
+    points: 50,
+    hintEn: 'Return { success: statusCode >= 200 && statusCode < 300, message, data, code: statusCode }.',
+    hintAr: 'أرجع كائنا يحتوي على البيانات وتكون الخاصية success صحيحة فقط عندما يكون رمز الحالة في نطاق 200 إلى 299.'
+  },
+  {
+    id: 'challenge-backend-jwt-auth',
+    titleEn: 'Backend JWT Header Authenticator',
+    titleAr: 'متحقق توكنات JWT للباك إند',
+    descEn: 'Write a function `verifyAuthHeader(authHeader)` that extracts the token from a `Bearer <token>` string. If the header is missing, improperly formatted, or the token string is under 10 chars, throw an Error with message `"Unauthorized"`. Otherwise, return the clean token string.',
+    descAr: 'اكتب دالة `verifyAuthHeader(authHeader)` تستخرج التوكن من سلسلة `Bearer <token>`. إذا كان الترويسة مفقودة أو غير مصاغة بشكل صحيح أو أن التوكن أقل من 10 أحرف، قم بإلقاء خطأ برمالة `"Unauthorized"`. بخلاف ذلك أرجع نص التوكن النظيف.',
+    category: 'backend',
+    difficulty: 'hard',
+    boilerplateCode: `function verifyAuthHeader(authHeader) {
+  // Validate Authorization header format and token length
+  return "";
+}`,
+    testCode: `
+let errorMsg = "";
+try {
+  verifyAuthHeader(null);
+} catch(e) {
+  errorMsg = e.message;
+}
+if (errorMsg !== 'Unauthorized') throw new Error('Missing authHeader must throw "Unauthorized".');
+
+try {
+  verifyAuthHeader("Basic 1234567890123");
+} catch(e) {
+  errorMsg = e.message;
+}
+if (errorMsg !== 'Unauthorized') throw new Error('Non-Bearer token must throw "Unauthorized".');
+
+const cleanToken = verifyAuthHeader("Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0");
+if (cleanToken !== "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0") {
+  throw new Error('Valid Bearer header should return clean token string. Got: ' + cleanToken);
+}
+`,
+    points: 70,
+    hintEn: 'Check if authHeader starts with "Bearer ". Split by space, check token length >= 10, throw new Error("Unauthorized") if invalid.',
+    hintAr: 'تأكد من بدء الترويسة بـ "Bearer " وقص النص للحصول على التوكن واختبار طوله، ثم ارفع خطأ باسم Unauthorized عند الفشل.'
+  },
+  {
+    id: 'challenge-laravel-eloquent-scope',
+    titleEn: 'Laravel Eloquent Scope & Filter',
+    titleAr: 'تطبيق النطاقات المخصصة في Laravel Eloquent',
+    descEn: 'Write a function `filterProducts(products, minPrice, category)` that mimics Eloquent local query scopes. Filter products where `price >= minPrice` and `category` matches (if provided). Return an array of sorted products by price ascending.',
+    descAr: 'اكتب دالة `filterProducts(products, minPrice, category)` تحاكي نطاقات استعلام Eloquent المحلية. أعد المنتجات التي سعرها أكبر من أو يساوي `minPrice` والمطابقة لـ `category` (إن وجد). أرجع مصفوفة من المنتجات المفلترة والمرتبة تصاعدياً حسب السعر.',
+    category: 'laravel',
+    difficulty: 'medium',
+    boilerplateCode: `function filterProducts(products, minPrice = 0, category = null) {
+  // Filter products by minPrice and optional category
+  // Return sorted array by price ascending
+  return [];
+}`,
+    testCode: `
+const items = [
+  { id: 1, name: 'Laptop', price: 1200, category: 'tech' },
+  { id: 2, name: 'Mouse', price: 25, category: 'tech' },
+  { id: 3, name: 'Desk', price: 300, category: 'furniture' },
+  { id: 4, name: 'Monitor', price: 400, category: 'tech' }
+];
+
+const res1 = filterProducts(items, 100, 'tech');
+if (res1.length !== 2) throw new Error('Expected 2 tech products >= 100 (Monitor, Laptop). Got: ' + res1.length);
+if (res1[0].name !== 'Monitor' || res1[1].name !== 'Laptop') {
+  throw new Error('Expected ascending price order [Monitor 400, Laptop 1200].');
+}
+
+const res2 = filterProducts(items, 0, null);
+if (res2.length !== 4) throw new Error('Null category should return all products sorted by price.');
+if (res2[0].price !== 25) throw new Error('Cheapest item (Mouse 25) must be first.');
+`,
+    points: 60,
+    hintEn: 'Use .filter() on products checking price >= minPrice and (!category || p.category === category), then .sort((a,b) => a.price - b.price).',
+    hintAr: 'استخدم filter للاختبار على السعر والفئة، ثم sort للترتيب حسب السعر تصاعدياً.'
+  },
+  {
+    id: 'challenge-mysql-join-query',
+    titleEn: 'MySQL Inner Join & User Metrics Builder',
+    titleAr: 'استعلام MySQL المعقد مع الدمج والتجميع',
+    descEn: 'Write a function `buildUserOrderMetricsQuery()` that generates a MySQL query joining `users` (u) and `orders` (o) on `u.id = o.user_id`. Select `u.id`, `u.email`, `COUNT(o.id) AS total_orders`, and `SUM(o.total) AS lifetime_value`, grouping by `u.id` and ordering by `lifetime_value` DESC.',
+    descAr: 'اكتب دالة `buildUserOrderMetricsQuery()` تولّد استعلام MySQL يدمج جدولين `users` (u) و `orders` (o) بشرط `u.id = o.user_id`. يجب تحديد `u.id` و `u.email` و `COUNT(o.id) AS total_orders` و `SUM(o.total) AS lifetime_value` والتجميع حسب `u.id` والترتيب حسب `lifetime_value` تنازلياً.',
+    category: 'mysql',
+    difficulty: 'hard',
+    boilerplateCode: `function buildUserOrderMetricsQuery() {
+  // Return the SQL string
+  return "";
+}`,
+    testCode: `
+const sql = buildUserOrderMetricsQuery().toLowerCase().replace(/\\s+/g, ' ');
+if (!sql.includes('select u.id') && !sql.includes('select u.id,')) throw new Error('SQL must select u.id.');
+if (!sql.includes('u.email')) throw new Error('SQL must select u.email.');
+if (!sql.includes('count(o.id) as total_orders')) throw new Error('SQL must count orders as total_orders.');
+if (!sql.includes('sum(o.total) as lifetime_value')) throw new Error('SQL must sum order totals as lifetime_value.');
+if (!sql.includes('from users u') && !sql.includes('from users as u')) throw new Error('SQL must select FROM users u.');
+if (!sql.includes('join orders o') && !sql.includes('join orders as o')) throw new Error('SQL must JOIN orders o.');
+if (!sql.includes('on u.id = o.user_id') && !sql.includes('on o.user_id = u.id')) throw new Error('SQL must JOIN ON u.id = o.user_id.');
+if (!sql.includes('group by u.id')) throw new Error('SQL must GROUP BY u.id.');
+if (!sql.includes('order by lifetime_value desc')) throw new Error('SQL must ORDER BY lifetime_value DESC.');
+`,
+    points: 80,
+    hintEn: 'SELECT u.id, u.email, COUNT(o.id) AS total_orders, SUM(o.total) AS lifetime_value FROM users u JOIN orders o ON u.id = o.user_id GROUP BY u.id ORDER BY lifetime_value DESC',
+    hintAr: 'ابنِ الاستعلام مستخدماً JOIN بين الجدولين وحساب مجاميع القياسات مع GROUP BY و ORDER BY DESC.'
+  },
+  {
+    id: 'challenge-php-di-container',
+    titleEn: 'PHP Dependency Injection & Service Registry',
+    titleAr: 'نموذج حقن التبعيات وحاوية الخدمات في PHP',
+    descEn: 'Write a class `ServiceContainer` with methods `bind(name, resolver)` and `make(name)`. `bind` registers a service factory function. `make` executes the factory function to return the resolved instance. Throw an Error `"Service not found"` if the service is not bound.',
+    descAr: 'اكتب كلاس `ServiceContainer` بطرق `bind(name, resolver)` و `make(name)`. تقوم `bind` بتسجيل دالة مصنع الخدمة، و `make` بتنفيذ الدالة لإرجاع النسخة المحلولة. ارفع خطأ برمالة `"Service not found"` إذا كانت الخدمة غير مسجلة.',
+    category: 'php',
+    difficulty: 'expert',
+    boilerplateCode: `class ServiceContainer {
+  constructor() {
+    this.bindings = new Map();
+  }
+
+  bind(name, resolver) {
+    // Bind service resolver
+  }
+
+  make(name) {
+    // Resolve service instance or throw "Service not found"
+  }
+}`,
+    testCode: `
+const container = new ServiceContainer();
+container.bind('db', () => ({ connection: 'mysql_connected' }));
+
+const db = container.make('db');
+if (!db || db.connection !== 'mysql_connected') {
+  throw new Error('Container failed to resolve bound "db" service.');
+}
+
+let err = "";
+try {
+  container.make('non_existent');
+} catch(e) {
+  err = e.message;
+}
+if (err !== 'Service not found') {
+  throw new Error('Expected "Service not found" error when resolving unbound service.');
+}
+`,
+    points: 90,
+    hintEn: 'Store resolvers in `this.bindings.set(name, resolver)`. In `make`, check if `this.bindings.has(name)`, then call `this.bindings.get(name)()`.',
+    hintAr: 'خزن الدوال في Map باسم bindings. وفي make تحقق من وجود الخدمة ثم استدعِ الدالة المربوطة.'
   }
 ];
+
+export function getChallengesByTrack(track: 'frontend' | 'backend' | 'fullstack'): CodingChallenge[] {
+  return CODING_CHALLENGES.filter(c => {
+    if (track === 'fullstack') return true;
+    if (track === 'backend') {
+      return ['php', 'laravel', 'mysql', 'backend'].includes(c.category);
+    }
+    return ['html', 'css', 'javascript', 'react'].includes(c.category);
+  });
+}
+

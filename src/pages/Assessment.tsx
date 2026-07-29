@@ -6,12 +6,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { generateProceduralQuestions, getQuestionsByCategory, generateCertificateId } from '../data/questions';
-import { Question, Difficulty, QuestionType } from '../types';
+import { generateProceduralQuestions, getQuestionsByCategory, getQuestionsByTrack, getTrackCategories, generateCertificateId } from '../data/questions';
+import { Question, Difficulty, QuestionType, QuestionCategory } from '../types';
 import { 
-  Play, Pause, BookMarked, ChevronLeft, ChevronRight, Check, AlertCircle, HelpCircle, Flame, Clock, RefreshCw, Bookmark, Award, GraduationCap, ClipboardList, Edit, Eye, Lightbulb
+  Play, Pause, BookMarked, ChevronLeft, ChevronRight, Check, AlertCircle, HelpCircle, Flame, Clock, RefreshCw, Bookmark, Award, GraduationCap, ClipboardList, Edit, Eye, Lightbulb, Briefcase, Globe
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { TakeHomeAssignmentStudio } from '../components/TakeHomeAssignmentStudio';
 
 const getCodingQuestionHint = (q: Question, isRtl: boolean): string => {
   if (isRtl && q.hintAr) return q.hintAr;
@@ -67,7 +68,7 @@ const getCodingQuestionHint = (q: Question, isRtl: boolean): string => {
 };
 
 export const Assessment: React.FC = () => {
-  const { t, lang, isRtl, toggleGlobalBookmark, progress, saveAssessmentResult } = useApp();
+  const { t, lang, isRtl, toggleGlobalBookmark, progress, saveAssessmentResult, selectedTrack } = useApp();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -89,7 +90,14 @@ export const Assessment: React.FC = () => {
     return q.explanation;
   };
 
-  const categoryParam = searchParams.get('category') || 'javascript';
+  const rawCategoryParam = searchParams.get('category');
+  const allowedTrackCategories = getTrackCategories(selectedTrack);
+  const defaultCategoryForTrack = selectedTrack === 'backend' ? 'laravel' : 'javascript';
+
+  const categoryParam = (rawCategoryParam && allowedTrackCategories.includes(rawCategoryParam as QuestionCategory))
+    ? (rawCategoryParam as QuestionCategory)
+    : defaultCategoryForTrack;
+
   const modeParam = searchParams.get('mode') || 'exam'; // 'exam' | 'study' | 'daily'
 
   // Assessment configurations based on parameters
@@ -100,12 +108,17 @@ export const Assessment: React.FC = () => {
       case 'javascript': return t('catJs');
       case 'react': return t('catReact');
       case 'bootstrap': return t('catBs');
+      case 'php': return t('catPhp');
+      case 'laravel': return t('catLaravel');
+      case 'mysql': return t('catMysql');
+      case 'backend': return t('catBackend');
       case 'english': return t('catEng');
       default: return 'Evaluation';
     }
   };
 
   // State
+  const [assessmentTab, setAssessmentTab] = useState<'quiz' | 'takehome'>('quiz');
   const STORAGE_KEY = `dev_assessment_session_${categoryParam}_${modeParam}`;
   const [hasSavedSession, setHasSavedSession] = useState(false);
   const [savedSessionData, setSavedSessionData] = useState<any>(null);
@@ -197,15 +210,21 @@ export const Assessment: React.FC = () => {
   const handleStartQuiz = () => {
     let qPool: Question[] = [];
     if (modeParam === 'daily') {
-      // 5 mixed questions
-      const cats: ('html' | 'css' | 'javascript' | 'react' | 'bootstrap' | 'english')[] = ['html', 'css', 'javascript', 'react', 'bootstrap', 'english'];
-      cats.forEach((c) => {
-        const singleQ = getQuestionsByCategory(c, 1, '', undefined);
-        if (singleQ.length > 0) qPool.push(singleQ[0]);
-      });
-      qPool = qPool.sort(() => Math.random() - 0.5).slice(0, 5);
+      // 5 mixed questions based on selected track
+      qPool = getQuestionsByTrack(selectedTrack, 5, '', difficultyFilter);
+      if (qPool.length < 5) {
+        const cats = getTrackCategories(selectedTrack);
+        cats.forEach((c) => {
+          const singleQ = getQuestionsByCategory(c, 1, '', difficultyFilter);
+          if (singleQ.length > 0) qPool.push(singleQ[0]);
+        });
+        qPool = qPool.sort(() => Math.random() - 0.5).slice(0, 5);
+      }
     } else {
       qPool = getQuestionsByCategory(categoryParam as any, 10, '', difficultyFilter);
+      if (qPool.length === 0) {
+        qPool = getQuestionsByTrack(selectedTrack, 10, '', difficultyFilter);
+      }
     }
     setQuestions(qPool);
     setIsQuizConfiguring(false);
@@ -545,14 +564,61 @@ export const Assessment: React.FC = () => {
 
   if (isQuizConfiguring && modeParam !== 'daily') {
     return (
-      <div className="max-w-xl mx-auto px-4 py-16 space-y-8" id="assessment-setup-wizard">
+      <div className="max-w-4xl mx-auto px-4 py-12 space-y-8" id="assessment-setup-wizard">
         
         <div className="text-center space-y-3">
           <GraduationCap className="w-12 h-12 text-amber-500 mx-auto" />
-          <h1 className="text-2xl md:text-3xl font-black text-white">Assessment Wizard</h1>
-          <p className="text-sm text-slate-400">Configure your parameters for "{getCategoryTitle(categoryParam)}" evaluation.</p>
+          <h1 className="text-2xl md:text-3xl font-black text-white">
+            {isRtl ? 'مركز التقييم واختبارات القبول' : 'Evaluation & Assessment Hub'}
+          </h1>
+          <p className="text-sm text-slate-400">
+            {isRtl ? 'اختر نوع التقييم: أسئلة سرعة وتقييم نظري، أو مشروع تاسك قبول وظيفي عملي (Take-Home Task).' : `Configure your parameters for "${getCategoryTitle(categoryParam)}" evaluation or submit a company take-home project.`}
+          </p>
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs font-bold text-amber-400">
+            <span>{selectedTrack === 'backend' ? '🖥️ Active Track: Backend (PHP / Laravel / MySQL)' : selectedTrack === 'fullstack' ? '🌐 Active Track: Fullstack' : '🎨 Active Track: Frontend (HTML / CSS / JS / React)'}</span>
+          </div>
+
+          {/* Mode Switcher Tabs */}
+          <div className="flex flex-wrap justify-center gap-3 pt-2">
+            <button
+              onClick={() => setAssessmentTab('quiz')}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border ${
+                assessmentTab === 'quiz'
+                  ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/20'
+                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              <ClipboardList className="w-4 h-4" />
+              <span>{isRtl ? 'اختبار الأسئلة والنظري (Speed Quiz)' : 'Multiple-Choice & Speed Quiz'}</span>
+            </button>
+
+            <button
+              onClick={() => setAssessmentTab('takehome')}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border ${
+                assessmentTab === 'takehome'
+                  ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/20'
+                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              <Briefcase className="w-4 h-4" />
+              <span>{isRtl ? 'تاسك مشروع القبول الوظيفي (Take-Home Task)' : 'Take-Home Project Assignment'}</span>
+            </button>
+
+            <button
+              onClick={() => navigate('/english-placement')}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border bg-indigo-500/10 hover:bg-indigo-500/20 border-indigo-500/30 text-indigo-300 hover:text-white"
+            >
+              <Globe className="w-4 h-4 text-indigo-400" />
+              <span>{isRtl ? 'اختبار تحديد المستوى الدولي للإنجليزية (CEFR)' : 'Global English CEFR Placement Test'}</span>
+            </button>
+          </div>
         </div>
 
+        {/* Render Take-Home Studio when tab selected */}
+        {assessmentTab === 'takehome' ? (
+          <TakeHomeAssignmentStudio />
+        ) : (
+          <div className="max-w-xl mx-auto space-y-8">
         {hasSavedSession && savedSessionData && (
           <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 p-5 rounded-2xl space-y-3 relative overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300" id="resume-session-banner">
             <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
@@ -643,12 +709,14 @@ export const Assessment: React.FC = () => {
 
           <button
             onClick={handleStartQuiz}
-            className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-slate-900 font-extrabold py-3.5 rounded-xl shadow-lg shadow-amber-500/10 transition-all text-sm"
+            className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-slate-900 font-extrabold py-3.5 rounded-xl shadow-lg shadow-amber-500/10 transition-all text-sm cursor-pointer"
           >
             Launch Evaluation
           </button>
 
         </div>
+        </div>
+        )}
 
       </div>
     );

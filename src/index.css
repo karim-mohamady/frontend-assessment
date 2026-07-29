@@ -1,5 +1,51 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Light Mode variable overrides when .dark is absent on html */
+html:not(.dark), html.light {
+  color-scheme: light;
+  --color-slate-950: #f8fafc; /* Page background */
+  --color-slate-900: #ffffff; /* Cards / Containers */
+  --color-slate-800: #e2e8f0; /* Borders and dividers */
+  --color-slate-700: #cbd5e1; /* Secondary borders */
+  --color-slate-600: #94a3b8; /* Subtle borders */
+  --color-slate-400: #475569; /* Muted subtext */
+  --color-slate-300: #334155; /* Secondary text */
+  --color-slate-200: #1e293b; /* Body text */
+  --color-slate-100: #0f172a; /* Headings and high-emphasis text */
+}
+
+/* Light mode specific background and text contrast fixes */
+html:not(.dark) body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+html:not(.dark) .bg-slate-950\/90,
+html:not(.dark) .bg-slate-950\/80,
+html:not(.dark) .bg-slate-950\/60,
+html:not(.dark) .bg-slate-950\/40 {
+  background-color: rgba(241, 245, 249, 0.95);
+}
+
+html:not(.dark) .bg-slate-900\/90,
+html:not(.dark) .bg-slate-900\/80,
+html:not(.dark) .bg-slate-900\/50,
+html:not(.dark) .bg-slate-900\/40 {
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+html:not(.dark) .text-white {
+  color: #0f172a;
+}
+
+/* Maintain dark text on gold/amber buttons in both light & dark mode */
+html:not(.dark) .text-slate-950,
+html.dark .text-slate-950 {
+  color: #020617 !important;
+}
+
 @theme {
   --animate-fade-in: fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
@@ -15,11 +61,12 @@
   }
 }
 
-/* Print layout optimizations to hide browser margins/headers and print perfect certificates */
+/* Print layout optimizations to hide browser margins/headers and print perfect certificates & reports */
 @media print {
   body {
     background: white !important;
     color: black !important;
+    font-family: system-ui, -apple-system, sans-serif !important;
   }
   
   #navbar-header, 
@@ -27,7 +74,8 @@
   #cert-view-actions, 
   #landing-page-root, 
   #dashboard-root, 
-  #assessment-quiz-active {
+  #assessment-quiz-active,
+  .no-print {
     display: none !important;
   }
 
@@ -43,5 +91,63 @@
     color: #0f172a !important;
     box-shadow: none !important;
     page-break-inside: avoid !important;
+  }
+
+  /* Assessment Report PDF & Print rules */
+  #report-view-root {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #0f172a !important;
+    background: transparent !important;
+  }
+
+  #report-view-root .bg-slate-900,
+  #report-view-root .bg-slate-950,
+  #report-view-root .bg-slate-900\/50,
+  #report-view-root .bg-slate-950\/60,
+  #report-view-root .bg-slate-950\/40 {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
+  }
+
+  #report-view-root .text-slate-400,
+  #report-view-root .text-slate-300,
+  #report-view-root .text-slate-200,
+  #report-view-root .text-slate-500 {
+    color: #334155 !important;
+  }
+
+  #report-view-root .text-white {
+    color: #0f172a !important;
+  }
+
+  #report-view-root .text-amber-500,
+  #report-view-root .text-amber-400 {
+    color: #d97706 !important;
+  }
+
+  #report-view-root .border-slate-800,
+  #report-view-root .border-slate-800\/80,
+  #report-view-root .border-slate-800\/50 {
+    border-color: #cbd5e1 !important;
+  }
+
+  #report-view-root nav,
+  #report-view-root button,
+  #share-results-card button,
+  #report-header-actions {
+    display: none !important;
+  }
+
+  /* Page breaks inside containers */
+  #report-view-root section,
+  #report-view-root .grid > div,
+  #report-view-root .space-y-6 > div,
+  #report-view-root .space-y-8 > div {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }

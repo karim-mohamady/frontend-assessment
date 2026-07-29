@@ -5,20 +5,23 @@
 
 import React, { useState } from 'react';
 import { useApp, ACHIEVEMENTS } from '../context/AppContext';
+import { BADGES } from '../data/badges';
+import { QuestionCategory } from '../types';
 import { InteractiveChart } from '../components/InteractiveChart';
 import { RadarChart } from '../components/RadarChart';
 import { RechartsPerformanceChart } from '../components/RechartsPerformanceChart';
 import { RecentAttemptsTable } from '../components/RecentAttemptsTable';
 import { Leaderboard } from '../components/Leaderboard';
 import { UserProfile } from '../components/UserProfile';
+import { DashboardRevisionSearch } from '../components/DashboardRevisionSearch';
 import { 
-  Award, Clock, CheckCircle2, AlertTriangle, Lightbulb, Settings, Download, Upload, Trash2, Edit2, Zap, Target, BarChart2, Compass, Activity, User
+  Award, Clock, CheckCircle2, AlertTriangle, Lightbulb, Settings, Download, Upload, Trash2, Edit2, Zap, Target, BarChart2, Compass, Activity, User, ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export const Dashboard: React.FC = () => {
   const { 
-    t, lang, isRtl, progress, setUserName, clearAllProgress, exportProgress, importProgress, unlockAchievement 
+    t, lang, isRtl, progress, setUserName, clearAllProgress, exportProgress, importProgress, unlockAchievement, selectedTrack
   } = useApp();
 
   const [importStr, setImportStr] = useState('');
@@ -50,30 +53,58 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  // 1. Calculate general stats across categories
-  const categoriesList: ('html' | 'css' | 'javascript' | 'react' | 'bootstrap' | 'english')[] = [
-    'html', 'css', 'javascript', 'react', 'bootstrap', 'english'
+  // 1. Calculate general stats across categories filtered by active track
+  const allCategoriesList: QuestionCategory[] = [
+    'html', 'css', 'javascript', 'react', 'bootstrap', 'english', 'php', 'laravel', 'mysql', 'backend', 'uiux', 'figma', 'web3', 'solidity'
   ];
 
-  const categoryNames = {
-    html: t('catHtml'),
-    css: t('catCss'),
-    javascript: t('catJs'),
-    react: t('catReact'),
-    bootstrap: t('catBs'),
-    english: t('catEng')
+  const categoriesList = allCategoriesList.filter(c => {
+    if (selectedTrack === 'fullstack') return true;
+    if (c === 'english') return true;
+    if (selectedTrack === 'backend') return ['php', 'laravel', 'mysql', 'backend'].includes(c);
+    if (selectedTrack === 'uiux') return ['uiux', 'figma', 'html', 'css'].includes(c);
+    if (selectedTrack === 'web3') return ['web3', 'solidity', 'javascript', 'react'].includes(c);
+    return ['html', 'css', 'javascript', 'react', 'bootstrap'].includes(c);
+  });
+
+  const categoryNames: Record<string, string> = {
+    html: t('catHtml') || 'HTML5',
+    css: t('catCss') || 'CSS3',
+    javascript: t('catJs') || 'JavaScript',
+    react: t('catReact') || 'React',
+    bootstrap: t('catBs') || 'Bootstrap',
+    english: t('catEng') || 'English',
+    php: 'PHP 8.x',
+    laravel: 'Laravel 11',
+    mysql: 'MySQL & SQL',
+    backend: 'Backend REST API',
+    uiux: t('catUiux') || 'UI/UX Design',
+    figma: t('catFigma') || 'Figma Auto-Layout',
+    web3: t('catWeb3') || 'Web3 & Blockchain',
+    solidity: t('catSolidity') || 'Solidity & EVM'
   };
 
-  const categoryColors = {
+  const categoryColors: Record<string, string> = {
     html: '#f97316', // Orange
     css: '#3b82f6', // Blue
     javascript: '#f59e0b', // Yellow
     react: '#0ea5e9', // Sky blue
     bootstrap: '#8b5cf6', // Purple
-    english: '#10b981' // Green
+    english: '#10b981', // Green
+    php: '#8892bf', // PHP Indigo
+    laravel: '#ff2d20', // Laravel Red
+    mysql: '#00758f', // MySQL Teal
+    backend: '#ec4899', // Pink
+    uiux: '#ec4899', // UI/UX Magenta
+    figma: '#a855f7', // Figma Purple
+    web3: '#eab308', // Web3 Gold
+    solidity: '#06b6d4' // Solidity Cyan
   };
 
-  // Find average percentages and previous scores for each category
+  // Track-specific completed assessments
+  const trackAssessments = progress.completedAssessments.filter((t) => categoriesList.includes(t.category as QuestionCategory));
+
+  // Find average percentages and previous scores for each track category
   const categoryScores = categoriesList.map((cat) => {
     const matchingTests = progress.completedAssessments.filter((t) => t.category === cat);
     const sortedTests = [...matchingTests].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -92,26 +123,26 @@ export const Dashboard: React.FC = () => {
     
     return {
       id: cat,
-      label: categoryNames[cat],
+      label: categoryNames[cat] || cat,
       value: latestScore,
       previousValue: previousScore,
       avgValue: avgScore,
-      color: categoryColors[cat],
+      color: categoryColors[cat] || '#3b82f6',
       count: matchingTests.length
     };
   });
 
-  const totalAssessments = progress.completedAssessments.length;
+  const totalAssessments = trackAssessments.length;
   
   const overallAvgScore = totalAssessments > 0
-    ? Math.round(progress.completedAssessments.reduce((acc, curr) => acc + curr.percentage, 0) / totalAssessments)
+    ? Math.round(trackAssessments.reduce((acc, curr) => acc + curr.percentage, 0) / totalAssessments)
     : 0;
 
   const totalAccuracy = totalAssessments > 0
-    ? Math.round(progress.completedAssessments.reduce((acc, curr) => acc + curr.accuracy, 0) / totalAssessments)
+    ? Math.round(trackAssessments.reduce((acc, curr) => acc + curr.accuracy, 0) / totalAssessments)
     : 0;
 
-  const totalTimeSpent = progress.completedAssessments.reduce((acc, curr) => acc + curr.timeSpent, 0);
+  const totalTimeSpent = trackAssessments.reduce((acc, curr) => acc + curr.timeSpent, 0);
 
   // Time spent formatting
   const formatTimeSpent = (secs: number) => {
@@ -123,18 +154,18 @@ export const Dashboard: React.FC = () => {
     return `${hrs} ${t('hr')} ${remMins} ${t('min')}`;
   };
 
-  // Find strongest and weakest skills
+  // Find strongest and weakest skills for the track
   const completedStats = categoryScores.filter((s) => s.count > 0);
   const strongest = completedStats.length > 0
     ? [...completedStats].sort((a, b) => b.value - a.value).filter((s) => s.value >= 70).slice(0, 2)
     : [];
   
   const weakest = categoryScores
-    .map((s) => ({ ...s, value: s.count > 0 ? s.value : 0 })) // Treat non-attempted as areas needing attention
+    .map((s) => ({ ...s, value: s.count > 0 ? s.value : 0 }))
     .sort((a, b) => a.value - b.value)
     .slice(0, 2);
 
-  // Dynamic AI-Style intelligent feedback suggestions
+  // Dynamic AI-Style intelligent feedback suggestions tailored to active track
   const generateAIRecommendations = () => {
     const recommendations: string[] = [];
 
@@ -154,12 +185,28 @@ export const Dashboard: React.FC = () => {
           recommendations.push("Read up on Bootstrap responsive offset columns grid wrappers and spacing scales.");
         } else if (score.id === 'english') {
           recommendations.push("Improve technical developer reading skills, API deprecation alerts, and Git merge flows.");
+        } else if (score.id === 'php') {
+          recommendations.push("Review PHP 8 type hinting, attributes, anonymous classes, and PSR-12 coding standards.");
+        } else if (score.id === 'laravel') {
+          recommendations.push("Practice Laravel Eloquent eager loading (with) to prevent N+1 queries in production.");
+        } else if (score.id === 'mysql') {
+          recommendations.push("Master MySQL B-Tree composite indexes, ACID transaction isolation levels, and EXPLAIN plans.");
+        } else if (score.id === 'backend') {
+          recommendations.push("Review RESTful HTTP status codes, JWT refresh token mechanics, and Redis caching layers.");
+        } else if (score.id === 'uiux') {
+          recommendations.push("Practice wireframing user personas, visual contrast ratios (WCAG 2.2 AA), and user journey mapping.");
+        } else if (score.id === 'figma') {
+          recommendations.push("Master Figma Auto-Layout 5.0 constraints, component variants, and design token variable exports.");
+        } else if (score.id === 'web3') {
+          recommendations.push("Strengthen EVM execution knowledge, Metamask wallet sign flows, and gas limit calculations.");
+        } else if (score.id === 'solidity') {
+          recommendations.push("Focus on Solidity reentrancy guards (nonReentrant), ERC-20 token standards, and EVM gas optimizations.");
         }
       }
     });
 
     if (recommendations.length === 0) {
-      recommendations.push("Stellar job! You have demonstrated high mastery across all front-end topics. Take on expert difficulties to unlock further honors.");
+      recommendations.push(`Stellar job! You have demonstrated high mastery across all ${selectedTrack.toUpperCase()} topics. Take on expert difficulties to unlock further honors.`);
     }
 
     return recommendations.slice(0, 4);
@@ -167,31 +214,45 @@ export const Dashboard: React.FC = () => {
 
   const aiRecs = generateAIRecommendations();
 
-  // Job readiness categorization
+  // Track-aware job readiness categorization
   const getJobReadiness = () => {
     const attemptedCount = completedStats.length;
-    if (attemptedCount < 3 || overallAvgScore < 60) {
+    const trackLabel = selectedTrack === 'frontend' ? (lang === 'ar' ? 'الواجهات الأمامية' : 'Frontend') :
+      selectedTrack === 'backend' ? (lang === 'ar' ? 'الهندسة الخلفية' : 'Backend') :
+      selectedTrack === 'uiux' ? (lang === 'ar' ? 'تصميم UI/UX' : 'UI/UX Design') :
+      selectedTrack === 'web3' ? (lang === 'ar' ? 'تطوير الويب 3' : 'Web3 Development') : (lang === 'ar' ? 'تطوير Full-Stack' : 'Full-Stack');
+
+    if (attemptedCount < 2 || overallAvgScore < 60) {
       return {
         level: t('notReadyYet'),
-        desc: 'Complete at least 3 major core assessments with a minimum average score of 60% to demonstrate initial competency.',
+        desc: lang === 'ar' 
+          ? `أكمل تقييمين على الأقل في مسار (${trackLabel}) بمتوسط نتيجة لا يقل عن 60% لإثبات الكفاءة الأولية.`
+          : `Complete at least 2 key assessments in the ${trackLabel} track with an average score of 60%+ to demonstrate baseline competency.`,
         color: 'text-amber-500 border-amber-500/20 bg-amber-500/5'
       };
     }
-    if (overallAvgScore >= 85 && attemptedCount >= 5) {
+    if (overallAvgScore >= 85 && attemptedCount >= 3) {
       return {
         level: t('readyMid'),
-        desc: 'Exceptional skill! Your score profile highlights deep architectural expertise in React, CSS specificity, and JS queues. Ready to lead projects.',
+        desc: lang === 'ar'
+          ? `مهارات استثنائية في مسار (${trackLabel})! تظهر نتائجك معرفة هندسية عميقة وتأهيلاً قيادياً.`
+          : `Exceptional mastery in ${trackLabel}! Your score profile highlights deep architectural expertise. Ready to lead projects.`,
         color: 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5'
       };
     }
     return {
       level: t('readyJunior'),
-      desc: 'Great baseline! You satisfy crucial requirements for junior level positions. Focus on strengthening remaining weak topics.',
+      desc: lang === 'ar'
+        ? `أساس متين في مسار (${trackLabel})! تلبي المتطلبات الأساسية للوظائف المبتدئة. واصل تحسين المواضيع الضعيفة.`
+        : `Great baseline in ${trackLabel}! You satisfy key requirements for entry-level positions. Focus on remaining topics.`,
       color: 'text-sky-400 border-sky-500/20 bg-sky-500/5'
     };
   };
 
   const readiness = getJobReadiness();
+
+  // Filter badges relevant to the selected track
+  const trackBadges = BADGES.filter(b => categoriesList.includes(b.category));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10" id="dashboard-root">
@@ -275,6 +336,11 @@ export const Dashboard: React.FC = () => {
           {importStatus === 'error' && <p className="text-xs text-red-400">Invalid code context. Verify your key structure.</p>}
         </div>
       )}
+
+      {/* Global Revision Search Bar */}
+      <section id="dashboard-revision-search-section">
+        <DashboardRevisionSearch />
+      </section>
 
       {/* 2. Key Metrics Bento Grid */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="dashboard-metrics-grid">
@@ -521,39 +587,99 @@ export const Dashboard: React.FC = () => {
         </div>
       </section>
 
-      {/* 6. Platform Achievements & Badges */}
-      <section className="bg-slate-900 border border-slate-800/80 p-6 md:p-8 rounded-3xl space-y-6" id="achievements-panel">
-        <div className="space-y-1">
-          <h3 className="font-extrabold text-white text-sm md:text-base">{t('achievements')}</h3>
-          <p className="text-xs text-slate-400">Unlock developer honors by scoring high grades, answering swiftly, and practicing daily.</p>
+      {/* 6. Track Skill Badges & Platform Achievements */}
+      <section className="bg-slate-900 border border-slate-800/80 p-6 md:p-8 rounded-3xl space-y-8" id="achievements-panel">
+        
+        {/* Track Specific Badges */}
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <h3 className="font-extrabold text-white text-sm md:text-base flex items-center gap-2">
+              <Award className="w-5 h-5 text-amber-500" />
+              <span>{lang === 'ar' ? `شارات تخصص ${selectedTrack.toUpperCase()}` : `${selectedTrack.toUpperCase()} Track Skill Badges`}</span>
+            </h3>
+            <p className="text-xs text-slate-400">
+              {lang === 'ar' 
+                ? 'احصل على نتيجة 85% أو أعلى في أي تقييم لفتح شارة التخصص وإثبات تميزك.' 
+                : 'Score 85%+ on any track assessment to unlock category mastery badges.'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {trackBadges.map((badge) => {
+              const matchingTests = progress.completedAssessments.filter((a) => a.category === badge.category);
+              const maxScore = matchingTests.length > 0 ? Math.max(...matchingTests.map(t => t.percentage)) : 0;
+              const isUnlocked = maxScore >= badge.threshold;
+
+              return (
+                <div 
+                  key={badge.id}
+                  className={`p-4 rounded-xl border flex space-x-3.5 rtl:space-x-reverse transition-all ${
+                    isUnlocked 
+                      ? 'bg-slate-950/80 border-amber-500/40 shadow-lg shadow-amber-500/5' 
+                      : 'bg-slate-950/30 border-slate-800/60 opacity-50'
+                  }`}
+                >
+                  <div className="text-2xl flex items-center justify-center bg-slate-900/90 w-11 h-11 rounded-xl shadow-inner shrink-0">
+                    {badge.icon}
+                  </div>
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1">
+                      <h4 className={`text-xs font-bold truncate ${isUnlocked ? 'text-amber-400' : 'text-slate-300'}`}>
+                        {lang === 'ar' ? badge.titleAr : badge.titleEn}
+                      </h4>
+                      {isUnlocked && <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />}
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-snug">
+                      {lang === 'ar' ? badge.descAr : badge.descEn}
+                    </p>
+                    <div className="text-[10px] font-mono font-bold text-slate-500">
+                      {isUnlocked ? (
+                        <span className="text-emerald-400">Unlocked ({maxScore}%)</span>
+                      ) : (
+                        <span>Best: {maxScore}% / {badge.threshold}%</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {ACHIEVEMENTS.map((ach) => {
-            const isUnlocked = progress.achievements.includes(ach.id);
-            return (
-              <div 
-                key={ach.id} 
-                className={`p-4 rounded-xl border flex space-x-3.5 rtl:space-x-reverse transition-all ${
-                  isUnlocked 
-                    ? 'bg-slate-950/80 border-amber-500/30' 
-                    : 'bg-slate-950/20 border-slate-900 opacity-40'
-                }`}
-              >
-                <div className="text-2xl flex items-center justify-center bg-slate-900 w-11 h-11 rounded-xl shadow-inner">
-                  {ach.icon}
+        {/* Global Platform Milestones */}
+        <div className="space-y-4 pt-4 border-t border-slate-800/60">
+          <div className="space-y-1">
+            <h3 className="font-extrabold text-white text-sm md:text-base">{t('achievements')}</h3>
+            <p className="text-xs text-slate-400">Unlock platform honors by scoring high grades, answering swiftly, and practicing daily.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {ACHIEVEMENTS.map((ach) => {
+              const isUnlocked = progress.achievements.includes(ach.id);
+              return (
+                <div 
+                  key={ach.id} 
+                  className={`p-4 rounded-xl border flex space-x-3.5 rtl:space-x-reverse transition-all ${
+                    isUnlocked 
+                      ? 'bg-slate-950/80 border-amber-500/30' 
+                      : 'bg-slate-950/20 border-slate-900 opacity-40'
+                  }`}
+                >
+                  <div className="text-2xl flex items-center justify-center bg-slate-900 w-11 h-11 rounded-xl shadow-inner shrink-0">
+                    {ach.icon}
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className={`text-xs font-bold ${isUnlocked ? 'text-amber-500' : 'text-slate-400'}`}>
+                      {isRtl ? ach.titleAr : ach.titleEn}
+                    </h4>
+                    <p className="text-[10px] text-slate-400 leading-snug">
+                      {isRtl ? ach.descAr : ach.descEn}
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <h4 className={`text-xs font-bold ${isUnlocked ? 'text-amber-500' : 'text-slate-400'}`}>
-                    {isRtl ? ach.titleAr : ach.titleEn}
-                  </h4>
-                  <p className="text-[10px] text-slate-400 leading-snug">
-                    {isRtl ? ach.descAr : ach.descEn}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </section>
 

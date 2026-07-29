@@ -4,15 +4,16 @@
  */
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { UserProgress, Achievement, MockInterviewResult } from '../types';
+import { UserProgress, Achievement, MockInterviewResult, AppLanguage, CareerTrack, Question, Difficulty } from '../types';
 import { BADGES } from '../data/badges';
+import { getQuestionsByTrack } from '../data/questions';
 
 // Localization Dictionary
 export const TRANSLATIONS = {
   en: {
-    title: 'Frontend Assessment Platform',
-    heroTitle: 'Evaluate & Certify Your Front-End Developer Skills',
-    heroSub: 'From beginner tags to expert hooks. Identify your strengths, address your weaknesses, and verify your job readiness with real, comprehensive testing.',
+    title: 'code-interview-Assessment',
+    heroTitle: 'Evaluate, Revise & Certify Developer Mastery',
+    heroSub: 'Multi-track assessments across Frontend, Backend, UI/UX, and Web3. Live coding sandboxes, interactive revision notes, interview preparation, and verifiable reports.',
     startBtn: 'Start Assessment',
     continueBtn: 'Continue assessment',
     dailyChallenge: 'Daily Challenge',
@@ -30,7 +31,15 @@ export const TRANSLATIONS = {
     catJs: 'JavaScript & Async ES6+',
     catReact: 'React, Hooks & Architecture',
     catBs: 'Bootstrap 5 & Layouts',
+    catPhp: 'PHP 8.x & OOP Security',
+    catLaravel: 'Laravel 11 & Eloquent ORM',
+    catMysql: 'MySQL, SQL JOINs & Indexes',
+    catBackend: 'Backend Architecture & APIs',
     catEng: 'Technical English for Devs',
+    catUiux: 'UI/UX Design Systems & Research',
+    catFigma: 'Figma Auto-Layout & Design Tokens',
+    catWeb3: 'Web3 & Blockchain Fundamentals',
+    catSolidity: 'Solidity & Smart Contract Security',
 
     // Category descriptions
     catHtmlDesc: 'Semantic structures, Forms, inputs, ARIA attributes, SEO and accessibility guidelines.',
@@ -38,7 +47,15 @@ export const TRANSLATIONS = {
     catJsDesc: 'Closures, scope, promises, async/await pipelines, DOM events, and prototypes.',
     catReactDesc: 'Hooks lifecycle, state closures, memoization, Context API, and React 19 concurrent features.',
     catBsDesc: 'Responsive grids, utility layout wrappers, form control systems, and modular structures.',
+    catPhpDesc: 'PHP 8.x types, OOP property promotion, PDO security, namespaces, and Composer autoloader.',
+    catLaravelDesc: 'Eloquent relationships, Artisan CLI, Middleware pipelines, Service Container, and Blade.',
+    catMysqlDesc: 'SQL queries, JOINs, B-Tree indexes, ACID transactions, normalization, and FOREIGN KEYs.',
+    catBackendDesc: 'RESTful API architecture, JWT authentication, Redis caching, CORS security, and status codes.',
     catEngDesc: 'Error logs reading, API documents parsing, Git vocabulary, and professional coding terms.',
+    catUiuxDesc: 'User personas, journey mapping, wireframing, color theory, typography scale, and WCAG accessibility.',
+    catFigmaDesc: 'Auto-Layout 5.0, component variants, interactive prototypes, design tokens, and dev handoff.',
+    catWeb3Desc: 'Ethereum EVM, decentralized ledger, gas optimization, wallet connections (Metamask), and dApp flows.',
+    catSolidityDesc: 'Smart contracts, reentrancy guards, ERC-20/ERC-721 standards, Hardhat deployment, and ABI interfaces.',
 
     // Modes & Stats
     overallScore: 'Overall Front-End Score',
@@ -118,9 +135,9 @@ export const TRANSLATIONS = {
     verifiedCert: 'VERIFIED DEVELOPER ASSESSMENT CERTIFICATE'
   },
   ar: {
-    title: 'منصة تقييم مطوري الواجهة الأمامية',
-    heroTitle: 'قيّم واعتمِد مهاراتك كمطور واجهة أمامية محترف',
-    heroSub: 'من وسوم المبتدئين إلى خطافات الخبراء. حدد نقاط قوتك، وعالج نقاط ضعفك، وتحقق من جاهزيتك للوظائف من خلال اختبارات حقيقية وشاملة.',
+    title: 'code-interview-Assessment',
+    heroTitle: 'قيّم واعتمِد ورراجع مهاراتك البرمجية الاحترافية',
+    heroSub: 'تقييمات متعددة المسارات في الواجهة الأمامية، الباك إند، UI/UX، والويب 3. مع بيئة بيئة برمجة حية، ملاحظات مراجعة شخصية، واستعداد للمقابلات.',
     startBtn: 'ابدأ التقييم',
     continueBtn: 'متابعة التقييم',
     dailyChallenge: 'التحدي اليومي',
@@ -138,7 +155,15 @@ export const TRANSLATIONS = {
     catJs: 'جافا سكريبت والمزامنة وES6+',
     catReact: 'ريأكت والخطافات والبنية البرمجية',
     catBs: 'بوتستراب 5 والتخطيطات',
+    catPhp: 'PHP 8.x والبرمجة الكائنية والأمان',
+    catLaravel: 'لارافيل 11 وعلاقات Eloquent',
+    catMysql: 'MySQL واستعلامات SQL والفهارس',
+    catBackend: 'هندسة الباك إند والـ APIs',
     catEng: 'اللغة الإنجليزية للمطورين',
+    catUiux: 'تصميم الواجهات وتجربة المستخدم UI/UX',
+    catFigma: 'أداة Figma والتخطيط التلقائي Auto-Layout',
+    catWeb3: 'أساسيات Web3 وتقنية البلوكشين',
+    catSolidity: 'لغة Solidity وأمان العقود الذكية',
 
     // Category descriptions
     catHtmlDesc: 'الهياكل الدلالية، النماذج، المدخلات، سمات ARIA، وإرشادات تحسين محركات البحث سيو وإمكانية الوصول.',
@@ -146,7 +171,15 @@ export const TRANSLATIONS = {
     catJsDesc: 'الclosures، النطاقات، الوعود وعمليات المزامنة، أحداث DOM، والبروتوتيب الموروث.',
     catReactDesc: 'دورة حياة الخطافات، والclosures في الحالة، والتخزين المؤقت، وسياق Context API، ومميزات React 19.',
     catBsDesc: 'الشبكات المتجاوبة، أدوات التخطيط السريعة، أنظمة التحكم في النماذج، والهياكل البرمجية الموحدة.',
+    catPhpDesc: 'أنواع PHP 8.x، ترقية خصائص البناء، أمان استعلامات PDO، مساحات الأسماء والتحميل التلقائي.',
+    catLaravelDesc: 'علاقات Eloquent ORM، أواامر Artisan، وسائط Middleware، حاوية الخدمات وقوالب Blade.',
+    catMysqlDesc: 'استعلامات SQL، عمليات الربط JOINs، فهارس B-Tree، معاملات ACID، التنسيق والمفاتيح الأجنبية.',
+    catBackendDesc: 'معمارية RESTful API، توكنات JWT، التخزين المؤقت بـ Redis، أمان CORS ورموز حالات HTTP.',
     catEngDesc: 'قراءة سجلات الأخطاء، تحليل مستندات واجهات البرمجيات، مصطلحات Git، والتعبيرات التقنية للمبرمجين.',
+    catUiuxDesc: 'شخصيات المستخدمين، خرائط رحلة العميل، التخطيط السلكي، نظرية الألوان، هرمية الخطوط، وسهولة الوصول WCAG.',
+    catFigmaDesc: 'تخطيط Auto-Layout 5.0، متغيرات المكونات، النماذج التفاعلية، متغيرات التصميم Tokens، وتسليم الأكواد للمطورين.',
+    catWeb3Desc: 'شبكة Ethereum EVM، السجل اللامركزي، تحسين رسوم Gas، ربط المحافظ (Metamask)، وتدفقات تطبيقات dApps.',
+    catSolidityDesc: 'العقود الذكية، حماية Reentrancy، معايير ERC-20/ERC-721، بيئة Hardhat، وواجهات ABI.',
 
     // Modes & Stats
     overallScore: 'مجموع نقاط الواجهة الأمامية',
@@ -225,113 +258,138 @@ export const TRANSLATIONS = {
     printCert: 'طباعة / تصدير PDF',
     verifiedCert: 'شهادة معتمدة لتقييم مطوري الواجهة الأمامية'
   },
-  es: {
-    title: 'Plataforma de Evaluación Frontend',
-    heroTitle: 'Evalúa y Certifica tus Habilidades de Desarrollador Front-End',
-    heroSub: 'Desde etiquetas para principiantes hasta hooks para expertos. Identifica tus fortalezas, aborda tus debilidades y verifica tu preparación laboral con pruebas reales y exhaustivas.',
-    startBtn: 'Iniciar Evaluación',
-    continueBtn: 'Continuar evaluación',
-    dailyChallenge: 'Desafío Diario',
-    dailyChallengeDesc: '¡Una mezcla rápida de 5 preguntas para mantener tu racha de aprendizaje!',
-    certificates: 'Certificados',
-    certSub: 'Supera cualquier examen con más del 70% para desbloquear tu certificado profesional y verificable.',
-    aboutTitle: 'Sobre la Plataforma',
-    aboutText: 'Este motor interactivo evalúa estructuras estándar de HTML5, especificidad avanzada de CSS, cuadrículas responsivas, pipelines de JS asíncronos, React 19 moderno y vocabulario técnico profesional para desarrolladores. Totalmente alineado con las expectativas de certificación comercial.',
-    faqTitle: 'Preguntas Frecuentes',
-    footerRights: 'Todos los derechos reservados. Creado como un punto de referencia premium para la evaluación de desarrolladores.',
+  it: {
+    title: 'code-interview-Assessment',
+    heroTitle: 'Valuta e Certifica le tue Competenze Front-End & Back-End',
+    heroSub: 'Da HTML/CSS e React a PHP 8, Laravel 11, MySQL e REST API. Identifica i punti di forza, migliora le debolezze e ottieni certificati verificabili.',
+    startBtn: 'Inizia Valutazione',
+    continueBtn: 'Continua valutazione',
+    dailyChallenge: 'Sfida Giornaliera',
+    dailyChallengeDesc: 'Un quiz rapido di 5 domande per mantenere la tua striscia di apprendimento!',
+    certificates: 'Certificati',
+    certSub: 'Supera qualsiasi esame oltre il 70% per sbloccare il tuo certificato professionale verificabile.',
+    aboutTitle: 'Sulla Piattaforma',
+    aboutText: 'Questo motore interattivo valuta strutture HTML5, CSS avanzato, JS asincrono, React 19, PHP 8 OOP, Laravel 11, MySQL e API REST secondo standard commerciali.',
+    faqTitle: 'Domande Frequenti',
+    footerRights: 'Tutti i diritti riservati. Sviluppato come benchmark di valutazione professionale.',
     
+    // Tracks
+    trackTitle: 'Seleziona il tuo Percorso',
+    trackFrontend: 'Percorso Front-End',
+    trackBackend: 'Percorso Back-End',
+    trackFullstack: 'Vista Full-Stack',
+    trackFrontendDesc: 'HTML5, CSS3, JS ES6+, React 19 & Bootstrap',
+    trackBackendDesc: 'PHP 8.x, Laravel 11, MySQL & REST API',
+    trackFullstackDesc: 'Ingegneria Web Completa',
+
     // Categories
-    catHtml: 'HTML5 y Semántica',
-    catCss: 'CSS3, Grid y Flexbox',
-    catJs: 'JavaScript y ES6+ Asíncrono',
-    catReact: 'React, Hooks y Arquitectura',
-    catBs: 'Bootstrap 5 y Diseños',
-    catEng: 'Inglés Técnico para Desarrolladores',
+    catHtml: 'HTML5 e Semantica',
+    catCss: 'CSS3, Grid & Flexbox',
+    catJs: 'JavaScript & Async ES6+',
+    catReact: 'React, Hooks & Architettura',
+    catBs: 'Bootstrap 5 e Layout',
+    catPhp: 'PHP 8.x e Sicurezza OOP',
+    catLaravel: 'Laravel 11 ed Eloquent ORM',
+    catMysql: 'MySQL, SQL JOIN e Indici',
+    catBackend: 'Architettura Backend e API',
+    catEng: 'Inglese Tecnico per Dev',
+    catUiux: 'UI/UX Design Systems & Research',
+    catFigma: 'Figma Auto-Layout & Design Tokens',
+    catWeb3: 'Fondamenti di Web3 & Blockchain',
+    catSolidity: 'Solidity & Sicurezza Smart Contract',
 
     // Category descriptions
-    catHtmlDesc: 'Estructuras semánticas, formularios, entradas, atributos ARIA, SEO y pautas de accesibilidad.',
-    catCssDesc: 'Modelo de caja, especificidad en cascada, Flexbox, diseños de Grid, transiciones y variables CSS.',
-    catJsDesc: 'Closures, alcance (scope), promesas, pipelines de async/await, eventos del DOM y prototipos.',
-    catReactDesc: 'Ciclo de vida de Hooks, closures de estado, memorización, Context API y características concurrentes de React 19.',
-    catBsDesc: 'Cuadrículas responsivas, wrappers de diseño de utilidad, sistemas de control de formularios y estructuras modulares.',
-    catEngDesc: 'Lectura de registros de errores, análisis de documentación de APIs, vocabulario de Git y términos de codificación profesionales.',
+    catHtmlDesc: 'Strutture semantiche, Form, input, attributi ARIA, SEO e accessibilità.',
+    catCssDesc: 'Box model, specificità CSS, Flexbox, Grid, transizioni e variabili CSS.',
+    catJsDesc: 'Closure, scope, promise, pipeline async/await, eventi DOM e prototipi.',
+    catReactDesc: 'Ciclo di vita degli Hook, stato, memoizzazione, Context API e React 19.',
+    catBsDesc: 'Griglie responsive, utility layout, moduli e strutture modulari.',
+    catPhpDesc: 'Tipi PHP 8.x, promozioni proprietà OOP, sicurezza PDO, namespace e Composer.',
+    catLaravelDesc: 'Relazioni Eloquent, Artisan CLI, Middleware, Service Container e Blade.',
+    catMysqlDesc: 'Query SQL, JOIN, indici B-Tree, transazioni ACID e chiavi esterne.',
+    catBackendDesc: 'Architettura REST API, autenticazione JWT, cache Redis, CORS e codici HTTP.',
+    catEngDesc: 'Lettura dei log di errore, analisi documenti API, vocabolario Git e termini tecnici.',
+    catUiuxDesc: 'User persona, journey map, wireframe, teoria dei colori, tipografia e accessibilità WCAG.',
+    catFigmaDesc: 'Auto-Layout 5.0, varianti di componenti, prototipi interattivi, design tokens e handoff.',
+    catWeb3Desc: 'Ethereum EVM, registro decentralizzato, ottimizzazione gas, connessione wallet e dApp.',
+    catSolidityDesc: 'Smart contract, protezione reentrancy, standard ERC-20/ERC-721, Hardhat e interfacce ABI.',
 
     // Modes & Stats
-    overallScore: 'Puntuación Front-End Global',
-    completedTests: 'Pruebas Completadas',
-    remainingTests: 'Pruebas Restantes',
-    learningStreak: 'Racha de Aprendizaje',
-    streakDays: '{{count}} Días',
-    avgAccuracy: 'Precisión Promedio',
-    timeSpent: 'Tiempo Total Dedicado',
-    sec: 'seg',
-    min: 'mins',
-    hr: 'horas',
-    strongestSkills: 'Habilidades Clave Fuertes',
-    weakestSkills: 'Habilidades que Requieren Práctica',
-    recommendations: 'Recomendaciones de Estudio de IA',
-    noAssessmentsYet: '¡Aún no se han completado evaluaciones. Realiza tu primera prueba para compilar tus estadísticas!',
+    overallScore: 'Punteggio Generale Ingegneria',
+    completedTests: 'Test Completati',
+    remainingTests: 'Test Rimanenti',
+    learningStreak: 'Striscia di Apprendimento',
+    streakDays: '{{count}} Giorni',
+    avgAccuracy: 'Accuratezza Media',
+    timeSpent: 'Tempo Totale Trascorso',
+    sec: 'sec',
+    min: 'min',
+    hr: 'ore',
+    strongestSkills: 'Punti di Forza',
+    weakestSkills: 'Competenze da Migliorare',
+    recommendations: 'Raccomandazioni di Studio AI',
+    noAssessmentsYet: 'Nessuna valutazione completata finora. Fai il tuo primo test!',
     
     // Assessment UI
-    question: 'Pregunta',
-    difficulty: 'Dificultad',
-    type: 'Tipo de Pregunta',
-    bookmark: 'Guardar',
-    bookmarked: 'Guardado',
-    next: 'Siguiente Pregunta',
-    prev: 'Pregunta Anterior',
-    submitExam: 'Enviar Evaluación',
-    confirmSubmit: '¿Estás seguro de que deseas enviar? Las preguntas omitidas se contarán como incorrectas.',
-    timer: 'Temporizador',
-    examMode: 'Modo Examen',
-    studyMode: 'Modo Estudio',
-    reviewAnswers: 'Revisar Respuestas',
-    correct: '¡Correcto!',
-    incorrect: 'Incorrecto',
-    explanation: 'Explicación',
-    retryIncorrect: 'Reintentar Preguntas Incorrectas',
-    practiceMode: 'Modo de Práctica',
+    question: 'Domanda',
+    difficulty: 'Difficoltà',
+    type: 'Tipo di Domanda',
+    bookmark: 'Salva',
+    bookmarked: 'Salvato',
+    next: 'Prossima Domanda',
+    prev: 'Domanda Precedente',
+    submitExam: 'Invia Valutazione',
+    confirmSubmit: 'Sei sicuro di voler inviare? Le domande saltate saranno conteggiate come errate.',
+    timer: 'Timer',
+    examMode: 'Modalità Esame',
+    studyMode: 'Modalità Studio',
+    reviewAnswers: 'Rivedi Risposte',
+    correct: 'Corretto!',
+    incorrect: 'Errato',
+    explanation: 'Spiegazione',
+    retryIncorrect: 'Riprova Domande Errate',
+    practiceMode: 'Modalità Esercitazione',
 
     // Difficulties
-    easy: 'Fácil',
+    easy: 'Facile',
     medium: 'Medio',
-    hard: 'Difícil',
-    expert: 'Experto',
+    hard: 'Difficile',
+    expert: 'Esperto',
 
     // Technical Job Readiness
-    readinessTitle: 'Veredicto de Preparación Laboral',
-    readyJunior: 'Listo para Puestos Front-End Junior',
-    readyMid: 'Listo para Puestos Front-End Semi-Senior (Mid-Level)',
-    notReadyYet: 'Se Requiere Desarrollo Continuo',
-    readinessDesc: 'Calculado utilizando pesos de precisión, puntuaciones de dificultad experta y cobertura total de categorías.',
+    readinessTitle: 'Verdetto di Idoneità Lavorativa',
+    readyJunior: 'Pronto per Posizioni Junior Developer',
+    readyMid: 'Pronto per Posizioni Mid-Level Developer',
+    notReadyYet: 'Sviluppo Continuo Richiesto',
+    readinessDesc: 'Calcolato utilizzando la precisione, i punteggi di difficoltà e la copertura dei temi.',
 
     // Settings & Actions
-    profileSettings: 'Configuración del Perfil',
-    developerName: 'Nombre del Desarrollador',
-    save: 'Guardar Cambios',
-    exportData: 'Exportar Progreso',
-    importData: 'Importar Progreso',
-    clearData: 'Restablecer Todo el Progreso',
-    dangerZone: 'Zona de Peligro',
-    achievements: 'Logros de la Plataforma',
-    signIn: 'Iniciar Sesión',
-    signOut: 'Cerrar Sesión',
-    loginDesc: 'Sincroniza tus logros, desafíos de codificación y puntuaciones de evaluación de forma segura en la nube.',
-    firebaseActive: 'Sincronización en la Nube Activa',
-    firebaseOffline: 'Sesión Local',
+    profileSettings: 'Impostazioni Profilo',
+    developerName: 'Nome Sviluppatore',
+    save: 'Salva Modifiche',
+    exportData: 'Esporta Progressi',
+    importData: 'Importa Progressi',
+    clearData: 'Ripristina Progressi',
+    dangerZone: 'Zona di Pericolo',
+    achievements: 'Obiettivi della Piattaforma',
+    signIn: 'Accedi',
+    signOut: 'Disconnetti',
+    loginDesc: 'Sincronizza i tuoi risultati e le tue valutazioni in modo sicuro nel cloud.',
+    firebaseActive: 'Sincronizzazione Cloud Attiva',
+    firebaseOffline: 'Sessione Locale Dev',
     
     // UI Theme & Lang
-    lightMode: 'Modo Claro',
-    darkMode: 'Modo Oscuro',
-    language: 'Idioma',
-    dashboard: 'Tablero',
-    home: 'Inicio',
-    sandbox: 'Arena de Código',
-    interviewPrep: 'Prep. de Entrevistas',
-    assessments: 'Evaluaciones',
-    viewCert: 'Ver Certificado',
-    printCert: 'Imprimir / Exportar',
-    verifiedCert: 'CERTIFICADO DE EVALUACIÓN DE DESARROLLADOR VERIFICADO'
+    lightMode: 'Modalità Chiara',
+    darkMode: 'Modalità Scura',
+    language: 'Lingua',
+    dashboard: 'Dashboard',
+    home: 'Home',
+    sandbox: 'Arena Codice',
+    interviewPrep: 'Colloquio AI',
+    assessments: 'Valutazioni',
+    viewCert: 'Visualizza Certificato',
+    printCert: 'Stampa / Esporta PDF',
+    verifiedCert: 'CERTIFICADO DI VALUTAZIONE SVILUPPATORE VERIFICATO'
   }
 };
 
@@ -340,90 +398,110 @@ export const ACHIEVEMENTS: Achievement[] = [
     id: 'ach-first-step',
     titleEn: 'First Steps Taken',
     titleAr: 'الخطوة الأولى',
-    titleEs: 'Primeros Pasos Dados',
+    titleIt: 'Primi Passi Fatti',
     descEn: 'Complete your first skill assessment on the platform.',
     descAr: 'أكمل أول تقييم مهارات لك على المنصة بنجاح.',
-    descEs: 'Completa tu primera evaluación de habilidades en la plataforma.',
+    descIt: 'Completa la tua prima valutazione sulla piattaforma.',
     icon: '🚀'
   },
   {
     id: 'ach-html-master',
     titleEn: 'HTML5 Architect',
     titleAr: 'مهندس هيكلة الويب',
-    titleEs: 'Arquitecto HTML5',
+    titleIt: 'Architetto HTML5',
     descEn: 'Score 90% or higher on the HTML assessment.',
     descAr: 'احصل على نتيجة 90% أو أعلى في تقييم HTML دلالي.',
-    descEs: 'Obtén un 90% o más en la evaluación de HTML.',
+    descIt: 'Ottieni un punteggio del 90% o superiore in HTML.',
     icon: '🧱'
   },
   {
     id: 'ach-css-wizard',
     titleEn: 'CSS Specificity Wizard',
     titleAr: 'ساحر تصاميم CSS',
-    titleEs: 'Mago de Especificidad CSS',
+    titleIt: 'Mago della Specificità CSS',
     descEn: 'Score 90% or higher on the CSS assessment.',
     descAr: 'احصل على نتيجة 90% أو أعلى في تقييم تخطيطات CSS.',
-    descEs: 'Obtén un 90% o más en la evaluación de CSS.',
+    descIt: 'Ottieni un punteggio del 90% o superiore in CSS.',
     icon: '🎨'
   },
   {
     id: 'ach-js-ninja',
     titleEn: 'JS Closure Ninja',
     titleAr: 'محارب جافا سكريبت',
-    titleEs: 'Ninja de Closures JS',
+    titleIt: 'Ninja delle Closure JS',
     descEn: 'Score 90% or higher on the JavaScript assessment.',
     descAr: 'احصل على نتيجة 90% أو أعلى في تقييم JavaScript.',
-    descEs: 'Obtén un 90% o más en la evaluación de JavaScript.',
+    descIt: 'Ottieni un punteggio del 90% o superiore in JavaScript.',
     icon: '⚡'
   },
   {
     id: 'ach-react-expert',
     titleEn: 'React Hook Wizard',
     titleAr: 'خبير مكونات ريأكت',
-    titleEs: 'Mago de Hooks de React',
+    titleIt: 'Mago degli Hook React',
     descEn: 'Score 90% or higher on the React assessment.',
     descAr: 'احصل على نتيجة 90% أو أعلى في تقييم React 19.',
-    descEs: 'Obtén un 90% o más en la evaluación de React.',
+    descIt: 'Ottieni un punteggio del 90% o superiore in React.',
     icon: '⚛️'
+  },
+  {
+    id: 'ach-php-master',
+    titleEn: 'PHP 8 Master',
+    titleAr: 'خبير برمجة PHP 8',
+    titleIt: 'Maestro PHP 8',
+    descEn: 'Score 90% or higher on the PHP assessment.',
+    descAr: 'احصل على نتيجة 90% أو أعلى في تقييم PHP 8.',
+    descIt: 'Ottieni un punteggio del 90% o superiore in PHP.',
+    icon: '🐘'
+  },
+  {
+    id: 'ach-laravel-ninja',
+    titleEn: 'Laravel Artisan Specialist',
+    titleAr: 'متخصص إطار لارفيل',
+    titleIt: 'Specialista Laravel',
+    descEn: 'Score 90% or higher on the Laravel assessment.',
+    descAr: 'احصل على نتيجة 90% أو أعلى في تقييم Laravel.',
+    descIt: 'Ottieni un punteggio del 90% o superiore in Laravel.',
+    icon: '🔴'
   },
   {
     id: 'ach-streak-3',
     titleEn: 'Dedicated Learner',
     titleAr: 'المبرمج الملتزم',
-    titleEs: 'Estudiante Dedicado',
+    titleIt: 'Studente Dedicato',
     descEn: 'Maintain a learning streak of 3 days or more.',
     descAr: 'حافظ على سلسلة تعلم نشطة لمدة 3 أيام متتالية أو أكثر.',
-    descEs: 'Mantén una racha de aprendizaje de 3 días o más.',
+    descIt: 'Mantiieni una striscia di apprendimento di 3 o più giorni.',
     icon: '🔥'
   },
   {
     id: 'ach-multilingual',
     titleEn: 'Polyglot Dev',
     titleAr: 'مطور متعدد اللغات',
-    titleEs: 'Desarrollador Políglota',
-    descEn: 'Toggle language options to assess in English and Arabic.',
-    descAr: 'قم بتبديل خيارات اللغة للتقييم باللغتين العربية والإنجليزية.',
-    descEs: 'Cambia las opciones de idioma para evaluar en inglés, español y árabe.',
+    titleIt: 'Sviluppatore Poliglotta',
+    descEn: 'Toggle language options to assess in English, Italian, and Arabic.',
+    descAr: 'قم بتبديل خيارات اللغة للتقييم باللغات المختلفة.',
+    descIt: 'Cambia le opzioni di lingua per valutare in inglese, italiano e arabo.',
     icon: '🌐'
   },
   {
     id: 'ach-speedster',
     titleEn: 'Light Speed Syntax',
     titleAr: 'سرعة البرق البرمجية',
-    titleEs: 'Sintaxis a la Velocidad de la Luz',
+    titleIt: 'Sintassi alla Velocità della Luce',
     descEn: 'Submit an assessment with average speed under 15s per item.',
     descAr: 'قم بتسليم أي تقييم بمتوسط وقت أقل من 15 ثانية لكل سؤال.',
-    descEs: 'Envía una evaluación con un tiempo promedio menor a 15 segundos por pregunta.',
+    descIt: 'Invia una valutazione con un tempo medio inferiore a 15s per domanda.',
     icon: '💨'
   },
   ...BADGES.map(b => ({
     id: b.id,
     titleEn: b.titleEn,
     titleAr: b.titleAr,
-    titleEs: b.titleEs,
+    titleIt: b.titleIt,
     descEn: b.descEn,
     descAr: b.descAr,
-    descEs: b.descEs,
+    descIt: b.descIt,
     icon: b.icon
   }))
 ];
@@ -450,8 +528,10 @@ export interface AppUser {
 interface AppContextType {
   theme: 'light' | 'dark';
   toggleTheme: () => void;
-  lang: 'en' | 'es' | 'ar';
-  setLang: (l: 'en' | 'es' | 'ar') => void;
+  lang: AppLanguage;
+  setLang: (l: AppLanguage) => void;
+  selectedTrack: CareerTrack;
+  setSelectedTrack: (t: CareerTrack) => void;
   t: (key: keyof typeof TRANSLATIONS['en']) => string;
   isRtl: boolean;
   progress: UserProgress;
@@ -470,6 +550,7 @@ interface AppContextType {
   registerWithEmail: (email: string, pass: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   saveMockInterview: (result: MockInterviewResult) => void;
+  getQuestionsForTrack: (overrideTrack?: CareerTrack, count?: number, searchQuery?: string, difficulty?: Difficulty) => Question[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -482,10 +563,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   // 2. Language state
-  const [lang, setLangState] = useState<'en' | 'es' | 'ar'>(() => {
+  const [lang, setLangState] = useState<AppLanguage>(() => {
     const saved = localStorage.getItem('assess-lang');
-    return (saved as 'en' | 'es' | 'ar') || 'en';
+    return (saved as AppLanguage) || 'ar';
   });
+
+  // 2b. Career Track state
+  const [selectedTrack, setSelectedTrackState] = useState<CareerTrack>(() => {
+    const saved = localStorage.getItem('assess-track');
+    return (saved as CareerTrack) || 'fullstack';
+  });
+
+  const setSelectedTrack = (track: CareerTrack) => {
+    setSelectedTrackState(track);
+    localStorage.setItem('assess-track', track);
+  };
 
   // 3. User progress state
   const [progress, setProgress] = useState<UserProgress>(() => {
@@ -942,6 +1034,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return false;
   };
 
+  const getQuestionsForTrack = (
+    overrideTrack?: CareerTrack,
+    count = 10,
+    searchQuery = '',
+    difficulty?: Difficulty
+  ): Question[] => {
+    const trackToUse = overrideTrack || selectedTrack;
+    return getQuestionsByTrack(trackToUse, count, searchQuery, difficulty);
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -949,6 +1051,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         toggleTheme,
         lang,
         setLang,
+        selectedTrack,
+        setSelectedTrack,
         t,
         isRtl,
         progress,
@@ -966,7 +1070,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loginWithEmail,
         registerWithEmail,
         logout,
-        saveMockInterview
+        saveMockInterview,
+        getQuestionsForTrack
       }}
     >
       {children}

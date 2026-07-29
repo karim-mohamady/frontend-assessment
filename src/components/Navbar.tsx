@@ -6,14 +6,71 @@
 import React, { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { Sun, Moon, Globe, Award, Zap, Code, User, LogOut, CheckCircle2, Shield, RefreshCw } from 'lucide-react';
+import { CareerTrack } from '../types';
+import { Sun, Moon, Globe, Award, Zap, Code, User, LogOut, CheckCircle2, Shield, RefreshCw, ChevronDown, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LoginModal } from './LoginModal';
 
+const TRACK_OPTIONS: { id: CareerTrack; icon: string; labelEn: string; labelAr: string; labelIt: string; descEn: string; descAr: string; descIt: string }[] = [
+  {
+    id: 'frontend',
+    icon: '💻',
+    labelEn: 'Frontend Web',
+    labelAr: 'واجهة أمامية',
+    labelIt: 'Frontend Web',
+    descEn: 'HTML, CSS, JS, React & Web Performance',
+    descAr: 'تطوير الواجهات بـ React و JavaScript و CSS',
+    descIt: 'HTML, CSS, JS, React e Prestazioni Web'
+  },
+  {
+    id: 'backend',
+    icon: '🖥️',
+    labelEn: 'Backend Engineering',
+    labelAr: 'هندسة الباك إند',
+    labelIt: 'Ingegneria Backend',
+    descEn: 'PHP 8, Laravel 11, MySQL & REST APIs',
+    descAr: 'تطوير الخوادم وقواعد البيانات والـ APIs',
+    descIt: 'PHP 8, Laravel 11, MySQL e REST API'
+  },
+  {
+    id: 'uiux',
+    icon: '🎨',
+    labelEn: 'UI/UX Design',
+    labelAr: 'تصميم UI/UX',
+    labelIt: 'UI/UX Design',
+    descEn: 'Figma Auto-Layout, Design Tokens & a11y',
+    descAr: 'أنظمة التصميم و Figma وأبحاث تجربة المستخدم',
+    descIt: 'Figma Auto-Layout, Design Token e Accessibilità'
+  },
+  {
+    id: 'web3',
+    icon: '🪙',
+    labelEn: 'Web3 Development',
+    labelAr: 'تطوير الويب 3',
+    labelIt: 'Sviluppo Web3',
+    descEn: 'Solidity, EVM, Smart Contracts & Ethereum',
+    descAr: 'العقود الذكية والبلوكشين ولغة Solidity',
+    descIt: 'Solidity, EVM, Smart Contract e Ethereum'
+  },
+  {
+    id: 'fullstack',
+    icon: '🌐',
+    labelEn: 'Fullstack Track',
+    labelAr: 'مسار شامل Fullstack',
+    labelIt: 'Percorso Fullstack',
+    descEn: 'Comprehensive assessment across all topics',
+    descAr: 'تقييم شامل لجميع التقنيات والتخصصات',
+    descIt: 'Valutazione completa di tutti gli argomenti'
+  }
+];
+
 export const Navbar: React.FC = () => {
-  const { theme, toggleTheme, lang, setLang, t, isRtl, progress, currentUser, logout } = useApp();
+  const { theme, toggleTheme, lang, setLang, selectedTrack, setSelectedTrack, t, isRtl, progress, currentUser, logout } = useApp();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isTrackMenuOpen, setIsTrackMenuOpen] = useState(false);
+
+  const activeTrackOption = TRACK_OPTIONS.find(t => t.id === selectedTrack) || TRACK_OPTIONS[0];
 
   const activeStyle = "text-amber-500 font-bold border-b-2 border-amber-500 pb-1";
   const inactiveStyle = "text-slate-300 hover:text-white transition-colors duration-200 pb-1";
@@ -44,14 +101,96 @@ export const Navbar: React.FC = () => {
             <NavLink to="/sandbox" className={({ isActive }) => isActive ? activeStyle : inactiveStyle}>
               {t('sandbox')}
             </NavLink>
+            <NavLink to="/revision" className={({ isActive }) => isActive ? activeStyle : inactiveStyle}>
+              {lang === 'ar' ? 'المراجعة والشرح' : lang === 'it' ? 'Revisione' : 'Revision'}
+            </NavLink>
             <NavLink to="/interview" className={({ isActive }) => isActive ? activeStyle : inactiveStyle}>
               {t('interviewPrep')}
             </NavLink>
+            <NavLink to="/system-design" className={({ isActive }) => isActive ? activeStyle : inactiveStyle}>
+              {lang === 'ar' ? 'معمل النظم' : lang === 'it' ? 'System Design' : 'System Design'}
+            </NavLink>
+            <NavLink to="/english-placement" className={({ isActive }) => isActive ? activeStyle : inactiveStyle}>
+              {lang === 'ar' ? 'تحديد مستوى إنجليزي' : lang === 'it' ? 'English Placement' : 'English Placement'}
+            </NavLink>
           </nav>
 
-          {/* Settings, Language, Streak & Theme controls */}
+          {/* Settings, Language, Track, Streak & Theme controls */}
           <div className="flex items-center space-x-3 rtl:space-x-reverse" id="navbar-controls">
             
+            {/* Career Track Dropdown Selector */}
+            <div className="relative" id="track-dropdown-container">
+              <button
+                onClick={() => setIsTrackMenuOpen(!isTrackMenuOpen)}
+                className="flex items-center space-x-2 rtl:space-x-reverse bg-slate-950/90 hover:bg-slate-800/90 px-3 py-1.5 rounded-xl border border-amber-500/30 hover:border-amber-500/60 text-xs font-bold transition-all text-slate-200 shadow-sm shadow-amber-500/5"
+                id="track-dropdown-trigger"
+                title="Select Career Track"
+              >
+                <span className="text-sm">{activeTrackOption.icon}</span>
+                <span className="font-black text-amber-400 truncate max-w-[100px] sm:max-w-none">
+                  {lang === 'ar' ? activeTrackOption.labelAr : lang === 'it' ? activeTrackOption.labelIt : activeTrackOption.labelEn}
+                </span>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isTrackMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {isTrackMenuOpen && (
+                  <>
+                    {/* Click backdrop */}
+                    <div className="fixed inset-0 z-10" onClick={() => setIsTrackMenuOpen(false)} />
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute left-0 rtl:right-0 rtl:left-auto top-11 w-72 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2 z-20 space-y-1"
+                      id="track-dropdown-menu"
+                    >
+                      <div className="px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-800/80 mb-1 flex items-center justify-between">
+                        <span>{lang === 'ar' ? 'اختر مسار التطوير' : lang === 'it' ? 'Seleziona Percorso' : 'Select Career Track'}</span>
+                        <span className="text-amber-500 text-[10px]">5 {lang === 'ar' ? 'مسارات' : 'Tracks'}</span>
+                      </div>
+
+                      {TRACK_OPTIONS.map((track) => {
+                        const isSelected = selectedTrack === track.id;
+                        return (
+                          <button
+                            key={track.id}
+                            onClick={() => {
+                              setSelectedTrack(track.id);
+                              setIsTrackMenuOpen(false);
+                            }}
+                            className={`w-full text-left rtl:text-right p-2.5 rounded-xl transition-all flex items-start space-x-3 rtl:space-x-reverse ${
+                              isSelected
+                                ? 'bg-amber-500/10 border border-amber-500/40 text-white shadow-sm'
+                                : 'hover:bg-slate-800/60 text-slate-300 border border-transparent'
+                            }`}
+                            id={`track-option-${track.id}`}
+                          >
+                            <div className="text-lg shrink-0 p-1.5 bg-slate-950/80 rounded-lg border border-slate-800">
+                              {track.icon}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <span className={`text-xs font-bold ${isSelected ? 'text-amber-400 font-extrabold' : 'text-slate-200'}`}>
+                                  {lang === 'ar' ? track.labelAr : lang === 'it' ? track.labelIt : track.labelEn}
+                                </span>
+                                {isSelected && <Check className="w-4 h-4 text-amber-400 shrink-0 ml-1 rtl:mr-1 rtl:ml-0" />}
+                              </div>
+                              <p className="text-[10px] text-slate-400 truncate mt-0.5">
+                                {lang === 'ar' ? track.descAr : lang === 'it' ? track.descIt : track.descEn}
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Streak Counter */}
             {progress.streak > 0 && (
               <motion.div 
@@ -83,8 +222,8 @@ export const Navbar: React.FC = () => {
             {/* Language Switcher */}
             <button
               onClick={() => {
-                if (lang === 'en') setLang('es');
-                else if (lang === 'es') setLang('ar');
+                if (lang === 'en') setLang('it');
+                else if (lang === 'it') setLang('ar');
                 else setLang('en');
               }}
               className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors flex items-center space-x-1 rtl:space-x-reverse"
@@ -93,7 +232,7 @@ export const Navbar: React.FC = () => {
             >
               <Globe className="w-5 h-5" />
               <span className="text-xs uppercase font-bold">
-                {lang === 'en' ? 'ES' : lang === 'es' ? 'AR' : 'EN'}
+                {lang === 'en' ? 'IT' : lang === 'it' ? 'AR' : 'EN'}
               </span>
             </button>
 
@@ -162,10 +301,10 @@ export const Navbar: React.FC = () => {
                             <Shield className={`w-4 h-4 ${currentUser.isMock ? 'text-slate-400' : 'text-emerald-400'}`} />
                             <div className="text-[11px] leading-tight text-right rtl:text-right ltr:text-left">
                               <p className="font-bold text-slate-200">
-                                {currentUser.isMock ? (lang === 'ar' ? 'جلسة مطور محلية' : (lang === 'es' ? 'Sesión de Desarrollo Local' : 'Local Dev Session')) : (lang === 'ar' ? 'جلسة فايربيز نشطة' : (lang === 'es' ? 'Sesión de Firebase Activa' : 'Firebase Session'))}
+                                {currentUser.isMock ? (lang === 'ar' ? 'جلسة مطور محلية' : (lang === 'it' ? 'Sessione Dev Locale' : 'Local Dev Session')) : (lang === 'ar' ? 'جلسة فايربيز نشطة' : (lang === 'it' ? 'Sessione Firebase Attiva' : 'Firebase Session'))}
                               </p>
                               <p className="text-[9px] text-slate-500">
-                                {currentUser.isMock ? (lang === 'ar' ? 'تخزين أوفلاين مؤمن' : (lang === 'es' ? 'Almacenamiento local offline' : 'Offline local storage')) : (lang === 'ar' ? 'مزامنة سحابية مستمرة' : (lang === 'es' ? 'Sincronización en la nube continua' : 'Continuous cloud sync'))}
+                                {currentUser.isMock ? (lang === 'ar' ? 'تخزين أوفلاين مؤمن' : (lang === 'it' ? 'Archiviazione locale offline' : 'Offline local storage')) : (lang === 'ar' ? 'مزامنة سحابية مستمرة' : (lang === 'it' ? 'Sincronizzazione cloud continua' : 'Continuous cloud sync'))}
                               </p>
                             </div>
                           </div>

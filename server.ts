@@ -39,15 +39,17 @@ async function startServer() {
         });
       }
 
-      const { category, difficulty, language, currentQuestion, userResponse, questionCount } = req.body;
+      const { category, difficulty, language, currentQuestion, userResponse, questionCount, track } = req.body;
 
+      const activeTrack = track || (['php', 'laravel', 'mysql', 'backend'].includes(category) ? 'backend' : 'frontend');
       const isStart = !userResponse || userResponse.trim() === '';
 
       let prompt = '';
       if (isStart) {
-        prompt = `This is the beginning of the interview. Generate the very first technical question for a candidate. Do not evaluate any response yet. Set score to -1 and feedback to empty.`;
+        prompt = `This is the beginning of the interview. Generate the very first technical question for a candidate in the category "${category}" targeting a ${difficulty} level for the ${activeTrack.toUpperCase()} development track. Do not evaluate any response yet. Set score to -1 and feedback to empty.`;
       } else {
         prompt = `Here is the current interview progress:
+Track: ${activeTrack.toUpperCase()} Engineering
 Topic Category: ${category}
 Seniority Level: ${difficulty}
 Language code: ${language}
@@ -56,20 +58,35 @@ Candidate Answer: "${userResponse}"
 This is question number ${questionCount} of 5.
 
 Please:
-1. Provide constructive feedback on the answer (identify if accurate, what is missing, how to improve).
+1. Provide constructive feedback on the answer (identify if accurate, what is missing, how to improve based on ${activeTrack === 'backend' ? 'PHP/Laravel/MySQL/REST standards' : 'React/JavaScript/Front-end standards'}).
 2. Rate the answer on a scale of 0 to 10 (as integer).
 3. If this is question ${questionCount} out of 5 (i.e. ${questionCount} >= 5), set isEnd to true, leave the next question empty, and construct a detailed overall summary and final percentage score (0-100).
-4. Otherwise (i.e. ${questionCount} < 5), set isEnd to false and generate the next highly relevant interview question.`;
+4. Otherwise (i.e. ${questionCount} < 5), set isEnd to false and generate the next highly relevant technical interview question for ${activeTrack === 'backend' ? 'backend/database engineering' : 'frontend/web engineering'}.`;
       }
 
-      const systemInstruction = `You are an expert front-end developer interviewer conducting a rigorous simulated tech interview.
+      let trackRoleContext = '';
+      if (activeTrack === 'backend') {
+        trackRoleContext = ` You are an expert Senior Backend & Database Software Engineering Interviewer conducting a rigorous simulated tech interview.
+Focus Area: Server-side architecture, PHP 8.x, Laravel 11, Eloquent ORM, MySQL 8 database schema & queries, REST API design, security (CSRF, SQLi prevention, JWT), and SOLID backend design patterns.
+Ensure all questions and evaluations strictly align with modern Backend Engineering & Database standards.`;
+      } else if (activeTrack === 'frontend') {
+        trackRoleContext = ` You are an expert Senior Front-End Software Engineering Interviewer conducting a rigorous simulated tech interview.
+Focus Area: Client-side web architecture, React 18+, modern ES6+ JavaScript, CSS3/responsive design, state management, Web Vitals, accessibility, and component design patterns.
+Ensure all questions and evaluations strictly align with modern Front-End Web Engineering standards.`;
+      } else {
+        trackRoleContext = ` You are an expert Principal Full-Stack Software Engineering Interviewer conducting a rigorous simulated tech interview.
+Focus Area: End-to-end fullstack architecture covering both Front-End (React, JavaScript, CSS) and Back-End (PHP 8, Laravel 11, MySQL, REST APIs) engineering standards.`;
+      }
+
+      const systemInstruction = `${trackRoleContext}
 Topic: ${category}
 Seniority: ${difficulty}
-Language: ${language === 'ar' ? 'Arabic (العربية) - Conduct the entire interaction in fluent professional technical Arabic' : 'English - Conduct the entire interaction in English'}
+Language: ${language === 'ar' ? 'Arabic (العربية) - Conduct the entire interaction in fluent professional technical Arabic with industry standard terminology' : language === 'it' ? 'Italian (Italiano) - Conduct the entire interaction in fluent professional technical Italian' : 'English - Conduct the entire interaction in English'}
 
 Rules:
-- Give professional, constructive, and accurate feedback.
-- For Arabic language, use modern software development terminology used in the Arab tech industry.
+- Give professional, constructive, and accurate technical feedback.
+- Tailor technical terminology strictly to the ${activeTrack.toUpperCase()} track specifications.
+- Evaluate live code snippets, design patterns, security implications, and query optimization where applicable.
 - Always output a valid JSON matching the schema. No backticks or wrap-around string comments.`;
 
       const response = await ai.models.generateContent({

@@ -14,40 +14,52 @@ export type QuestionType =
   | 'code-output'
   | 'bug-fixing';
 
+export type QuestionCategory = 'html' | 'css' | 'javascript' | 'react' | 'bootstrap' | 'php' | 'laravel' | 'mysql' | 'backend' | 'english' | 'uiux' | 'web3' | 'figma' | 'solidity';
+
+export type CareerTrack = 'frontend' | 'backend' | 'fullstack' | 'uiux' | 'web3';
+
+export type AppLanguage = 'ar' | 'en' | 'it';
+
 export interface Question {
   id: string;
-  category: 'html' | 'css' | 'javascript' | 'react' | 'bootstrap' | 'english';
+  category: QuestionCategory;
   topic: string;
   difficulty: Difficulty;
   type: QuestionType;
   questionText: string;
   questionTextAr: string;
+  questionTextIt?: string;
   questionTextEs?: string;
   codeSnippet?: string;
   // For multiple-choice, multiple-answer, true-false
   options?: string[];
   optionsAr?: string[];
+  optionsIt?: string[];
   optionsEs?: string[];
   // Correct answers: indices or strings
   correctAnswer: number[] | string | string[]; // numbers for indices, or strings/objects
   // For match columns format
   matchLeft?: string[];
   matchLeftAr?: string[];
+  matchLeftIt?: string[];
   matchLeftEs?: string[];
   matchRight?: string[]; // correct matches correspond to indices in matchLeft
   matchRightAr?: string[];
+  matchRightIt?: string[];
   matchRightEs?: string[];
   explanation: string;
   explanationAr: string;
+  explanationIt?: string;
   explanationEs?: string;
   hint?: string;
   hintAr?: string;
+  hintIt?: string;
   hintEs?: string;
 }
 
 export interface AssessmentResult {
   id: string;
-  category: 'html' | 'css' | 'javascript' | 'react' | 'bootstrap' | 'english';
+  category: QuestionCategory;
   date: string;
   score: number; // Final weighted score
   maxScore: number;
@@ -96,15 +108,18 @@ export interface UserProgress {
   userName: string;
   mockInterviews?: MockInterviewResult[];
   customAvatar?: string;
+  selectedTrack?: CareerTrack;
 }
 
 export interface Achievement {
   id: string;
   titleEn: string;
   titleAr: string;
+  titleIt?: string;
   titleEs?: string;
   descEn: string;
   descAr: string;
+  descIt?: string;
   descEs?: string;
   icon: string;
   unlockedAt?: string;
@@ -113,8 +128,9 @@ export interface Achievement {
 export interface FAQItem {
   qEn: string;
   qAr: string;
-  qEs?: string;
+  qIt?: string;
   aEn: string;
   aAr: string;
-  aEs?: string;
+  aIt?: string;
 }
+

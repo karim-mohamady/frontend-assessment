@@ -1,6 +1,6 @@
 {
-  "name": "Frontend Assessment Platform",
-  "description": "A comprehensive assessment platform evaluating front-end development skills across HTML, CSS, JavaScript, React, Bootstrap, and Technical English.",
-  "requestFramePermissions": ["camera"],
+  "name": "code-interview-Assessment",
+  "description": "Global developer evaluation and interview prep platform with technical assessments, CEFR English placement test, system design studio, and interactive coding sandbox.",
+  "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

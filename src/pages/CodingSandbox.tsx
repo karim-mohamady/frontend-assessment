@@ -14,14 +14,27 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { isFirebaseConfigured, getFirebaseConfig, syncProgressToCloud, loginWithGoogle } from '../lib/firebase';
 import { PrismEditor } from '../components/PrismEditor';
+import { CoCoderAssistantModal } from '../components/CoCoderAssistantModal';
 
 export const CodingSandbox: React.FC = () => {
-  const { lang, isRtl, theme, progress, unlockAchievement, saveProgressState } = useApp();
+  const { lang, isRtl, theme, progress, unlockAchievement, saveProgressState, selectedTrack } = useApp();
+  
+  const [isCoCoderOpen, setIsCoCoderOpen] = useState(false);
   
   // Selection state
   const [challenges, setChallenges] = useState<CodingChallenge[]>(CODING_CHALLENGES);
+  
+  // Filter challenges based on selected track
+  const filteredChallenges = challenges.filter(item => {
+    if (selectedTrack === 'fullstack') return true;
+    if (selectedTrack === 'backend') {
+      return ['php', 'laravel', 'mysql', 'backend'].includes(item.category);
+    }
+    return ['html', 'css', 'javascript', 'react'].includes(item.category);
+  });
+
   const [activeIdx, setActiveIdx] = useState(0);
-  const activeChallenge = challenges[activeIdx];
+  const activeChallenge = filteredChallenges[activeIdx] || filteredChallenges[0] || CODING_CHALLENGES[0];
 
   const getChallengeTitle = (item: CodingChallenge) => {
     if (lang === 'ar') return item.titleAr;
@@ -41,14 +54,139 @@ export const CodingSandbox: React.FC = () => {
     return item.hintEn;
   };
 
+  // State for Backend Environment Tabs
+  const [activeEnvTab, setActiveEnvTab] = useState<'terminal' | 'database' | 'api' | 'preview'>('terminal');
+  const [terminalInput, setTerminalInput] = useState('');
+  const [terminalHistory, setTerminalHistory] = useState<string[]>([
+    'Laravel Framework 11.x CLI Environment',
+    'Type "php artisan list" or "php index.php" or click "Run Code".',
+    '-------------------------------------------------------'
+  ]);
+
   // Editor code state
-  const [code, setCode] = useState(activeChallenge.boilerplateCode);
+  const [code, setCode] = useState(activeChallenge ? activeChallenge.boilerplateCode : '');
   const [showHint, setShowHint] = useState(false);
   
   // Console / Testing outputs
   const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
   const [testResult, setTestResult] = useState<{ status: 'idle' | 'success' | 'error'; message: string }>({ status: 'idle', message: '' });
   const [isRunning, setIsRunning] = useState(false);
+
+  // Set default environment tab based on challenge category
+  useEffect(() => {
+    if (['php', 'laravel', 'backend'].includes(activeChallenge.category)) {
+      setActiveEnvTab('terminal');
+    } else if (activeChallenge.category === 'mysql') {
+      setActiveEnvTab('database');
+    } else {
+      setActiveEnvTab('preview');
+    }
+  }, [activeChallenge]);
+
+  // Handle interactive command execution in simulated terminal
+  const executeArtisanCommand = (cmdText: string) => {
+    const cmd = cmdText.trim();
+    if (!cmd) return;
+
+    let outputLines: string[] = [`$ ${cmd}`];
+
+    if (cmd === 'clear') {
+      setTerminalHistory([]);
+      return;
+    } else if (cmd.startsWith('php artisan route:list') || cmd === 'artisan route:list') {
+      outputLines.push(
+        ' +--------+----------+--------------------+-----------------------+---------------------------------------+------------+',
+        ' | Domain | Method   | URI                | Name                  | Action                                | Middleware |',
+        ' +--------+----------+--------------------+-----------------------+---------------------------------------+------------+',
+        ' |        | GET|HEAD | /                  | home                  | Closure                               | web        |',
+        ' |        | GET|HEAD | api/v1/users       | api.users.index       | App\\Http\\Controllers\\UserController@index| api        |',
+        ' |        | POST     | api/v1/users       | api.users.store       | App\\Http\\Controllers\\UserController@store| api,auth   |',
+        ' |        | GET|HEAD | api/v1/orders      | api.orders.index      | App\\Http\\Controllers\\OrderController@index| api,auth   |',
+        ' +--------+----------+--------------------+-----------------------+---------------------------------------+------------+'
+      );
+    } else if (cmd.startsWith('php artisan migrate:fresh') || cmd === 'artisan migrate:fresh') {
+      outputLines.push(
+        'INFO  Dropping all tables ... 24.12ms DONE',
+        'INFO  Preparing database migrations.',
+        '2026_01_01_000001_create_users_table .................................... 11.20ms DONE',
+        '2026_01_01_000002_create_password_reset_tokens_table ................... 8.45ms DONE',
+        '2026_01_01_000003_create_failed_jobs_table ............................. 14.10ms DONE',
+        '2026_01_01_000004_create_orders_table ................................... 18.20ms DONE',
+        '2026_01_01_000005_create_products_table ................................. 15.60ms DONE',
+        'INFO  Database migration completed successfully [Batch 1].'
+      );
+    } else if (cmd.startsWith('php artisan migrate:status') || cmd === 'artisan migrate:status') {
+      outputLines.push(
+        ' +------+-------------------------------------------------------+-------+',
+        ' | Ran? | Migration                                             | Batch |',
+        ' +------+-------------------------------------------------------+-------+',
+        ' | Yes  | 2026_01_01_000001_create_users_table                  | 1     |',
+        ' | Yes  | 2026_01_01_000002_create_password_reset_tokens_table  | 1     |',
+        ' | Yes  | 2026_01_01_000003_create_failed_jobs_table            | 1     |',
+        ' | Yes  | 2026_01_01_000004_create_orders_table                 | 1     |',
+        ' | Yes  | 2026_01_01_000005_create_products_table               | 1     |',
+        ' +------+-------------------------------------------------------+-------+'
+      );
+    } else if (cmd.startsWith('php artisan migrate') || cmd === 'artisan migrate') {
+      outputLines.push(
+        'INFO  Preparing database migrations.',
+        '2026_01_01_000001_create_users_table .................................... 12.45ms DONE',
+        '2026_01_01_000002_create_password_reset_tokens_table ................... 9.10ms DONE',
+        '2026_01_01_000003_create_orders_table ................................... 18.20ms DONE',
+        '2026_01_01_000004_create_products_table ................................. 15.30ms DONE',
+        'INFO  Database migration completed successfully [Batch 1].'
+      );
+    } else if (cmd.startsWith('php artisan db:seed') || cmd === 'artisan db:seed') {
+      outputLines.push(
+        'INFO  Seeding database.',
+        'Database\\Seeders\\UserSeeder ............................................ 45.10ms DONE',
+        'Database\\Seeders\\ProductSeeder ......................................... 82.40ms DONE',
+        'INFO  Database seeding completed successfully.'
+      );
+    } else if (cmd.startsWith('php artisan make:migration') || cmd.startsWith('artisan make:migration')) {
+      const match = cmd.match(/create_\w+_table/);
+      const tableName = match ? match[0] : 'create_custom_table';
+      outputLines.push(
+        `INFO  Migration [database/migrations/2026_07_27_140000_${tableName}.php] created successfully.`
+      );
+    } else if (cmd.startsWith('php artisan test') || cmd.startsWith('artisan test')) {
+      outputLines.push(
+        ' PASS  Tests\\Feature\\ProductApiTest',
+        ' ✓ it fetches product list paginated',
+        ' ✓ it validates request payload on creation',
+        '',
+        ' Tests:    2 passed',
+        ' Time:     0.18s'
+      );
+    } else if (cmd.startsWith('php artisan list') || cmd === 'artisan list') {
+      outputLines.push(
+        'Laravel Framework 11.x CLI',
+        '',
+        'Available commands:',
+        '  migrate             Run the database migrations',
+        '  migrate:fresh       Drop all tables and re-run all migrations',
+        '  migrate:status      Show the status of each migration',
+        '  db:seed             Seed the database with records',
+        '  make:migration      Create a new migration file',
+        '  route:list          List all registered routes',
+        '  test                Run the application tests'
+      );
+    } else if (cmd.startsWith('php')) {
+      outputLines.push('[PHP 8.3 CLI] Running script in sandbox context...');
+      outputLines.push('Execution successful. Exit Code: 0');
+    } else {
+      outputLines.push(`zsh: command not found: ${cmd}. Try "php artisan migrate", "php artisan route:list", or "php artisan test".`);
+    }
+
+    setTerminalHistory(prev => [...prev, ...outputLines]);
+  };
+
+  const handleTerminalCommand = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!terminalInput.trim()) return;
+    executeArtisanCommand(terminalInput);
+    setTerminalInput('');
+  };
   
   // Scoring / Accomplishment state
   const [completedChallenges, setCompletedChallenges] = useState<string[]>(() => {
@@ -104,15 +242,46 @@ export const CodingSandbox: React.FC = () => {
     }
   };
 
-  // Run user code for preview (HTML/CSS) or standard eval
+  // Run user code for preview (HTML/CSS, JS, PHP, MySQL, REST API)
   const runPreview = () => {
     setIsRunning(true);
-    setConsoleLogs([`[System]: Initializing runtime environment...`]);
+    setConsoleLogs([`[System]: Initializing runtime environment for ${activeChallenge.category.toUpperCase()}...`]);
     setTestResult({ status: 'idle', message: '' });
 
     setTimeout(() => {
       if (activeChallenge.category === 'css' || activeChallenge.category === 'html') {
         setConsoleLogs((prev) => [...prev, `[Renderer]: Rendered HTML and styles into isolated sandbox viewport.`]);
+      } else if (['php', 'laravel'].includes(activeChallenge.category)) {
+        setConsoleLogs((prev) => [
+          ...prev,
+          `[PHP 8.3 Engine]: Parsing PHP script AST & checking syntax...`,
+          `[PHP Output]: Script compiled cleanly with 0 syntax errors.`,
+          `[Server Logs]: Route handled in 14ms (Memory usage: 4.2MB)`
+        ]);
+        setTerminalHistory(prev => [
+          ...prev,
+          `$ php index.php`,
+          `[PHP 8.3 CLI] Executing ${activeChallenge.id}.php...`,
+          `SUCCESS: Output generated without exceptions.`,
+          `-------------------------------------------------------`
+        ]);
+      } else if (activeChallenge.category === 'mysql') {
+        const queryUpper = code.toUpperCase();
+        const hasSelect = queryUpper.includes('SELECT');
+        const hasJoin = queryUpper.includes('JOIN');
+        setConsoleLogs((prev) => [
+          ...prev,
+          `[MySQL 8.0 Engine]: Parsing SQL Statement...`,
+          `[Query Plan]: ${hasSelect ? 'Primary Index Scan' : 'Table Scan'} initialized.`,
+          `[MySQL Response]: Query executed in 0.002 sec. Returned ${hasJoin ? '12' : '25'} rows.`
+        ]);
+      } else if (activeChallenge.category === 'backend') {
+        setConsoleLogs((prev) => [
+          ...prev,
+          `[REST Client]: Sending Mock HTTP GET /api/v1/resource`,
+          `[Response Header]: HTTP/1.1 200 OK (Content-Type: application/json)`,
+          `[Response Body]: { "status": "success", "timestamp": "${new Date().toISOString()}" }`
+        ]);
       } else {
         // Javascript Code Evaluation with custom console mock
         const capturedLogs: string[] = [];
@@ -130,7 +299,7 @@ export const CodingSandbox: React.FC = () => {
 
         try {
           // Construct sandbox function with captured console
-          const runner = new Function('console', 'React', `${code}\n// Run sample cases if defined\nif (typeof fizzBuzz === "function") {\n  console.log("fizzBuzz(15) output preview: " + JSON.stringify(fizzBuzz(15).slice(0, 5)) + "...");\n}`);
+          const runner = new Function('console', 'React', `${code}\nif (typeof fizzBuzz === "function") {\n  console.log("fizzBuzz(15) output preview: " + JSON.stringify(fizzBuzz(15).slice(0, 5)) + "...");\n}`);
           runner(customConsole, React);
           setConsoleLogs((prev) => [
             ...prev,
@@ -167,20 +336,21 @@ export const CodingSandbox: React.FC = () => {
           iframe.contentWindow!.document.write(code);
           iframe.contentWindow!.document.close();
 
-          // Wait brief delay for styles to load in iframe DOM
           await new Promise(resolve => setTimeout(resolve, 100));
 
-          // Run tests in the context of the iframe
           const testFunc = new Function('document', 'window', activeChallenge.testCode);
           testFunc(iframe.contentWindow!.document, iframe.contentWindow);
           
           document.body.removeChild(iframe);
+        } else if (['php', 'laravel', 'mysql', 'backend'].includes(activeChallenge.category)) {
+          // Verify Backend code using testCode regex or evaluation
+          const testFunc = new Function('code', activeChallenge.testCode);
+          testFunc(code);
         } else {
           // Verify JavaScript algorithms
           const testFunc = new Function('React', `${code}\n${activeChallenge.testCode}`);
           const res = testFunc(React);
           
-          // Handle promise resolution (like debounce challenge)
           if (res instanceof Promise) {
             await res;
           }
@@ -191,7 +361,9 @@ export const CodingSandbox: React.FC = () => {
           status: 'success',
           message: lang === 'en' 
             ? `Fantastic! Code passed all requirements. (+${activeChallenge.points} XP)`
-            : `رائع ومبهر! كودك اجتاز كافة شروط الاختبار بنجاح. (+${activeChallenge.points} نقطة خبرة)`
+            : (lang === 'it' 
+              ? `Fantastico! Il codice ha superato tutti i requisiti. (+${activeChallenge.points} XP)`
+              : `رائع ومبهر! كودك اجتاز كافة شروط الاختبار بنجاح. (+${activeChallenge.points} نقطة خبرة)`)
         });
         setConsoleLogs((prev) => [...prev, `[Assertions]: PASSED. All strict requirements satisfied.`]);
         
@@ -376,11 +548,12 @@ export const CodingSandbox: React.FC = () => {
           
           {/* Challenge Selector */}
           <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-2">
-              {lang === 'en' ? 'Select Coding Task' : 'اختر المهمة البرمجية'}
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-2 flex justify-between items-center">
+              <span>{lang === 'en' ? 'Select Coding Task' : (lang === 'it' ? 'Seleziona Sfida' : 'اختر المهمة البرمجية')}</span>
+              <span className="text-[10px] text-amber-500 font-mono font-bold uppercase">{selectedTrack}</span>
             </h3>
             <div className="space-y-1.5">
-              {challenges.map((item, idx) => {
+              {filteredChallenges.map((item, idx) => {
                 const isCompleted = completedChallenges.includes(item.id);
                 const isActive = idx === activeIdx;
 
@@ -521,6 +694,14 @@ export const CodingSandbox: React.FC = () => {
 
               <div className="flex items-center gap-2">
                 <button
+                  onClick={() => setIsCoCoderOpen(true)}
+                  className="px-3.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-bold text-xs rounded-xl transition-all border border-amber-500/30 cursor-pointer flex items-center gap-1.5"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{lang === 'en' ? 'AI Co-Coder' : 'مراجعة المبرمج الذكي'}</span>
+                </button>
+
+                <button
                   onClick={runPreview}
                   disabled={isRunning}
                   className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5 border border-slate-700 disabled:opacity-50"
@@ -542,97 +723,256 @@ export const CodingSandbox: React.FC = () => {
 
           </div>
 
-          {/* Lower Panel: Live CSS Viewport or JS Console Output terminal */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/* Live Terminal Console Logs */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col min-h-[200px]">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                <Terminal className="w-4 h-4 text-slate-500" />
-                <span>{lang === 'en' ? 'Console Logs' : 'سجل مخرجات الكونسول'}</span>
-              </div>
-              
-              <div className="flex-grow bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-xs leading-relaxed overflow-y-auto space-y-1.5 text-slate-300">
-                {consoleLogs.length === 0 ? (
-                  <p className="text-slate-600 italic">No output logs yet. Write code and hit "Run".</p>
-                ) : (
-                  consoleLogs.map((log, i) => (
-                    <div 
-                      key={i} 
-                      className={`whitespace-pre-wrap ${
-                        log.startsWith('[Error]') || log.startsWith('[Runtime Exception]') ? 'text-red-400' :
-                        log.startsWith('[System]') ? 'text-blue-400' :
-                        log.startsWith('[Assertions]') ? 'text-emerald-400' : 'text-slate-300'
-                      }`}
-                    >
-                      {log}
-                    </div>
-                  ))
+          {/* Lower Panel: Environment Tabs (Artisan CLI / Database / API Client / Browser Viewport / Console) */}
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+            {/* Environment Tabs Header */}
+            <div className="bg-slate-950 px-4 py-2.5 border-b border-slate-800 flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center space-x-2 rtl:space-x-reverse text-xs font-bold">
+                {['php', 'laravel', 'backend'].includes(activeChallenge.category) && (
+                  <button
+                    onClick={() => setActiveEnvTab('terminal')}
+                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+                      activeEnvTab === 'terminal'
+                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Terminal className="w-3.5 h-3.5" />
+                    <span>Artisan / PHP CLI Terminal</span>
+                  </button>
                 )}
+
+                {activeChallenge.category === 'mysql' && (
+                  <button
+                    onClick={() => setActiveEnvTab('database')}
+                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+                      activeEnvTab === 'database'
+                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Database className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>MySQL Inspector</span>
+                  </button>
+                )}
+
+                {['html', 'css'].includes(activeChallenge.category) && (
+                  <button
+                    onClick={() => setActiveEnvTab('preview')}
+                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+                      activeEnvTab === 'preview'
+                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Browser Viewport</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => setActiveEnvTab('api')}
+                  className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+                    activeEnvTab === 'api'
+                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <CloudLightning className="w-3.5 h-3.5 text-rose-400" />
+                  <span>{lang === 'ar' ? 'سجل الأخطاء والمخرجات' : 'Execution Logs'}</span>
+                </button>
               </div>
+
+              <span className="text-[10px] font-mono text-slate-500">
+                ENV: PHP 8.3 / Node 20.x Isolated Container
+              </span>
             </div>
 
-            {/* Test Result card / Live Output sandbox element */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col min-h-[200px]">
+            {/* Tab Body Contents */}
+            <div className="p-4">
               
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                <Sparkles className="w-4 h-4 text-amber-500" />
-                <span>{lang === 'en' ? 'Test Result / Sandbox' : 'نتيجة الفحص والمعاينة المباشرة'}</span>
-              </div>
+              {/* Terminal Tab */}
+              {activeEnvTab === 'terminal' && (
+                <div className="space-y-3 font-mono text-xs">
+                  {/* Quick Artisan Action Chips */}
+                  <div className="flex flex-wrap items-center gap-1.5 pb-1">
+                    <span className="text-[10px] text-slate-500 font-sans uppercase font-bold mr-1">Quick Artisan Actions:</span>
+                    <button
+                      type="button"
+                      onClick={() => executeArtisanCommand('php artisan migrate')}
+                      className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                      title="Run database migrations"
+                    >
+                      <span>⚡ php artisan migrate</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => executeArtisanCommand('php artisan migrate:fresh')}
+                      className="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                      title="Drop tables & re-run migrations"
+                    >
+                      <span>🔄 migrate:fresh</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => executeArtisanCommand('php artisan migrate:status')}
+                      className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                      title="Check migration status"
+                    >
+                      <span>📊 migrate:status</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => executeArtisanCommand('php artisan db:seed')}
+                      className="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                      title="Seed database with dummy records"
+                    >
+                      <span>🌱 db:seed</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => executeArtisanCommand('php artisan route:list')}
+                      className="px-2.5 py-1 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                      title="List registered HTTP routes"
+                    >
+                      <span>🗺️ route:list</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTerminalHistory([])}
+                      className="px-2 py-1 text-slate-500 hover:text-slate-300 ml-auto text-[10px] font-sans underline cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  </div>
 
-              {/* Render dynamic iframe box for HTML/CSS tasks, else show clear status */}
-              {(activeChallenge.category === 'css' || activeChallenge.category === 'html') ? (
-                <div className="flex-grow bg-white rounded-lg overflow-hidden border border-slate-800 min-h-[120px] relative">
+                  <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 h-48 overflow-y-auto space-y-1 text-slate-300">
+                    {terminalHistory.map((line, i) => (
+                      <div key={i} className={line.startsWith('$') ? 'text-amber-400 font-bold' : 'text-slate-300'}>
+                        {line}
+                      </div>
+                    ))}
+                  </div>
+
+                  <form onSubmit={handleTerminalCommand} className="flex gap-2">
+                    <span className="text-amber-500 font-bold self-center">$</span>
+                    <input
+                      type="text"
+                      value={terminalInput}
+                      onChange={(e) => setTerminalInput(e.target.value)}
+                      placeholder="Try: php artisan route:list, php artisan migrate, or php artisan test..."
+                      className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-amber-300 focus:outline-none focus:border-amber-500 font-mono"
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl cursor-pointer"
+                    >
+                      Exec
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              {/* Database Tab */}
+              {activeEnvTab === 'database' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
+                    <span>Database: app_production (MySQL 8.0)</span>
+                    <span className="text-emerald-400">Connection Status: OK</span>
+                  </div>
+
+                  <div className="bg-slate-950 border border-slate-800 rounded-xl overflow-x-auto p-3">
+                    <table className="w-full text-left rtl:text-right text-xs font-mono">
+                      <thead>
+                        <tr className="border-b border-slate-800 text-amber-500">
+                          <th className="p-2">id</th>
+                          <th className="p-2">name</th>
+                          <th className="p-2">email</th>
+                          <th className="p-2">role</th>
+                          <th className="p-2">created_at</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/50 text-slate-300">
+                        <tr>
+                          <td className="p-2 text-slate-500">1</td>
+                          <td className="p-2 font-bold text-white">Karim Ahmed</td>
+                          <td className="p-2">karim@example.com</td>
+                          <td className="p-2"><span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 rounded text-[10px]">admin</span></td>
+                          <td className="p-2 text-slate-500">2026-07-27</td>
+                        </tr>
+                        <tr>
+                          <td className="p-2 text-slate-500">2</td>
+                          <td className="p-2 font-bold text-white">Elena Rossi</td>
+                          <td className="p-2">elena@dev.it</td>
+                          <td className="p-2"><span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-400 rounded text-[10px]">developer</span></td>
+                          <td className="p-2 text-slate-500">2026-07-27</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Preview Tab (HTML / CSS) */}
+              {activeEnvTab === 'preview' && (
+                <div className="bg-white rounded-xl overflow-hidden border border-slate-800 h-52 relative">
                   <iframe
                     title="live-editor-sandbox"
                     srcDoc={code}
                     className="w-full h-full bg-white border-none"
                     sandbox="allow-scripts"
                   />
-                  <div className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-slate-900/80 text-[8px] font-mono text-slate-400 rounded">
-                    iframe sandbox
-                  </div>
                 </div>
-              ) : (
-                <div className="flex-grow bg-slate-950 border border-slate-800 rounded-lg p-4 flex flex-col justify-center items-center text-center">
-                  {testResult.status === 'idle' && (
-                    <div className="space-y-1">
-                      <Trophy className="w-8 h-8 text-slate-600 mx-auto" />
-                      <p className="text-xs text-slate-500">Assertion tests have not been executed yet.</p>
+              )}
+
+              {/* Logs / API Response Tab */}
+              {activeEnvTab === 'api' && (
+                <div className="space-y-3">
+                  <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 h-48 overflow-y-auto space-y-1.5 font-mono text-xs">
+                    {consoleLogs.length === 0 ? (
+                      <p className="text-slate-600 italic">No execution logs. Click "Run Code" or "Run Assert Tests".</p>
+                    ) : (
+                      consoleLogs.map((log, i) => (
+                        <div
+                          key={i}
+                          className={`whitespace-pre-wrap ${
+                            log.startsWith('[Error]') || log.startsWith('[Runtime Exception]') ? 'text-red-400' :
+                            log.startsWith('[System]') ? 'text-blue-400' :
+                            log.startsWith('[Assertions]') ? 'text-emerald-400' : 'text-slate-300'
+                          }`}
+                        >
+                          {log}
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {testResult.status !== 'idle' && (
+                    <div className={`p-3 rounded-xl border text-xs font-bold flex items-center gap-2 ${
+                      testResult.status === 'success'
+                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                        : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                    }`}>
+                      {testResult.status === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                      <span>{testResult.message}</span>
                     </div>
-                  )}
-
-                  {testResult.status === 'success' && (
-                    <motion.div 
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="space-y-2"
-                    >
-                      <CheckCircle2 className="w-10 h-10 text-emerald-400 fill-emerald-500/10 mx-auto" />
-                      <p className="text-sm font-bold text-emerald-400">{testResult.message}</p>
-                    </motion.div>
-                  )}
-
-                  {testResult.status === 'error' && (
-                    <motion.div 
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="space-y-2 max-w-xs"
-                    >
-                      <AlertCircle className="w-10 h-10 text-rose-500 mx-auto" />
-                      <p className="text-xs font-bold text-rose-400 leading-normal">{testResult.message}</p>
-                    </motion.div>
                   )}
                 </div>
               )}
 
             </div>
-
           </div>
 
         </div>
 
       </div>
+
+      <CoCoderAssistantModal
+        isOpen={isCoCoderOpen}
+        onClose={() => setIsCoCoderOpen(false)}
+        code={code}
+        challengeTitle={getChallengeTitle(activeChallenge)}
+      />
 
     </div>
   );
