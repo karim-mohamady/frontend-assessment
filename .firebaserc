@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "frontend-assessment-react"
-  }
+    "default": "code-interview-assessment"
+  },
+  "targets": {},
+  "etags": {}
 }

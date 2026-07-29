@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect width="100" height="100" rx="24" fill="#0F172A"/>
+  <rect x="3" y="3" width="94" height="94" rx="21" stroke="url(#border_grad)" stroke-width="4"/>
+  <!-- Code Brackets & Slash -->
+  <path d="M30 38L18 50L30 62" stroke="#60A5FA" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M70 38L82 50L70 62" stroke="#60A5FA" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M55 30L45 70" stroke="#38BDF8" stroke-width="7" stroke-linecap="round"/>
+  <!-- Verified Badge -->
+  <circle cx="76" cy="24" r="9" fill="#10B981"/>
+  <path d="M72 24L75 27L80 21" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="border_grad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+</svg>
