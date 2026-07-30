@@ -802,6 +802,88 @@ $stmt->execute(['email' => $userEmail]);`,
     correctAnswer: [0],
     explanation: 'CORS is a browser enforcement mechanism where HTTP headers (like Access-Control-Allow-Origin) tell browsers if cross-domain requests are authorized.',
     explanationAr: 'CORS هي آلية حماية بالمتصفحات حيث تخبر ترويسات HTTP المتصفح بمدى السماح بالطلبات القادمة من نطاقات مختلفة.'
+  },
+  // --- SOFTWARE QA & WEB TESTING ---
+  {
+    id: 'testing-1',
+    category: 'testing',
+    topic: 'Unit Testing & Jest',
+    difficulty: 'medium',
+    type: 'multiple-choice',
+    questionText: 'Which testing pattern structures unit test cases cleanly into three distinct logical phases (Setup, Execution, Verification)?',
+    questionTextAr: 'أي من أنماط الاختبار التالية ينظم حالات اختبار الوحدات بوضوح إلى ثلاث مراحل منطقية مميزة (التجهيز، التنفيذ، والتحقق)؟',
+    options: [
+      'AAA Pattern (Arrange, Act, Assert)',
+      'MVC Pattern (Model, View, Controller)',
+      'TDD Red-Green-Refactor Loop',
+      'Page Object Model (POM)'
+    ],
+    optionsAr: [
+      'نمط AAA (التجهيز Arrange، التنفيذ Act، التأكيد Assert)',
+      'نمط MVC (النموذج Model، العرض View، المتحكم Controller)',
+      'حلقة TDD (الأحمر - الأخضر - إعادة الهيكلة)',
+      'نمط كائن الصفحة (Page Object Model)'
+    ],
+    correctAnswer: [0],
+    explanation: 'The AAA (Arrange-Act-Assert) pattern isolates test setup, execution of the unit under test, and assertion of expectations clearly.',
+    explanationAr: 'يعزل نمط AAA تجهيز البيانات، وتنفيذ الوحدة الخاضعة للاختبار، وتأكيد التوقعات بشكل منظم وواضح.'
+  },
+  {
+    id: 'testing-2',
+    category: 'testing',
+    topic: 'React Testing Library',
+    difficulty: 'hard',
+    type: 'code-output',
+    codeSnippet: `import { render, screen, fireEvent } from '@testing-library/react';
+import Counter from './Counter';
+
+test('increments count on click', () => {
+  render(<Counter />);
+  const button = screen.getByRole('button', { name: /increment/i });
+  fireEvent.click(button);
+  expect(screen.getByTestId('count-value')).toHaveTextContent('1');
+});`,
+    questionText: 'What principle does React Testing Library emphasize over testing component internal implementation details?',
+    questionTextAr: 'ما هو المبدأ الذي تؤكد عليه مكتبة React Testing Library بدلاً من اختبار تفاصيل التنفيذ الداخلي للمكون؟',
+    options: [
+      'Testing components the way actual users interact with them (DOM queries via roles, text, and labels).',
+      'Testing internal state variables directly via React component instance pointers.',
+      'Mocking every single child React hook automatically.',
+      'Compiling React JSX code into WebAssembly binaries before asserting.'
+    ],
+    optionsAr: [
+      'اختبار المكونات بنفس الطريقة التي يتفاعل بها المستخدمون الحقيقيون (استعلامات DOM عبر الأدوار والنصوص والعناوين).',
+      'اختبار متغيرات الحالة الداخلية مباشرة عبر مؤشرات المكون.',
+      'محاكاة (Mocking) كل خطاف React فرعي تلقائياً.',
+      'تجميع كود JSX إلى WebAssembly قبل الفحص.'
+    ],
+    correctAnswer: [0],
+    explanation: 'React Testing Library promotes user-centric testing through accessible DOM queries, avoiding brittle tests coupled to internal state.',
+    explanationAr: 'تشجع React Testing Library الاختبار المتركز على المستخدم من خلال استعلامات DOM وسهولة الوصول، مما يتجنب الاختبارات الهشة المرتطبة بالحالة الداخلية.'
+  },
+  {
+    id: 'testing-3',
+    category: 'testing',
+    topic: 'End-to-End Testing (Playwright/Cypress)',
+    difficulty: 'expert',
+    type: 'multiple-choice',
+    questionText: 'In E2E automation frameworks like Playwright and Cypress, what design pattern isolates UI locators and page interactions from test specs?',
+    questionTextAr: 'في أطر أتمتة اختبارات النهاية إلى النهاية (E2E) مثل Playwright و Cypress، ما هو نمط التصميم الذي يعزل محددات الواجهة والتفاعلات عن ملفات الاختبار؟',
+    options: [
+      'Page Object Model (POM)',
+      'Singleton Pattern',
+      'Factory Method',
+      'Observer Pattern'
+    ],
+    optionsAr: [
+      'نمط كائن الصفحة Page Object Model (POM)',
+      'نمط النمط الفردي Singleton',
+      'نمط مصنع الدوال Factory Method',
+      'نمط المراقب Observer Pattern'
+    ],
+    correctAnswer: [0],
+    explanation: 'Page Object Model (POM) creates clean abstractions for web pages, keeping element selectors centralized so UI updates only require changing a single page class.',
+    explanationAr: 'ينشئ نمط كائن الصفحة (POM) طبقة تجريد ناتجة عن صفحات الويب، مما يجعل محددات العناصر مركزية بحيث تتطلب التحديثات تغيير كلاس الصفحة فقط.'
   }
 ];
 
@@ -881,6 +963,11 @@ export function generateProceduralQuestions(
       'Solidity Syntax & Data Types', 'Smart Contract Security', 'Reentrancy Guard',
       'Ethers.js & Wagmi Integration', 'DeFi Liquidity Pools', 'DAO Governance Protocols',
       'Bytecode & Gas Optimization'
+    ],
+    testing: [
+      'Unit Testing & Jest', 'React Testing Library', 'End-to-End Testing (Playwright/Cypress)',
+      'API Testing & Postman', 'Test Driven Development (TDD)', 'Mocking & Spies',
+      'Regression & Smoke Testing', 'Continuous Integration & Test Automation'
     ]
   };
 
@@ -1381,6 +1468,43 @@ console.log(arr);`;
         explanation = `ERC-20 is the technical standard for fungible tokens, defining functions like transfer(), balanceOf(), and approve().`;
         explanationAr = `معيار ERC-20 هو المعيار التقني للتوكنات القابلة للاستبدال ويحدد دوال مثل transfer و balanceOf و approve.`;
       }
+    } else if (category === 'testing') {
+      if (templateIdx === 0) {
+        questionText = `Under ${topic}, what is the primary objective of automated API testing with tools like Postman or Supertest?`;
+        questionTextAr = `ضمن موضوع ${topic}، ما هو الهدف الأساسي من اختبار واجهات البرمجة (API Testing) المؤتمت بـ Postman أو Supertest؟`;
+        options = [
+          `To verify backend HTTP endpoints respond with valid status codes, expected JSON payload schema structures, and correct authorization rules.`,
+          `To style CSS animations in React frontend views.`,
+          `To compress SVG icons inside local storage memory.`,
+          `To create user wireframes inside Figma files.`
+        ];
+        optionsAr = [
+          `للتحقق من أن نقاط نهاية HTTP في الباك إند تستجيب برموز حالة صحيحة، وهياكل بيانات JSON متوقعة، وقواعد مصادقة سليمة.`,
+          `لتنسيق تحريكات CSS في واجهات React.`,
+          `لضغط أيقونات SVG في ذاكرة التخزين المحلي.`,
+          `لإنشاء التخطيطات السلكية داخل ملفات Figma.`
+        ];
+        correctAnswer = [0];
+        explanation = `API testing verifies data integrity, status codes, and authentication logic directly at the service layer without relying on UI rendering.`;
+        explanationAr = `يتحقق اختبار API من سلامة البيانات ورموز الحالة ومنطق المصادقة مباشرة على مستوى الخدمة دون الاعتماد على عرض الواجهات.`;
+      } else if (templateIdx === 1) {
+        type = 'true-false';
+        questionText = `In Test Driven Development (TDD), developers write failing automated test cases (Red) before writing any application production code (Green).`;
+        questionTextAr = `في التطوير الموجه بالاختبار (TDD)، يكتب المطورون حالات اختبار مؤتمتة فاشلة (Red) قبل كتابة أي كود إنتاجي للتطبيق (Green).`;
+        options = ['True / صحيح', 'False / خطأ'];
+        optionsAr = ['True / صحيح', 'False / خطأ'];
+        correctAnswer = [0];
+        explanation = `TDD follows the Red-Green-Refactor cycle: write a failing test first, make it pass with minimal code, then refactor.`;
+        explanationAr = `يتبع TDD دورة الأحمر-الأخضر-إعادة الهيكلة: كتابة اختبار فاشل أولاً، ثم إنجاحه بأقل كود، ثم تحسين الكود.`;
+      } else {
+        questionText = `Which command or runner is used to execute automated tests in JavaScript ecosystems with zero-config support?`;
+        questionTextAr = `أي من المشغلات التالية يُستخدم لتنفيذ الاختبارات المؤتمتة في نظام جافا سكريبت بدون تكوينات معقدة؟`;
+        options = ['Jest / Vitest', 'Webpack', 'Babel', 'NPM Init'];
+        optionsAr = ['Jest / Vitest', 'Webpack', 'Babel', 'NPM Init'];
+        correctAnswer = [0];
+        explanation = `Jest and Vitest provide comprehensive test runners, assertion libraries, and coverage reporting for modern JS apps.`;
+        explanationAr = `توفر Jest و Vitest بيئة كاملة لتشغيل الاختبارات والمحاكاة وتقارير تغطية الكود للتطبيقات الحديثة.`;
+      }
     } else {
       // English for Developers
       const vocab = ENGLISH_VOCABULARY[i % ENGLISH_VOCABULARY.length];
@@ -1444,7 +1568,8 @@ const CATEGORY_BANK_SIZES: Record<QuestionCategory, number> = {
   uiux: 300,
   figma: 250,
   web3: 350,
-  solidity: 300
+  solidity: 300,
+  testing: 350
 };
 
 // Global Questions Indexer / Search Engine
@@ -1461,7 +1586,10 @@ export function getTrackCategories(track: CareerTrack): QuestionCategory[] {
   if (track === 'web3') {
     return ['web3', 'solidity', 'javascript', 'react', 'english'];
   }
-  return ['html', 'css', 'javascript', 'react', 'bootstrap', 'php', 'laravel', 'mysql', 'backend', 'uiux', 'figma', 'web3', 'solidity', 'english'];
+  if (track === 'testing') {
+    return ['testing', 'javascript', 'react', 'backend', 'english'];
+  }
+  return ['html', 'css', 'javascript', 'react', 'bootstrap', 'php', 'laravel', 'mysql', 'backend', 'uiux', 'figma', 'web3', 'solidity', 'testing', 'english'];
 }
 
 export function getQuestionsByTrack(

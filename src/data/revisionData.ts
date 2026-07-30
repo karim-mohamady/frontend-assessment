@@ -50,7 +50,8 @@ export const REVISION_CATEGORIES: {
   { id: 'figma', track: ['uiux', 'fullstack'], nameEn: 'Figma Auto-Layout & Tokens', nameAr: 'أداة Figma والتخطيط التلقائي', nameIt: 'Figma Auto-Layout e Token', icon: '📐', color: 'border-fuchsia-500/40 text-fuchsia-400 bg-fuchsia-500/10' },
   { id: 'web3', track: ['web3', 'fullstack'], nameEn: 'Web3 & EVM Fundamentals', nameAr: 'أساسيات Web3 وتقنية البلوكشين', nameIt: 'Fondamenti Web3 e EVM', icon: '🪙', color: 'border-yellow-500/40 text-yellow-400 bg-yellow-500/10' },
   { id: 'solidity', track: ['web3', 'fullstack'], nameEn: 'Solidity & Smart Contracts', nameAr: 'لغة Solidity وأمان العقود الذكية', nameIt: 'Solidity e Smart Contract', icon: '📜', color: 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10' },
-  { id: 'english', track: ['frontend', 'backend', 'uiux', 'web3', 'fullstack'], nameEn: 'Technical English for Devs', nameAr: 'اللغة الإنجليزية التقنية للمطورين', nameIt: 'Inglese Tecnico per Sviluppatori', icon: '📖', color: 'border-slate-500/40 text-slate-300 bg-slate-500/10' }
+  { id: 'testing', track: ['testing', 'fullstack'], nameEn: 'QA & Web Testing', nameAr: 'اختبار الجودة وأتمتة الويب', nameIt: 'QA e Web Testing', icon: '🧪', color: 'border-lime-500/40 text-lime-400 bg-lime-500/10' },
+  { id: 'english', track: ['frontend', 'backend', 'uiux', 'web3', 'testing', 'fullstack'], nameEn: 'Technical English for Devs', nameAr: 'اللغة الإنجليزية التقنية للمطورين', nameIt: 'Inglese Tecnico per Sviluppatori', icon: '📖', color: 'border-slate-500/40 text-slate-300 bg-slate-500/10' }
 ];
 
 // Topic ordering dictionary for standard pedagogical sequence (Fundamentals -> Intermediate -> Advanced -> Architecture)
@@ -122,7 +123,13 @@ const PEDAGOGICAL_ORDER: Record<string, number> = {
 
   'Solidity Syntax & Data Types': 10,
   'Smart Contract Security': 20,
-  'Reentrancy Guard': 30
+  'Reentrancy Guard': 30,
+
+  'Unit Testing & Jest': 10,
+  'React Testing Library': 20,
+  'End-to-End Testing (Playwright/Cypress)': 30,
+  'API Testing & Postman': 40,
+  'Test Driven Development (TDD)': 50
 };
 
 // Practical code example mapping per topic
@@ -165,7 +172,11 @@ const CODE_EXAMPLES: Record<string, string> = {
 
   'Figma Auto-Layout 5.0': `// Design System JSON Token Spec\n{\n  "color": {\n    "primary": { "value": "#f59e0b" },\n    "background": { "value": "#020617" }\n  },\n  "spacing": {\n    "padding-container": { "value": "24px" },\n    "gap-items": { "value": "12px" }\n  }\n}`,
 
-  'Reentrancy Guard': `// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\nimport "@openzeppelin/contracts/utils/ReentrancyGuard.sol";\n\ncontract SecureVault is ReentrancyGuard {\n    mapping(address => uint256) public balances;\n\n    function withdraw(uint256 _amount) external nonReentrant {\n        require(balances[msg.sender] >= _amount, "Insufficient balance");\n        balances[msg.sender] -= _amount;\n        (bool success, ) = payable(msg.sender).call{value: _amount}("");\n        require(success, "ETH transfer failed");\n    }\n}`
+  'Reentrancy Guard': `// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\nimport "@openzeppelin/contracts/utils/ReentrancyGuard.sol";\n\ncontract SecureVault is ReentrancyGuard {\n    mapping(address => uint256) public balances;\n\n    function withdraw(uint256 _amount) external nonReentrant {\n        require(balances[msg.sender] >= _amount, "Insufficient balance");\n        balances[msg.sender] -= _amount;\n        (bool success, ) = payable(msg.sender).call{value: _amount}("");\n        require(success, "ETH transfer failed");\n    }\n}`,
+
+  'Unit Testing & Jest': `import { render, screen, fireEvent } from '@testing-library/react';\nimport Counter from './Counter';\n\ntest('increments counter on click', () => {\n  render(<Counter />);\n  const button = screen.getByRole('button', { name: /increment/i });\n  fireEvent.click(button);\n  expect(screen.getByTestId('count')).toHaveTextContent('1');\n});`,
+
+  'End-to-End Testing (Playwright/Cypress)': `import { test, expect } from '@playwright/test';\n\ntest('user can login and submit form', async ({ page }) => {\n  await page.goto('https://app.example.com/login');\n  await page.fill('#email', 'dev@example.com');\n  await page.fill('#password', 'Secret123!');\n  await page.click('button[type="submit"]');\n  await expect(page.locator('h1')).toHaveText('Dashboard');\n});`
 };
 
 // Converts raw questions into fully formed RevisionItems
@@ -179,7 +190,7 @@ export function getAllRevisionItems(): RevisionItem[] {
   const categoriesList: QuestionCategory[] = [
     'html', 'css', 'javascript', 'react', 'bootstrap',
     'php', 'laravel', 'mysql', 'backend', 'english',
-    'uiux', 'figma', 'web3', 'solidity'
+    'uiux', 'figma', 'web3', 'solidity', 'testing'
   ];
 
   categoriesList.forEach((cat) => {
@@ -206,6 +217,8 @@ export function getAllRevisionItems(): RevisionItem[] {
       track = 'uiux';
     } else if (['web3', 'solidity'].includes(q.category)) {
       track = 'web3';
+    } else if (['testing'].includes(q.category)) {
+      track = 'testing';
     }
 
     // Determine correct answer text

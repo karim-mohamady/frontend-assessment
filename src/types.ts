@@ -14,9 +14,9 @@ export type QuestionType =
   | 'code-output'
   | 'bug-fixing';
 
-export type QuestionCategory = 'html' | 'css' | 'javascript' | 'react' | 'bootstrap' | 'php' | 'laravel' | 'mysql' | 'backend' | 'english' | 'uiux' | 'web3' | 'figma' | 'solidity';
+export type QuestionCategory = 'html' | 'css' | 'javascript' | 'react' | 'bootstrap' | 'php' | 'laravel' | 'mysql' | 'backend' | 'english' | 'uiux' | 'web3' | 'figma' | 'solidity' | 'testing';
 
-export type CareerTrack = 'frontend' | 'backend' | 'fullstack' | 'uiux' | 'web3';
+export type CareerTrack = 'frontend' | 'backend' | 'fullstack' | 'uiux' | 'web3' | 'testing';
 
 export type AppLanguage = 'ar' | 'en' | 'it';
 

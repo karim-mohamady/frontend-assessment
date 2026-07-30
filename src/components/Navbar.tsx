@@ -53,6 +53,16 @@ const TRACK_OPTIONS: { id: CareerTrack; icon: string; labelEn: string; labelAr: 
     descIt: 'Solidity, EVM, Smart Contract e Ethereum'
   },
   {
+    id: 'testing',
+    icon: '🧪',
+    labelEn: 'Web & QA Testing',
+    labelAr: 'اختبار الجودة والويب',
+    labelIt: 'Web & QA Testing',
+    descEn: 'Jest, React Testing Library, Playwright, Cypress & API Testing',
+    descAr: 'اختبارات الوحدات والـ E2E وأتمتة الجودة و Postman',
+    descIt: 'Jest, React Testing Library, Playwright, Cypress e API'
+  },
+  {
     id: 'fullstack',
     icon: '🌐',
     labelEn: 'Fullstack Track',
@@ -72,8 +82,8 @@ export const Navbar: React.FC = () => {
 
   const activeTrackOption = TRACK_OPTIONS.find(t => t.id === selectedTrack) || TRACK_OPTIONS[0];
 
-  const activeStyle = "text-amber-500 font-bold border-b-2 border-amber-500 pb-1";
-  const inactiveStyle = "text-slate-300 hover:text-white transition-colors duration-200 pb-1";
+  const activeStyle = "text-amber-500 font-bold border-b-2 border-amber-500 pb-1 whitespace-nowrap shrink-0";
+  const inactiveStyle = "text-slate-300 hover:text-white transition-colors duration-200 pb-1 whitespace-nowrap shrink-0";
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-900/80 border-b border-slate-800" id="navbar-header">
@@ -91,7 +101,7 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Navigation Links */}
-          <nav className="flex space-x-6 rtl:space-x-reverse text-sm" id="main-nav-links">
+          <nav className="flex items-center space-x-4 rtl:space-x-reverse text-xs md:text-sm overflow-x-auto max-w-[280px] sm:max-w-md md:max-w-xl lg:max-w-2xl py-2 scrollbar-none" id="main-nav-links">
             <NavLink to="/" className={({ isActive }) => isActive ? activeStyle : inactiveStyle}>
               {t('home')}
             </NavLink>
@@ -112,6 +122,24 @@ export const Navbar: React.FC = () => {
             </NavLink>
             <NavLink to="/english-placement" className={({ isActive }) => isActive ? activeStyle : inactiveStyle}>
               {lang === 'ar' ? 'تحديد مستوى إنجليزي' : lang === 'it' ? 'English Placement' : 'English Placement'}
+            </NavLink>
+            <NavLink to="/qa-testing" className={({ isActive }) => isActive ? activeStyle : inactiveStyle}>
+              {lang === 'ar' ? 'معمل التستنج' : lang === 'it' ? 'QA & Testing' : 'QA & Testing'}
+            </NavLink>
+            <NavLink to="/db-designer" className={({ isActive }) => isActive ? activeStyle : inactiveStyle}>
+              {lang === 'ar' ? 'مصمم ERD القواعد' : lang === 'it' ? 'DB Architect' : 'DB Architect'}
+            </NavLink>
+            <NavLink to="/devops" className={({ isActive }) => isActive ? activeStyle : inactiveStyle}>
+              {lang === 'ar' ? 'DevOps & Docker' : 'DevOps & Docker'}
+            </NavLink>
+            <NavLink to="/web3" className={({ isActive }) => isActive ? activeStyle : inactiveStyle}>
+              {lang === 'ar' ? 'Web3 & Solidity' : 'Web3 & Solidity'}
+            </NavLink>
+            <NavLink to="/algorithms" className={({ isActive }) => isActive ? activeStyle : inactiveStyle}>
+              {lang === 'ar' ? 'محاكي الخوارزميات' : 'Algorithms'}
+            </NavLink>
+            <NavLink to="/cyber-security" className={({ isActive }) => isActive ? activeStyle : inactiveStyle}>
+              {lang === 'ar' ? 'الأمن السيبراني' : 'Cyber Security'}
             </NavLink>
           </nav>
 

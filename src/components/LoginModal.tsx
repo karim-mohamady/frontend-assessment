@@ -276,6 +276,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
+
+                  {/* Password Strength Indicator (in signup mode) */}
+                  {authMode === 'signup' && password.length > 0 && (
+                    <div className="pt-1.5 space-y-1">
+                      <div className="flex items-center justify-between text-[10px] font-mono">
+                        <span className="text-slate-400">
+                          {lang === 'ar' ? 'قوة كلمة المرور المشفرة:' : 'Password Security Rating:'}
+                        </span>
+                        <span className={password.length > 8 && /[A-Z]/.test(password) && /[0-9]/.test(password) ? 'text-emerald-400 font-bold' : password.length >= 6 ? 'text-amber-400 font-bold' : 'text-rose-400 font-bold'}>
+                          {password.length > 8 && /[A-Z]/.test(password) && /[0-9]/.test(password) ? (lang === 'ar' ? 'قوية جداً (256-bit Entropy)' : 'Strong (256-bit Entropy)') : password.length >= 6 ? (lang === 'ar' ? 'متوسطة' : 'Moderate') : (lang === 'ar' ? 'ضعيفة' : 'Weak')}
+                        </span>
+                      </div>
+                      <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden flex">
+                        <div className={`h-full transition-all duration-300 ${password.length > 8 && /[A-Z]/.test(password) && /[0-9]/.test(password) ? 'w-full bg-emerald-500' : password.length >= 6 ? 'w-2/3 bg-amber-500' : 'w-1/3 bg-rose-500'}`} />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Confirm Password Field (only in register) */}

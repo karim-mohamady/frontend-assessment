@@ -52,6 +52,14 @@ const STAR_QUESTIONS: STARQuestion[] = [
     titleAr: 'اعطِ مثالاً على كيفية توجيه وتدريب مهندس مبتدئ أو تحسين ممارسات الفريق البرمجي (Code Review, CI/CD).',
     tipEn: 'Quantify team productivity gains, code quality improvements, or onboarding time reduction.',
     tipAr: 'استعرض التأثير الرقمي على إنتاجية الفريق، تحسين جودة الكود، أو تقليل زمن تجهيز الموظفين الجدد.'
+  },
+  {
+    id: 'star-qa',
+    category: 'problem_solving',
+    titleEn: 'Describe a time when automated test suites caught a critical regression flaw before deployment.',
+    titleAr: 'صف موقفاً اكتشفت فيه اختبارات الأتمتة الجودة (Playwright / Jest) عيباً أو تراجعاً خطيراً في النظام قبل رفع التحديث للإنتاج.',
+    tipEn: 'Detail your E2E test setup, pipeline trigger, bug isolation, and how automated tests prevented a severe outage.',
+    tipAr: 'استعرض إعداد خطة اختبارات الأتمتة، محفزات الـ CI/CD، وعزل الخطأ لمنع التوقعات أو الأعطال الحرجة في الإنتاج.'
   }
 ];
 

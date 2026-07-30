@@ -2,6 +2,15 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Scrollbar hiding utilities for clean horizontal overflow scrolling */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Light Mode variable overrides when .dark is absent on html */
 html:not(.dark), html.light {
   color-scheme: light;
@@ -38,6 +47,49 @@ html:not(.dark) .bg-slate-900\/40 {
 
 html:not(.dark) .text-white {
   color: #0f172a;
+}
+
+/* Light Mode Hover Adjustments for crisp legibility and high contrast */
+html:not(.dark) .hover\:text-white:hover {
+  color: #0f172a !important;
+}
+
+html:not(.dark) .hover\:bg-slate-800:hover {
+  background-color: #e2e8f0 !important;
+}
+
+html:not(.dark) .hover\:bg-slate-900:hover {
+  background-color: #f1f5f9 !important;
+}
+
+html:not(.dark) .hover\:bg-slate-950:hover {
+  background-color: #ffffff !important;
+}
+
+html:not(.dark) .hover\:border-slate-700:hover,
+html:not(.dark) .hover\:border-slate-800:hover {
+  border-color: #94a3b8 !important;
+}
+
+/* Accent link hovers in light mode (deeper tones for WCAG AA contrast) */
+html:not(.dark) .hover\:text-amber-400:hover,
+html:not(.dark) .hover\:text-amber-500:hover {
+  color: #d97706 !important;
+}
+
+html:not(.dark) .hover\:text-cyan-400:hover,
+html:not(.dark) .hover\:text-cyan-500:hover {
+  color: #0284c7 !important;
+}
+
+html:not(.dark) .hover\:text-sky-400:hover,
+html:not(.dark) .hover\:text-sky-500:hover {
+  color: #0369a1 !important;
+}
+
+html:not(.dark) .hover\:text-emerald-400:hover,
+html:not(.dark) .hover\:text-emerald-500:hover {
+  color: #059669 !important;
 }
 
 /* Maintain dark text on gold/amber buttons in both light & dark mode */

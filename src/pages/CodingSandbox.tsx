@@ -30,6 +30,9 @@ export const CodingSandbox: React.FC = () => {
     if (selectedTrack === 'backend') {
       return ['php', 'laravel', 'mysql', 'backend'].includes(item.category);
     }
+    if (selectedTrack === 'testing') {
+      return ['testing', 'javascript', 'react'].includes(item.category);
+    }
     return ['html', 'css', 'javascript', 'react'].includes(item.category);
   });
 

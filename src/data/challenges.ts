@@ -13,7 +13,7 @@ export interface CodingChallenge {
   descEn: string;
   descAr: string;
   descEs?: string;
-  category: 'html' | 'css' | 'javascript' | 'react' | 'php' | 'laravel' | 'mysql' | 'backend';
+  category: 'html' | 'css' | 'javascript' | 'react' | 'php' | 'laravel' | 'mysql' | 'backend' | 'testing';
   difficulty: Difficulty;
   boilerplateCode: string;
   testCode: string; // Executable JS assertions that throw on failure
@@ -547,14 +547,91 @@ if (err !== 'Service not found') {
     points: 90,
     hintEn: 'Store resolvers in `this.bindings.set(name, resolver)`. In `make`, check if `this.bindings.has(name)`, then call `this.bindings.get(name)()`.',
     hintAr: 'خزن الدوال في Map باسم bindings. وفي make تحقق من وجود الخدمة ثم استدعِ الدالة المربوطة.'
+  },
+  {
+    id: 'challenge-qa-jest-assertions',
+    titleEn: 'Jest Async API Assertion Suite',
+    titleAr: 'اختبار الاستجابات المؤتمتة باستخدام Jest',
+    descEn: 'Write a test suite function `validateApiResponse(response)` that checks if an API HTTP response object is valid. The response must have status `200`, `ok: true`, and a `data` array with at least 1 item. Return `true` if valid, otherwise throw an Error with message `"Invalid API Response"`.',
+    descAr: 'اكتب دالة فحص `validateApiResponse(response)` للتحقق من صحة استجابة API. يجب أن تحتوي الاستجابة على status `200` و `ok: true` ومصفوفة `data` لا تقل عن عنصر واحد. أرجع `true` إذا كانت الاستجابة سليمة، وإلا ارفع خطأ برسال "Invalid API Response".',
+    category: 'testing',
+    difficulty: 'medium',
+    boilerplateCode: `function validateApiResponse(response) {
+  // Validate status === 200, ok === true, and response.data is a non-empty array
+  if (!response || response.status !== 200 || !response.ok) {
+    throw new Error('Invalid API Response');
+  }
+  if (!Array.isArray(response.data) || response.data.length === 0) {
+    throw new Error('Invalid API Response');
+  }
+  return true;
+}`,
+    testCode: `
+const valid = validateApiResponse({ status: 200, ok: true, data: [{ id: 1, name: 'Karim' }] });
+if (valid !== true) throw new Error('Failed to validate legitimate response.');
+
+let errCaught = false;
+try {
+  validateApiResponse({ status: 500, ok: false, data: [] });
+} catch(e) {
+  if (e.message === 'Invalid API Response') errCaught = true;
+}
+if (!errCaught) throw new Error('Did not throw "Invalid API Response" on 500 error.');
+`,
+    points: 60,
+    hintEn: 'Check `response.status === 200 && response.ok && Array.isArray(response.data) && response.data.length > 0`.',
+    hintAr: 'تحقق من status === 200 و ok === true وأثر مصفوفة data تحتوي عناصر.'
+  },
+  {
+    id: 'challenge-qa-playwright-pom',
+    titleEn: 'Page Object Model Selector Assertion',
+    titleAr: 'نمط كائن الصفحة POM لاختبارات E2E',
+    descEn: 'Create a Page Object class `LoginPage` with `fillCredentials(email, password)` and `submit()`. The class stores a simulated page DOM object. `fillCredentials` updates `page.emailInput` and `page.passwordInput`. `submit` sets `page.submitted` to `true` and returns `"LOGGED_IN"`.',
+    descAr: 'أنشئ كلاس `LoginPage` بخصائص `fillCredentials(email, password)` و `submit()`. يستقبل الكلاس كائن صفحة وهمي. تقوم `fillCredentials` بملء الحقول وتعيين `page.submitted` عند الضغط.',
+    category: 'testing',
+    difficulty: 'hard',
+    boilerplateCode: `class LoginPage {
+  constructor(page) {
+    this.page = page;
+  }
+
+  fillCredentials(email, password) {
+    this.page.emailInput = email;
+    this.page.passwordInput = password;
+  }
+
+  submit() {
+    this.page.submitted = true;
+    return 'LOGGED_IN';
+  }
+}`,
+    testCode: `
+const mockPage = { emailInput: '', passwordInput: '', submitted: false };
+const loginPage = new LoginPage(mockPage);
+loginPage.fillCredentials('karim@example.com', 'Pass123!');
+const res = loginPage.submit();
+
+if (mockPage.emailInput !== 'karim@example.com' || mockPage.passwordInput !== 'Pass123!') {
+  throw new Error('fillCredentials failed to populate page selectors.');
+}
+if (!mockPage.submitted || res !== 'LOGGED_IN') {
+  throw new Error('submit failed to trigger form submission.');
+}
+`,
+    points: 75,
+    hintEn: 'Assign parameters to `this.page.emailInput` and `this.page.passwordInput`, then set `this.page.submitted = true`.',
+    hintAr: 'عيّن قيم البرامترات إلى متغيرات الصفحة وعين submitted = true.'
   }
 ];
 
-export function getChallengesByTrack(track: 'frontend' | 'backend' | 'fullstack'): CodingChallenge[] {
+export function getChallengesByTrack(track: 'frontend' | 'backend' | 'fullstack' | 'testing' | 'web3' | 'uiux'): CodingChallenge[] {
   return CODING_CHALLENGES.filter(c => {
     if (track === 'fullstack') return true;
     if (track === 'backend') {
       return ['php', 'laravel', 'mysql', 'backend'].includes(c.category);
+    }
+    if (track === 'testing') {
+      return ['testing', 'javascript', 'react'].includes(c.category);
     }
     return ['html', 'css', 'javascript', 'react'].includes(c.category);
   });

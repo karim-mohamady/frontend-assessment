@@ -43,6 +43,7 @@ export const Home: React.FC = () => {
     { id: 'figma' as const, title: t('catFigma'), desc: t('catFigmaDesc'), icon: '📐', color: 'from-purple-600 to-fuchsia-600', totalQ: '250+', track: 'uiux' },
     { id: 'web3' as const, title: t('catWeb3'), desc: t('catWeb3Desc'), icon: '🪙', color: 'from-amber-500 to-yellow-600', totalQ: '350+', track: 'web3' },
     { id: 'solidity' as const, title: t('catSolidity'), desc: t('catSolidityDesc'), icon: '📜', color: 'from-cyan-600 to-blue-700', totalQ: '300+', track: 'web3' },
+    { id: 'testing' as const, title: lang === 'ar' ? 'اختبار الجودة والويب' : 'QA & Web Testing', desc: lang === 'ar' ? 'اختبارات Jest و Playwright و Cypress و APIs' : 'Jest, RTL, Playwright, Cypress & Postman API', icon: '🧪', color: 'from-lime-500 to-emerald-600', totalQ: '350+', track: 'testing' },
     { id: 'english' as const, title: t('catEng'), desc: t('catEngDesc'), icon: '📝', color: 'from-emerald-500 to-teal-600', totalQ: '150+', track: 'fullstack' }
   ];
 

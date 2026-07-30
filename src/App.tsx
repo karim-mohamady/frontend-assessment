@@ -17,6 +17,12 @@ import { InterviewPrep } from './pages/InterviewPrep';
 import { Revision } from './pages/Revision';
 import { SystemDesignStudio } from './pages/SystemDesignStudio';
 import { GlobalEnglishPlacement } from './pages/GlobalEnglishPlacement';
+import { WebTestingStudio } from './pages/WebTestingStudio';
+import { DatabaseSchemaStudio } from './pages/DatabaseSchemaStudio';
+import { DevOpsStudio } from './pages/DevOpsStudio';
+import { Web3Studio } from './pages/Web3Studio';
+import { AlgorithmVisualizer } from './pages/AlgorithmVisualizer';
+import { CyberSecurityStudio } from './pages/CyberSecurityStudio';
 
 export default function App() {
   return (
@@ -39,6 +45,12 @@ export default function App() {
               <Route path="/interview" element={<RouteTransition><InterviewPrep /></RouteTransition>} />
               <Route path="/system-design" element={<RouteTransition><SystemDesignStudio /></RouteTransition>} />
               <Route path="/english-placement" element={<RouteTransition><GlobalEnglishPlacement /></RouteTransition>} />
+              <Route path="/qa-testing" element={<RouteTransition><WebTestingStudio /></RouteTransition>} />
+              <Route path="/db-designer" element={<RouteTransition><DatabaseSchemaStudio /></RouteTransition>} />
+              <Route path="/devops" element={<RouteTransition><DevOpsStudio /></RouteTransition>} />
+              <Route path="/web3" element={<RouteTransition><Web3Studio /></RouteTransition>} />
+              <Route path="/algorithms" element={<RouteTransition><AlgorithmVisualizer /></RouteTransition>} />
+              <Route path="/cyber-security" element={<RouteTransition><CyberSecurityStudio /></RouteTransition>} />
             </Routes>
           </main>
 
